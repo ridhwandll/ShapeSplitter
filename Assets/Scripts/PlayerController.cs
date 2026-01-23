@@ -3,7 +3,8 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour, IHealth
 {
     public float moveSpeed = 35;
-    public float counterMovement = 13;
+    public float acceleration = 10f; // higher = snappier
+
     public float maxAimLineDistance = 5.0f;
     public float fireRate = 0.2f;
     
@@ -11,6 +12,7 @@ public class PlayerController : MonoBehaviour, IHealth
     private int _health;
     private int _maxHealth = 50;
     
+    private Vector3 _currentVelocity;
     private Vector2 _input;
     private Rigidbody2D _rigidBody2D;
     private LineRenderer _lineRenderer;
@@ -37,33 +39,22 @@ public class PlayerController : MonoBehaviour, IHealth
     void Update()
     {
         _input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        MovePlayer();
         AimAndShoot();
     }
-
-    private void FixedUpdate()
+    
+    private void MovePlayer()
     {
-        float velocity =  _rigidBody2D.linearVelocity.magnitude;
-        float maxSpeed =  moveSpeed * 1.5f;
+        ////// Translation Based Movement //////
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+        Vector3 inputDir = new Vector3(horizontal, vertical, 0f).normalized;
 
-        if (_input.x > 0 && _rigidBody2D.linearVelocity.x > maxSpeed) _input.x = 0;
-        if (_input.x > 0 && _rigidBody2D.linearVelocity.x < -maxSpeed)  _input.x = 0;
-        if (_input.y > 0 && _rigidBody2D.linearVelocity.y > maxSpeed)  _input.y = 0;
-        if (_input.y > 0 && _rigidBody2D.linearVelocity.y < -maxSpeed) _input.y = 0;
-
-        float xBonus = 1.0f;
-        float yBonus = 1.0f;
+        _currentVelocity = Vector3.Lerp(_currentVelocity, inputDir * moveSpeed, acceleration * Time.deltaTime);
         
-        if (_input.x < 0 && _rigidBody2D.linearVelocity.x > 0) xBonus = 2.0f;
-        if (_input.x > 0 && _rigidBody2D.linearVelocity.x < 0)  xBonus = 2.0f;
-        if (_input.y > 0 && _rigidBody2D.linearVelocity.y < 0)  yBonus = 2.0f;
-        if (_input.y > 0 && _rigidBody2D.linearVelocity.y < 0) yBonus = 2.0f;
-        
-        float extraForce = maxSpeed - velocity;
-        
-        _rigidBody2D.AddForce(_input * moveSpeed * extraForce * xBonus * yBonus * 2 * Time.fixedDeltaTime);
-        _rigidBody2D.AddForce(counterMovement * -_rigidBody2D.linearVelocity * moveSpeed * Time.fixedDeltaTime);
+        transform.position += _currentVelocity * Time.deltaTime;
     }
-
+    
     private void AimAndShoot()
     {
         // Draw Aim Line
