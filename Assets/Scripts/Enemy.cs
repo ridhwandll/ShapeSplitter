@@ -92,6 +92,9 @@ public class Enemy : MonoBehaviour, IHealth
         _health = Mathf.Max(0, _health - amount);
         if (_health == 0)
         {
+            if (Camera.main != null)
+                Camera.main.gameObject.GetComponent<CameraShake>().Shake();
+
             // Play Enemy Death effect
             enemyDeathParticleSystem.transform.SetParent(null);
             enemyDeathParticleSystem.Play();
