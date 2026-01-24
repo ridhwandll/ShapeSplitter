@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour, IHealth
     public float dashSpeed = 15f;
     public float dashDuration = 0.15f;
     public float dashCooldown = 1f;
+    public UIManager gameScreenUIManager;
     
     public ParticleSystem playerParticleSystem;
     
@@ -33,7 +34,6 @@ public class PlayerController : MonoBehaviour, IHealth
     private Camera _mainCamera;
     public GameObject bulletPrefab;
     private float _nextFireTime;
-    private UIManager _uiManager;
     
     
     void Awake()
@@ -42,14 +42,14 @@ public class PlayerController : MonoBehaviour, IHealth
         _rigidBody2D = GetComponent<Rigidbody2D>();
         _lineRenderer = GetComponent<LineRenderer>();
         _trailRenderer = GetComponent<TrailRenderer>();
-        _uiManager = GameObject.FindGameObjectWithTag("UIManager").GetComponent<UIManager>();
         _trailRenderer.emitting = false;
+        Constants.IsPlayerAlive = true; // Reset this value everytime scene is loaded
     }
 
     void Start()
     {
         _health = _maxHealth;
-        _uiManager.UpdatePlayerHealth(_health);
+        gameScreenUIManager.UpdatePlayerHealth(_health);
     }
     
     void Update()
@@ -144,13 +144,13 @@ public class PlayerController : MonoBehaviour, IHealth
         if (!isDamagingByOwnBullet)               
             playerParticleSystem.Play();
         
-        _uiManager.UpdatePlayerHealth(_health);
+        gameScreenUIManager.UpdatePlayerHealth(_health);
     }
     
     public void Heal(int amount)
     {
         _health = Mathf.Min(_maxHealth, _health + amount);
-        _uiManager.UpdatePlayerHealth(_health);
+        gameScreenUIManager.UpdatePlayerHealth(_health);
     }
 
     private void OnTriggerEnter2D(Collider2D other)

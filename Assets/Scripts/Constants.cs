@@ -8,4 +8,5 @@ public static class Constants
     
     public static int OwnBulletDamage = 1;
     public static int DashDamage = 5;
+    public static int PlayerMaxHealth = 50;
 }
