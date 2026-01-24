@@ -1,12 +1,23 @@
+using System;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour, IHealth
 {
+    // Movement
     public float moveSpeed = 35;
-    public float acceleration = 10f; // higher = snappier
-
+    public float acceleration = 10f; // Higher = snappier
+    
     public float maxAimLineDistance = 5.0f;
     public float fireRate = 0.2f;
+    
+    public float dashSpeed = 15f;
+    public float dashDuration = 0.15f;
+    public float dashCooldown = 1f;
+    
+    private bool _isDashing;
+    private float _dashTimeLeft;
+    private float _lastDashTime;
+    private Vector3 _dashDirection;
     
     // Health
     private int _health;
@@ -16,6 +27,7 @@ public class PlayerController : MonoBehaviour, IHealth
     private Vector2 _input;
     private Rigidbody2D _rigidBody2D;
     private LineRenderer _lineRenderer;
+    private TrailRenderer _trailRenderer;
     private Camera _mainCamera;
     public GameObject bulletPrefab;
     private float _nextFireTime;
@@ -27,6 +39,7 @@ public class PlayerController : MonoBehaviour, IHealth
         _mainCamera = Camera.main;
         _rigidBody2D = GetComponent<Rigidbody2D>();
         _lineRenderer = GetComponent<LineRenderer>();
+        _trailRenderer = GetComponent<TrailRenderer>();
         _uiManager = GameObject.FindGameObjectWithTag("UIManager").GetComponent<UIManager>();
     }
 
@@ -39,8 +52,38 @@ public class PlayerController : MonoBehaviour, IHealth
     void Update()
     {
         _input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        if (!_isDashing && Input.GetKeyDown(KeyCode.Space) && Time.time >= _lastDashTime + dashCooldown)
+            TryStartDash();
+
+        if (_isDashing)
+        {
+            transform.position += _dashDirection * dashSpeed * Time.deltaTime;
+            _dashTimeLeft -= Time.deltaTime;
+
+            if (_dashTimeLeft <= 0f)
+            {
+                _trailRenderer.emitting = false;
+                _isDashing = false;
+                _lastDashTime = Time.time;
+            }
+        }
         MovePlayer();
         AimAndShoot();
+    }
+
+    private void TryStartDash()
+    {
+        Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
+        mousePos.z = 0f;
+        Vector3 aimDir = mousePos - transform.position;
+        
+        _trailRenderer.Clear();
+        _trailRenderer.emitting = true;
+        _trailRenderer.time = dashDuration;
+        
+        _dashDirection = (aimDir).normalized;
+        _dashTimeLeft = dashDuration;
+        _isDashing = true;
     }
     
     private void MovePlayer()
@@ -102,5 +145,15 @@ public class PlayerController : MonoBehaviour, IHealth
     {
         _health = Mathf.Min(_maxHealth, _health + amount);
         _uiManager.UpdatePlayerHealth(_health);
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Enemy") && _isDashing)
+        {
+            Debug.Log("Enemy Hit");
+            IHealth health = other.GetComponent<IHealth>();
+            health.TakeDamage(5);            
+        }
     }
 }

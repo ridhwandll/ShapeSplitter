@@ -36,16 +36,21 @@ public class Bullet : MonoBehaviour
             health.TakeDamage(_damage);
             Destroy(gameObject); 
         }
-        else if (collision.gameObject.CompareTag("Player") && _isEnemyBullet)
-        {
-            health.TakeDamage(_damage);
-            Destroy(gameObject); 
-        }
         
         //Destroy if hits walls
         if (collision.gameObject.CompareTag("Wall"))
         {
             Destroy(gameObject);
+        }
+    }
+
+    void OnTriggerEnter2D(Collider2D collision) // Player is a Trigger Only
+    {
+        IHealth health = collision.gameObject.GetComponent<IHealth>();
+        if (collision.gameObject.CompareTag("Player") && _isEnemyBullet)
+        {
+            health.TakeDamage(_damage);
+            Destroy(gameObject); 
         }
     }
 }
