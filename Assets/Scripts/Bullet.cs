@@ -5,20 +5,32 @@ public class Bullet : MonoBehaviour
     private int _damage = 1;
     public float speed = 10f;
     public float lifetime = 2f;
-    
     private Vector2 direction;
     private bool _isEnemyBullet;
-
-    private void Start()
-    {
-    }
     
     public void Setup(Vector2 shootDirection, bool isEnemyBullet = false)
     {
         _isEnemyBullet = isEnemyBullet;
-        gameObject.GetComponent<SpriteRenderer>().color = isEnemyBullet  ? Constants.EnemyColor : Constants.PlayerColor;        
+        Color bulletColor = isEnemyBullet ? Constants.EnemyColor : Constants.PlayerColor;
+        gameObject.GetComponent<SpriteRenderer>().color = bulletColor;        
         direction = shootDirection.normalized;
         Destroy(gameObject, lifetime); // auto destroy after lifetime
+        
+        // Set the color of the trail
+        Gradient gradient = new Gradient();
+        GradientColorKey[] colorKeys = new GradientColorKey[2];
+        colorKeys[0] = new GradientColorKey(bulletColor, 0.0f);
+        colorKeys[1] = new GradientColorKey(bulletColor, 1.0f);
+
+        GradientAlphaKey[] alphaKeys = new GradientAlphaKey[2];
+        alphaKeys[0] = new GradientAlphaKey(bulletColor.a, 1.0f);
+        alphaKeys[1] = new GradientAlphaKey(bulletColor.a, 0.0f);
+
+        // Set the keys in the gradient
+        gradient.SetKeys(colorKeys, alphaKeys);
+
+        // Assign the new gradient to the TrailRenderer's colorGradient property
+        GetComponent<TrailRenderer>().colorGradient = gradient;
     }
 
     void Update()

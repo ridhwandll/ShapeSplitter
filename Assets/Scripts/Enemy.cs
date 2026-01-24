@@ -10,11 +10,13 @@ public class Enemy : MonoBehaviour, IHealth
     public float stopDistance = 1.5f;
     public float smoothTime = 0.3f;
     private Vector3 _velocity; // required for SmoothDamp
+    
     public LayerMask enemyLayer;
     public GameObject bulletPrefab;
     public GameObject lifeShardPrefab;
     public float fireRate = 0.3f;
-    
+    public ParticleSystem enemyDeathParticleSystem;
+
     public float personalSpace = 0.7f;
     private Transform _player;
     private float _nextFireTime;
@@ -85,11 +87,16 @@ public class Enemy : MonoBehaviour, IHealth
     public int GetCurrentHealth() => _health;
     public int GetMaxHealth() => _maxHealth;
 
-    public void TakeDamage(int amount)
+    public void TakeDamage(int amount, bool isDamagingByOwnBullet = false)
     {
         _health = Mathf.Max(0, _health - amount);
         if (_health == 0)
         {
+            // Play Enemy Death effect
+            enemyDeathParticleSystem.transform.SetParent(null);
+            enemyDeathParticleSystem.Play();
+            Destroy(enemyDeathParticleSystem.gameObject, enemyDeathParticleSystem.main.duration + enemyDeathParticleSystem.main.startLifetime.constantMax);
+            
             Instantiate(lifeShardPrefab, transform.position, Quaternion.identity);
             Destroy(gameObject);
         }

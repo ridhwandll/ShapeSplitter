@@ -14,6 +14,8 @@ public class PlayerController : MonoBehaviour, IHealth
     public float dashDuration = 0.15f;
     public float dashCooldown = 1f;
     
+    public ParticleSystem playerParticleSystem;
+    
     private bool _isDashing;
     private float _dashTimeLeft;
     private float _lastDashTime;
@@ -41,6 +43,7 @@ public class PlayerController : MonoBehaviour, IHealth
         _lineRenderer = GetComponent<LineRenderer>();
         _trailRenderer = GetComponent<TrailRenderer>();
         _uiManager = GameObject.FindGameObjectWithTag("UIManager").GetComponent<UIManager>();
+        _trailRenderer.emitting = false;
     }
 
     void Start()
@@ -122,14 +125,14 @@ public class PlayerController : MonoBehaviour, IHealth
             bullet.GetComponent<Bullet>().Setup(aimDir);
             _nextFireTime = Time.time + fireRate;
             
-            TakeDamage(1); // Shooting 1 bullet does 1 damage to self
+            TakeDamage(Constants.OwnBulletDamage, true); // Shooting 1 bullet does 1 damage to self
         }
     }
     
     public int GetCurrentHealth() => _health;
     public int GetMaxHealth() => _maxHealth;
 
-    public void TakeDamage(int amount)
+    public void TakeDamage(int amount, bool isDamagingByOwnBullet = false)
     {
         _health = Mathf.Max(0, _health - amount);
         if (_health == 0) //TODO: LEVEL END HERE
@@ -137,6 +140,9 @@ public class PlayerController : MonoBehaviour, IHealth
             Destroy(gameObject);
             Constants.IsPlayerAlive = false;
         }
+        
+        if (!isDamagingByOwnBullet)               
+            playerParticleSystem.Play();
         
         _uiManager.UpdatePlayerHealth(_health);
     }
@@ -153,7 +159,7 @@ public class PlayerController : MonoBehaviour, IHealth
         {
             Debug.Log("Enemy Hit");
             IHealth health = other.GetComponent<IHealth>();
-            health.TakeDamage(5);            
+            health.TakeDamage(Constants.DashDamage);            
         }
     }
 }
