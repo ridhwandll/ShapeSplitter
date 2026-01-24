@@ -180,6 +180,7 @@ MonoBehaviour:
   lifeShardPrefab: {fileID: 8776967741011382629, guid: ab821d0d78221bd4a8b206431b27c1d7, type: 3}
   fireRate: 1
   enemyDeathParticleSystem: {fileID: 6657544588451587833}
+  deathClip: {fileID: 8300000, guid: 5e33ecc0ab0d591449faa3d0ce26daf6, type: 3}
   personalSpace: 5
 --- !u!1 &8701256254152397179
 GameObject:

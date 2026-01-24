@@ -15,8 +15,11 @@ public class Enemy : MonoBehaviour, IHealth
     public GameObject bulletPrefab;
     public GameObject lifeShardPrefab;
     public float fireRate = 0.3f;
-    public ParticleSystem enemyDeathParticleSystem;
 
+    //On Death
+    public ParticleSystem enemyDeathParticleSystem;
+    public AudioClip deathClip;
+        
     public float personalSpace = 0.7f;
     private Transform _player;
     private float _nextFireTime;
@@ -95,6 +98,8 @@ public class Enemy : MonoBehaviour, IHealth
             if (Camera.main != null)
                 Camera.main.gameObject.GetComponent<CameraShake>().Shake();
 
+            SoundFXManager.instance.PlaySoundFXClip(deathClip, transform, 1.0f);
+            
             // Play Enemy Death effect
             enemyDeathParticleSystem.transform.SetParent(null);
             enemyDeathParticleSystem.Play();

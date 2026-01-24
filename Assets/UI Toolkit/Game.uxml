@@ -2,5 +2,8 @@
     <Style src="project://database/Assets/UI%20Toolkit/Game.uss?fileID=7433441132597879392&amp;guid=06888833cb779c340bf021c11c5e7193&amp;type=3#Game"/>
     <ui:VisualElement style="flex-grow: 1; flex-direction: column;">
         <ui:Label text="Health: " name="HealthBar" style="color: rgb(255, 255, 255); -unity-font-style: bold; font-size: 26px; align-items: auto; align-self: center;"/>
+        <ui:Slider label="Master" value="0.5" high-value="1" name="MasterVol" low-value="0.0001" style="-unity-font-style: bold; color: rgb(255, 255, 255); -unity-text-align: upper-center;"/>
+        <ui:Slider label="SoundFX" value="0.5" high-value="1" name="SoundFXVol" low-value="0.0001" style="-unity-text-align: upper-center; color: rgb(255, 255, 255); -unity-font-style: bold;"/>
+        <ui:Slider label="Music" value="0.5" high-value="1" name="MusicVol" low-value="0.0001" style="-unity-font-style: bold; -unity-text-align: upper-center; color: rgb(255, 255, 255);"/>
     </ui:VisualElement>
 </ui:UXML>
