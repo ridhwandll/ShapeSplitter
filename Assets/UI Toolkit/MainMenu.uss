@@ -1,0 +1,93 @@
+:root {
+}
+
+
+
+.button {
+    font-size: 60px;
+    -unity-font-style: bold;
+    background-color: rgb(51, 51, 51);
+    color: rgb(255, 221, 119);
+    border-left-color: rgb(255, 191, 0);
+    border-right-color: rgb(255, 191, 0);
+    border-top-color: rgb(255, 191, 0);
+    border-bottom-color: rgb(255, 191, 0);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+    align-self: stretch;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    padding-right: 50px;
+    padding-left: 50px;
+    margin-right: 20px;
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+
+
+
+
+.button:hover {
+    font-size: 60px;
+    -unity-font-style: bold;
+    background-color: rgb(51, 51, 51);
+    color: rgb(255, 221, 119);
+    border-left-color: rgb(51, 51, 51);
+    border-right-color: rgb(51, 51, 51);
+    border-top-color: rgb(51, 51, 51);
+    border-bottom-color: rgb(51, 51, 51);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+    align-self: stretch;
+    align-items: center;
+    scale: 1.1 1.1;
+    transition-duration: 0.09s;
+    padding-right: 50px;
+    padding-left: 50px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.button:active {
+    font-size: 60px;
+    -unity-font-style: bold;
+    background-color: rgb(51, 51, 51);
+    color: rgb(255, 221, 119);
+    border-left-color: rgb(255, 121, 0);
+    border-right-color: rgb(255, 121, 0);
+    border-top-color: rgb(255, 121, 0);
+    border-bottom-color: rgb(255, 121, 0);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+    border-top-width: 3px;
+    border-right-width: 3px;
+    border-bottom-width: 3px;
+    border-left-width: 3px;
+    align-self: stretch;
+    align-items: center;
+    scale: 0.9 0.9;
+    transition-duration: 0.1s;
+    padding-right: 50px;
+    padding-left: 50px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}

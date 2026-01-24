@@ -1,9 +1,10 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI%20Toolkit/Game.uss?fileID=7433441132597879392&amp;guid=06888833cb779c340bf021c11c5e7193&amp;type=3#Game"/>
     <ui:VisualElement style="flex-grow: 1; flex-direction: column;">
-        <ui:Label text="Health: " name="HealthBar" style="color: rgb(255, 255, 255); -unity-font-style: bold; font-size: 26px; align-items: auto; align-self: center;"/>
-        <ui:Slider label="Master" value="0.5" high-value="1" name="MasterVol" low-value="0.0001" style="-unity-font-style: bold; color: rgb(255, 255, 255); -unity-text-align: upper-center;"/>
-        <ui:Slider label="SoundFX" value="0.5" high-value="1" name="SoundFXVol" low-value="0.0001" style="-unity-text-align: upper-center; color: rgb(255, 255, 255); -unity-font-style: bold;"/>
-        <ui:Slider label="Music" value="0.5" high-value="1" name="MusicVol" low-value="0.0001" style="-unity-font-style: bold; -unity-text-align: upper-center; color: rgb(255, 255, 255);"/>
+        <ui:VisualElement name="Header" style="flex-grow: 0.01; flex-direction: row;">
+            <ui:Button text="BACK" name="BackToMMBtn" class="button" style="flex-grow: 0.01; flex-shrink: 1; -unity-font-style: bold; color: rgb(255, 178, 0); background-color: rgb(58, 58, 58); border-top-width: 3px; border-right-width: 3px; border-bottom-width: 3px; border-left-width: 3px; border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px;"/>
+            <ui:Label text="Health: " name="HealthBar" style="color: rgb(255, 255, 255); -unity-font-style: bold; font-size: 30px; align-items: auto; align-self: stretch; flex-grow: 1; flex-shrink: 1; -unity-text-align: middle-center;"/>
+        </ui:VisualElement>
+        <ui:VisualElement name="GameView" style="flex-grow: 1;"/>
     </ui:VisualElement>
 </ui:UXML>
