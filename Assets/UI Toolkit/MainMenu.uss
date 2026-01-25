@@ -33,7 +33,7 @@
 
 .button:hover {
     font-size: 70px;
-    -unity-font-style: bold;
+    -unity-font-style: normal;
     background-color: rgb(51, 51, 51);
     color: rgb(255, 221, 119);
     border-left-color: rgb(51, 51, 51);
@@ -61,7 +61,7 @@
 
 .button:active {
     font-size: 70px;
-    -unity-font-style: bold;
+    -unity-font-style: normal;
     background-color: rgb(51, 51, 51);
     color: rgb(255, 221, 119);
     border-left-color: rgb(255, 121, 0);

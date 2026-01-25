@@ -195,7 +195,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f24822e3228fd14e904e34f1961f787, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawnIntro
-  spawnTime: 0.2
+  spawnTime: 0.5
   scaleCurve:
     serializedVersion: 2
     m_Curve:
