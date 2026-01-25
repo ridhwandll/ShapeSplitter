@@ -11,8 +11,12 @@ namespace MainMenu
 
         private Button _playButton;
         private Button _optionsButton;
+        private Button _shopButton;
         private Button _exitButton;
     
+        //SHOP
+        ShopMenuManager _shopMenuManager;
+        
         // OPTIONS MENU
         private Slider _masterVolSlider;
         private Slider _soundFXVolSlider;
@@ -21,6 +25,7 @@ namespace MainMenu
         private OptionsMenuManager _optionsMenuManager;
         private VisualElement _optionsMenu;
         private VisualElement _mainMenu;
+        private VisualElement _shopMenu;
 
         private Button _backToMainMenuButton;
         private Button _audioOptionsButton;
@@ -39,15 +44,19 @@ namespace MainMenu
         {
             VisualElement root = uiDocument.rootVisualElement;
 
+            _shopMenuManager = new ShopMenuManager();
             _optionsMenuManager = new OptionsMenuManager();
             _optionsMenuManager.Initialize(uiDocument);
+            _shopMenuManager.Initialize(root);
             
             _optionsMenu = root.Q<VisualElement>("OptionsMenu");
             _mainMenu = root.Q<VisualElement>("MainMenu");
+            _shopMenu = root.Q<VisualElement>("ShopMenu");
         
             _backToMainMenuButton =  root.Q<Button>("BackButton");
             _playButton = root.Q<Button>("PlayButton");
             _optionsButton = root.Q<Button>("OptionsButton");
+            _shopButton = root.Q<Button>("ShopButton"); 
             _exitButton = root.Q<Button>("ExitButton");
             _audioOptionsButton = root.Q<Button>("AudioButton");
             _graphicsOptionsButton = root.Q<Button>("GraphicsButton");
@@ -57,19 +66,19 @@ namespace MainMenu
             _soundFXVolSlider = root.Q<Slider>("SoundFXVol");
             _musicVolSlider = root.Q<Slider>("MusicVol");
         
-            //Graphics
+            //// OPTIONS-GRAPHICS
             _bloomToggle = root.Q<Toggle>("BloomToggle");
             _tonemappingToggle = root.Q<Toggle>("TonemappingToggle");
             _vignetteToggle = root.Q<Toggle>("VignetteToggle");
-            _bloomToggle.RegisterValueChangedCallback(evt => { Constants.Bloom = evt.newValue; });
-            _vignetteToggle.RegisterValueChangedCallback(evt => { Constants.Vignette = evt.newValue; });
-            _tonemappingToggle.RegisterValueChangedCallback(evt => { Constants.Tonemapping = evt.newValue; });
+            _bloomToggle.RegisterValueChangedCallback(evt => { Globals.Bloom = evt.newValue; });
+            _vignetteToggle.RegisterValueChangedCallback(evt => { Globals.Vignette = evt.newValue; });
+            _tonemappingToggle.RegisterValueChangedCallback(evt => { Globals.Tonemapping = evt.newValue; });
             
-            _bloomToggle.value =  Constants.Bloom;
-            _vignetteToggle.value =  Constants.Vignette;
-            _tonemappingToggle.value =  Constants.Tonemapping;
+            _bloomToggle.value =  Globals.Bloom;
+            _vignetteToggle.value =  Globals.Vignette;
+            _tonemappingToggle.value =  Globals.Tonemapping;
             
-            // Difficulty
+            //// OPTIONS-DIFFICULTY
             _difficultyOptionsGroup =root.Q<RadioButtonGroup>("DifficultyRadioButtons");
             _difficultyOptionsGroup.RegisterValueChangedCallback((evt) =>
             {
@@ -77,31 +86,33 @@ namespace MainMenu
                 switch (evt.newValue)
                 {
                     case 0:
-                        Constants.Difficulty = DifficultyLevel.Easy;
+                        Globals.Difficulty = DifficultyLevel.Easy;
                         break;
                     case 1:
-                        Constants.Difficulty = DifficultyLevel.Medium;
+                        Globals.Difficulty = DifficultyLevel.Medium;
                         break;
                     case 2:
-                        Constants.Difficulty = DifficultyLevel.Hard;
+                        Globals.Difficulty = DifficultyLevel.Hard;
                         break;
                     case 3:
-                        Constants.Difficulty = DifficultyLevel.Impossible;
+                        Globals.Difficulty = DifficultyLevel.Impossible;
                         break;
                 }
             });
-            _difficultyOptionsGroup.value = (int)Constants.Difficulty;
+            _difficultyOptionsGroup.value = (int)Globals.Difficulty;
             
+            //// OPTIONS-AUDIO
             _masterVolSlider.RegisterValueChangedCallback(OnMasterVolumeChanged);
             _soundFXVolSlider.RegisterValueChangedCallback(OnSoundFXVolumeChanged);
             _musicVolSlider.RegisterValueChangedCallback(OnMusicVolumeChanged);
 
-            _masterVolSlider.value = Constants.MasterVolume;
-            _soundFXVolSlider.value = Constants.SoundFXVolume;
-            _musicVolSlider.value = Constants.MusicVolume;
+            _masterVolSlider.value = Globals.MasterVolume;
+            _soundFXVolSlider.value = Globals.SoundFXVolume;
+            _musicVolSlider.value = Globals.MusicVolume;
             
             _playButton.clicked += OnPlayButtonPressed;
             _optionsButton.clicked += OnOptionsButtonPressed;
+            _shopButton.clicked += OnShopButtonPressed;
             _exitButton.clicked += OnExitButtonPressed;
             _backToMainMenuButton.clicked += OnBackToMainMenuButtonPressed;
             _audioOptionsButton.clicked += () => { _optionsMenuManager.Show(MenuType.AudioMenu); };
@@ -119,8 +130,15 @@ namespace MainMenu
         }
         private void OnOptionsButtonPressed()
         {
+            _backToMainMenuButton.style.display = DisplayStyle.Flex;
             _mainMenu.style.display = DisplayStyle.None;
             AnimateAndShowMenu(_optionsMenu);
+        }
+        private void OnShopButtonPressed()
+        {
+            _backToMainMenuButton.style.display = DisplayStyle.Flex;
+            _mainMenu.style.display = DisplayStyle.None;
+            AnimateAndShowMenu(_shopMenu);
         }
         private void OnExitButtonPressed()
         {
@@ -141,14 +159,12 @@ namespace MainMenu
         {
             soundMixerManager.SetMusicVolume(e.newValue);
         }
-        //// GRAPHICS ////
-        
-        
-        //// DIFFICULTY ////
         
         private void OnBackToMainMenuButtonPressed()
         {
+            _shopMenu.style.display = DisplayStyle.None;
             _optionsMenu.style.display = DisplayStyle.None;
+            _backToMainMenuButton.style.display = DisplayStyle.None;
             AnimateAndShowMenu(_mainMenu);
         }
 

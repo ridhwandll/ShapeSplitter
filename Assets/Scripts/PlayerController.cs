@@ -58,13 +58,13 @@ public class PlayerController : MonoBehaviour, IHealth
             return;
         
         _input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        if (!_isDashing && Input.GetKeyDown(KeyCode.Space) && Time.time >= _lastDashTime + Constants.PlayerDashCooldown)
+        if (!_isDashing && Input.GetKeyDown(KeyCode.Space) && Time.time >= _lastDashTime + Globals.PlayerDashCooldown)
             TryStartDash();
 
         if (!_isDashing)
         {
             float elapsedDash = Time.time - _lastDashTime;
-            gameScreenUIManager.UpdateDashSlider(Mathf.Clamp(elapsedDash, 0f, Constants.PlayerDashCooldown));
+            gameScreenUIManager.UpdateDashSlider(Mathf.Clamp(elapsedDash, 0f, Globals.PlayerDashCooldown));
         }
 
         if (_isDashing)
@@ -136,7 +136,7 @@ public class PlayerController : MonoBehaviour, IHealth
             bullet.GetComponent<Bullet>().Setup(aimDir);
             _nextFireTime = Time.time + fireRate;
             
-            TakeDamage(Constants.OwnBulletDamage, true); // Shooting 1 bullet does 1 damage to self
+            TakeDamage(Globals.OwnBulletDamage, true); // Shooting 1 bullet does 1 damage to self
         }
     }
     
@@ -170,7 +170,7 @@ public class PlayerController : MonoBehaviour, IHealth
         {
             Debug.Log("Enemy Hit");
             IHealth health = other.GetComponent<IHealth>();
-            health.TakeDamage(Constants.DashDamage);            
+            health.TakeDamage(Globals.DashDamage);            
         }
     }
     

@@ -24,10 +24,10 @@ public class UIManager : MonoBehaviour
     private void Awake()
     {
         dashSlider.minValue = 0;
-        dashSlider.maxValue = Constants.PlayerDashCooldown;
+        dashSlider.maxValue = Globals.PlayerDashCooldown;
 
         healthSlider.minValue = 0;
-        healthSlider.maxValue = Constants.PlayerMaxHealth;
+        healthSlider.maxValue = Globals.PlayerMaxHealth;
     }
 
     void Start()
@@ -36,7 +36,7 @@ public class UIManager : MonoBehaviour
         GameManager.Instance.OnPlayerDied += OnPlayerDied;
         waveNumber.text = "WAVE: " + enemySpawner.GetDifficultyLevel();
         enemySpawner.OnDifficultyChanged += OnDifficultyChanged;
-        difficultyText.text = Constants.Difficulty.ToString().ToUpper();
+        difficultyText.text = Globals.Difficulty.ToString().ToUpper();
     }
 
     public void UpdateDashSlider(float timeLeftTillNextDash)
@@ -47,9 +47,9 @@ public class UIManager : MonoBehaviour
     public void UpdatePlayerHealth(int playerHealth) // NOT CALLED EVERY FRAME
     {
         healthSlider.value = playerHealth;
-        healthText.text = playerHealth + "/" + Constants.PlayerMaxHealth;
+        healthText.text = playerHealth + "/" + Globals.PlayerMaxHealth;
 
-        if (playerHealth <= Constants.PlayerMaxHealth / 3)
+        if (playerHealth <= Globals.PlayerMaxHealth / 3)
         {
             healthBarBorder.color = Color.softRed;
             healthText.color = Color.red;

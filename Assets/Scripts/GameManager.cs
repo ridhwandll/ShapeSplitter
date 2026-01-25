@@ -21,11 +21,11 @@ public class GameManager : MonoBehaviour
             Instance = this;
 
         if (volume.profile.TryGet<Bloom>(out var b))
-            b.active = Constants.Bloom;
+            b.active = Globals.Bloom;
         if (volume.profile.TryGet<Vignette>(out var v))
-            v.active = Constants.Vignette;
+            v.active = Globals.Vignette;
         if (volume.profile.TryGet<Tonemapping>(out var t))
-            t.active = Constants.Tonemapping;
+            t.active = Globals.Tonemapping;
         
         _isPaused = false;
         OnPauseChanged?.Invoke(_isPaused);

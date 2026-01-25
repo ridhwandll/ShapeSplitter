@@ -1,10 +1,11 @@
 using UnityEngine;
 
-public static class Constants
+public static class Globals
 {
     public static readonly Color PlayerColor = new Color32(255,191,0, 255);
     public static readonly Color EnemyColor = new Color32(255,75,51, 255);
-
+    public static readonly int InitialShopItemCost = 250;
+    public static readonly float CostMultiplier = 1.4f;
 
     public static float PlayerDashCooldown = 8.0f;
         
@@ -21,4 +22,8 @@ public static class Constants
     public static float MusicVolume = 0.2f;
     
     public static DifficultyLevel Difficulty = 0;
+    
+    // Sore
+    public static int Coins = 999999;
+    public static int Highscore = 69;
 }

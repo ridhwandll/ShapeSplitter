@@ -44,7 +44,7 @@ public class EnemySpawner : MonoBehaviour
         StartCoroutine(SpawnRoutine());
         _canSpawnBigChonk = true;
 
-        switch (Constants.Difficulty)
+        switch (Globals.Difficulty)
         {
             case DifficultyLevel.Easy:
                 difficultyInterval = 30.0f;
@@ -63,7 +63,7 @@ public class EnemySpawner : MonoBehaviour
                 maxEnemiesIncreasePerWave = 6;
                 break;
         }
-        Debug.Log("Playing in: " + Constants.Difficulty + "Mode");
+        Debug.Log("Playing in: " + Globals.Difficulty + "Mode");
     }
 
     void Update()
