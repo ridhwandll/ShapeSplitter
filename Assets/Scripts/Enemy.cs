@@ -18,7 +18,7 @@ public class Enemy : MonoBehaviour, IHealth
     public float moveSpeed = 3f;
     public float stopDistance = 1.5f;
     public float smoothTime = 0.3f;
-    public float fireRate = 0.3f;
+    public float fireRate = 1.0f;
     
     private Vector3 _velocity; // required for SmoothDamp
     
@@ -60,17 +60,19 @@ public class Enemy : MonoBehaviour, IHealth
                 _maxHealth = 3;
                 moveSpeed = 3f;
                 stopDistance = 2.0f;
+                fireRate = 1.2f;
                 break;
             case EnemyType.LongRanged:
                 _maxHealth = 2;
                 moveSpeed = 1.5f;
-                stopDistance = 4.5f;
-                fireRate = 0.5f;
+                stopDistance = 5f;
+                fireRate = 0.35f;
                 break;
             case EnemyType.BigChonk:
-                _maxHealth = 10;
-                moveSpeed = 1.0f;
-                stopDistance = 3.0f;
+                _maxHealth = 15;
+                moveSpeed = 0.9f;
+                stopDistance = 3.5f;
+                fireRate = 0.7f;
                 break;
         }
         _health = _maxHealth;
@@ -114,11 +116,14 @@ public class Enemy : MonoBehaviour, IHealth
             return;
         }
 
-        //Rotate the enemy
-        float angle = Mathf.Atan2(toPlayer.y, toPlayer.x) * Mathf.Rad2Deg;
-        Quaternion targetRot = Quaternion.Euler(0f, 0f, angle);
-        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, 720.0f * Time.deltaTime);
-        
+        if (_enemyType == EnemyType.LongRanged)
+        {
+            //Rotate the enemy
+            float angle = Mathf.Atan2(toPlayer.y, toPlayer.x) * Mathf.Rad2Deg;
+            Quaternion targetRot = Quaternion.Euler(0f, 0f, angle);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, 720.0f * Time.deltaTime);
+        }
+
         // Move the enemy
         Vector3 desiredPos = targetPos - toPlayer.normalized * stopDistance;
         Vector3 newPos = Vector3.SmoothDamp(currentPos, desiredPos, ref _velocity, smoothTime, moveSpeed);

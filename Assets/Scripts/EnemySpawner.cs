@@ -3,6 +3,14 @@ using System;
 using System.Collections;
 using Random = UnityEngine.Random;
 
+public enum DifficultyLevel
+{
+    Easy = 0,
+    Medium = 1,
+    Hard = 2,
+    Impossible = 3
+}
+
 public class EnemySpawner : MonoBehaviour
 {
     public GameObject shortRangeEnemyPrefab;
@@ -19,13 +27,13 @@ public class EnemySpawner : MonoBehaviour
 
     [Header("Difficulty Scaling")]
     public float difficultyInterval = 10.0f; // seconds per level
-    public float spawnDelayDecreasePerLevel = 0.1f;
-    public int maxEnemiesIncreasePerLevel = 2;
+    public float spawnDelayDecreasePerWave = 0.1f;
+    public int maxEnemiesIncreasePerWave = 2;
 
     private int _currentEnemies;
     private bool _paused;
-    private int _difficultyLevel = 1;
-    private float _difficultyTimer;
+    private int _wave = 1;
+    private float _waveTimer;
     public Action<int> OnDifficultyChanged;
     
     private bool _canSpawnBigChonk = true;
@@ -35,6 +43,27 @@ public class EnemySpawner : MonoBehaviour
         GameManager.Instance.OnPauseChanged += OnGamePaused;
         StartCoroutine(SpawnRoutine());
         _canSpawnBigChonk = true;
+
+        switch (Constants.Difficulty)
+        {
+            case DifficultyLevel.Easy:
+                difficultyInterval = 30.0f;
+                maxEnemiesIncreasePerWave = 1;
+                break;
+            case DifficultyLevel.Medium:
+                difficultyInterval = 25.0f;
+                maxEnemiesIncreasePerWave = 2;
+                break;
+            case DifficultyLevel.Hard:
+                difficultyInterval = 18.0f;
+                maxEnemiesIncreasePerWave = 4;
+                break;
+            case DifficultyLevel.Impossible:
+                difficultyInterval = 12.0f;
+                maxEnemiesIncreasePerWave = 6;
+                break;
+        }
+        Debug.Log("Playing in: " + Constants.Difficulty + "Mode");
     }
 
     void Update()
@@ -42,13 +71,13 @@ public class EnemySpawner : MonoBehaviour
         if (_paused || !GameManager.Instance.IsPlayerAlive)
             return;
 
-        _difficultyTimer += Time.deltaTime;
+        _waveTimer += Time.deltaTime;
 
-        if (_difficultyTimer >= difficultyInterval)
+        if (_waveTimer >= difficultyInterval)
         {
-            _difficultyTimer = 0f;
-            _difficultyLevel++;
-            OnDifficultyChanged?.Invoke(_difficultyLevel);
+            _waveTimer = 0f;
+            _wave++;
+            OnDifficultyChanged?.Invoke(_wave);
         }
     }
 
@@ -58,13 +87,13 @@ public class EnemySpawner : MonoBehaviour
         {
             yield return new WaitWhile(() => _paused);
 
-            int scaledMaxEnemies = baseMaxEnemies + (_difficultyLevel - 1) * maxEnemiesIncreasePerLevel;
+            int scaledMaxEnemies = baseMaxEnemies + (_wave - 1) * maxEnemiesIncreasePerWave;
 
             if (_currentEnemies < scaledMaxEnemies)
                 SpawnEnemy();
 
-            float minDelay = Mathf.Max(0.2f, baseMinSpawnDelay - (_difficultyLevel - 1) * spawnDelayDecreasePerLevel);
-            float maxDelay = Mathf.Max(minDelay + 0.1f, baseMaxSpawnDelay - (_difficultyLevel - 1) * spawnDelayDecreasePerLevel);
+            float minDelay = Mathf.Max(0.2f, baseMinSpawnDelay - (_wave - 1) * spawnDelayDecreasePerWave);
+            float maxDelay = Mathf.Max(minDelay + 0.1f, baseMaxSpawnDelay - (_wave - 1) * spawnDelayDecreasePerWave);
             float delay = Random.Range(minDelay, maxDelay);
             
             yield return new WaitForSeconds(delay);
@@ -109,12 +138,13 @@ public class EnemySpawner : MonoBehaviour
         
         GameObject enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity, transform);
         enemy.GetComponent<Enemy>().Initiate(this, enemyType);
+        enemy.GetComponent<EnemySpawnIntro>()?.Play();
         _currentEnemies++;
     }
 
     public int GetDifficultyLevel()
     {
-        return _difficultyLevel;
+        return _wave;
     }
     
     public void OnEnemyDied(EnemyType type)

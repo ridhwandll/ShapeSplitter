@@ -7,17 +7,20 @@ namespace MainMenu
     {
         AudioMenu,
         GraphicsMenu,
+        DifficultyMenu,
     }
 
     public class OptionsMenuManager
     {
         private VisualElement _audioMenu;
         private VisualElement _graphicsMenu;
+        private VisualElement _difficultyMenu;
 
         public void Initialize(UIDocument document)
         {
             _audioMenu = document.rootVisualElement.Q<VisualElement>("AudioMenu");
             _graphicsMenu = document.rootVisualElement.Q<VisualElement>("GraphicsMenu");
+            _difficultyMenu = document.rootVisualElement.Q<VisualElement>("DifficultyMenu");
         }
     
         public void Show(MenuType menuType)
@@ -27,6 +30,7 @@ namespace MainMenu
             // Hide All
             _audioMenu.style.display = DisplayStyle.None;
             _graphicsMenu.style.display = DisplayStyle.None;
+            _difficultyMenu.style.display = DisplayStyle.None;
 
             menu.style.display = DisplayStyle.Flex;
             menu.style.opacity = 0f;
@@ -48,6 +52,8 @@ namespace MainMenu
                     return _audioMenu;
                 case MenuType.GraphicsMenu:
                     return _graphicsMenu;
+                case MenuType.DifficultyMenu:
+                    return _difficultyMenu;
             }
             return null;
         }

@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour, IHealth
     public UIManager gameScreenUIManager;
     
     public ParticleSystem playerParticleSystem;
+    public AudioClip dashSound;
     
     private bool _isDashing;
     private float _dashTimeLeft;
@@ -95,6 +96,8 @@ public class PlayerController : MonoBehaviour, IHealth
         _dashDirection = (aimDir).normalized;
         _dashTimeLeft = dashDuration;
         _isDashing = true;
+        _mainCamera.gameObject.GetComponent<CameraShake>().Shake(0.4f, 3, 0.01f);
+        SoundFXManager.instance.PlaySoundFXClip(dashSound, transform, 0.5f);
     }
     
     private void MovePlayer()

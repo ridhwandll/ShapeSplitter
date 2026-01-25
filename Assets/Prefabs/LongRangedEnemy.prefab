@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7617095669577950055}
   - component: {fileID: 7314182695061431030}
   - component: {fileID: 8242999759259190955}
+  - component: {fileID: 6625121858525594327}
   m_Layer: 3
   m_Name: LongRangedEnemy
   m_TagString: Enemy
@@ -30,7 +31,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -7.1598163, y: -2.7079625, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
+  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 64838555631958011}
@@ -85,7 +86,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 75f5f34dc1b5347e0b8351032682f224, type: 3}
+  m_Sprite: {fileID: 3528139193801910542, guid: d44ef23dd5de9414f805e18a5a05c6c8, type: 3}
   m_Color: {r: 1, g: 0.29411766, b: 0.2, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -132,8 +133,8 @@ PolygonCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.28866667}
-    oldSize: {x: 1, y: 1}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 1.92, y: 1.69}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -141,9 +142,9 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 0, y: 0.5773587}
-      - {x: -0.5, y: -0.28866667}
-      - {x: 0.5, y: -0.28866667}
+    - - {x: -0.01036485, y: 0.9090703}
+      - {x: -1.0182998, y: -0.8484298}
+      - {x: 0.98720205, y: -0.82769793}
   m_UseDelaunayMesh: 1
 --- !u!50 &7314182695061431030
 Rigidbody2D:
@@ -187,15 +188,52 @@ MonoBehaviour:
   moveSpeed: 3
   stopDistance: 1.5
   smoothTime: 0.3
+  fireRate: 1
   enemyLayer:
     serializedVersion: 2
     m_Bits: 8
   bulletPrefab: {fileID: 6469692633469274891, guid: 5ae21c41bb09599429ecb8ad37ddfaad, type: 3}
   lifeShardPrefab: {fileID: 8776967741011382629, guid: ab821d0d78221bd4a8b206431b27c1d7, type: 3}
-  fireRate: 1
   enemyDeathParticleSystem: {fileID: 2274675121614144604}
   deathClip: {fileID: 8300000, guid: 5e33ecc0ab0d591449faa3d0ce26daf6, type: 3}
   personalSpace: 5
+--- !u!114 &6625121858525594327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4582104593587692413}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f24822e3228fd14e904e34f1961f787, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemySpawnIntro
+  spawnTime: 0.5
+  scaleCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &8806846769284373594
 GameObject:
   m_ObjectHideFlags: 0

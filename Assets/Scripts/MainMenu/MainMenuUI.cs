@@ -13,6 +13,7 @@ namespace MainMenu
         private Button _optionsButton;
         private Button _exitButton;
     
+        // OPTIONS MENU
         private Slider _masterVolSlider;
         private Slider _soundFXVolSlider;
         private Slider _musicVolSlider;
@@ -24,7 +25,16 @@ namespace MainMenu
         private Button _backToMainMenuButton;
         private Button _audioOptionsButton;
         private Button _graphicsOptionsButton;
-    
+        private Button _difficultyOptionsButton;
+        
+        //Graphics Toggles
+        private Toggle _bloomToggle;
+        private Toggle _vignetteToggle;
+        private Toggle _tonemappingToggle;
+        
+        // Difficulty
+        private RadioButtonGroup _difficultyOptionsGroup;
+        
         void Start()
         {
             VisualElement root = uiDocument.rootVisualElement;
@@ -41,22 +51,62 @@ namespace MainMenu
             _exitButton = root.Q<Button>("ExitButton");
             _audioOptionsButton = root.Q<Button>("AudioButton");
             _graphicsOptionsButton = root.Q<Button>("GraphicsButton");
-            
+            _difficultyOptionsButton = root.Q<Button>("DifficultyButton");
             
             _masterVolSlider = root.Q<Slider>("MasterVol");
             _soundFXVolSlider = root.Q<Slider>("SoundFXVol");
             _musicVolSlider = root.Q<Slider>("MusicVol");
         
+            //Graphics
+            _bloomToggle = root.Q<Toggle>("BloomToggle");
+            _tonemappingToggle = root.Q<Toggle>("TonemappingToggle");
+            _vignetteToggle = root.Q<Toggle>("VignetteToggle");
+            _bloomToggle.RegisterValueChangedCallback(evt => { Constants.Bloom = evt.newValue; });
+            _vignetteToggle.RegisterValueChangedCallback(evt => { Constants.Vignette = evt.newValue; });
+            _tonemappingToggle.RegisterValueChangedCallback(evt => { Constants.Tonemapping = evt.newValue; });
+            
+            _bloomToggle.value =  Constants.Bloom;
+            _vignetteToggle.value =  Constants.Vignette;
+            _tonemappingToggle.value =  Constants.Tonemapping;
+            
+            // Difficulty
+            _difficultyOptionsGroup =root.Q<RadioButtonGroup>("DifficultyRadioButtons");
+            _difficultyOptionsGroup.RegisterValueChangedCallback((evt) =>
+            {
+                Debug.Log("Selected index: " + ((DifficultyLevel)evt.newValue).ToString());
+                switch (evt.newValue)
+                {
+                    case 0:
+                        Constants.Difficulty = DifficultyLevel.Easy;
+                        break;
+                    case 1:
+                        Constants.Difficulty = DifficultyLevel.Medium;
+                        break;
+                    case 2:
+                        Constants.Difficulty = DifficultyLevel.Hard;
+                        break;
+                    case 3:
+                        Constants.Difficulty = DifficultyLevel.Impossible;
+                        break;
+                }
+            });
+            _difficultyOptionsGroup.value = (int)Constants.Difficulty;
+            
             _masterVolSlider.RegisterValueChangedCallback(OnMasterVolumeChanged);
             _soundFXVolSlider.RegisterValueChangedCallback(OnSoundFXVolumeChanged);
             _musicVolSlider.RegisterValueChangedCallback(OnMusicVolumeChanged);
-        
+
+            _masterVolSlider.value = Constants.MasterVolume;
+            _soundFXVolSlider.value = Constants.SoundFXVolume;
+            _musicVolSlider.value = Constants.MusicVolume;
+            
             _playButton.clicked += OnPlayButtonPressed;
             _optionsButton.clicked += OnOptionsButtonPressed;
             _exitButton.clicked += OnExitButtonPressed;
             _backToMainMenuButton.clicked += OnBackToMainMenuButtonPressed;
-            _audioOptionsButton.clicked += OnAudioOptionsButtonPressed;
-            _graphicsOptionsButton.clicked += OnGraphicsOptionsButtonPressed;
+            _audioOptionsButton.clicked += () => { _optionsMenuManager.Show(MenuType.AudioMenu); };
+            _graphicsOptionsButton.clicked += () => { _optionsMenuManager.Show(MenuType.GraphicsMenu); };
+            _difficultyOptionsButton.clicked += () => { _optionsMenuManager.Show(MenuType.DifficultyMenu); };
             
             _mainMenu.style.display = DisplayStyle.Flex;
             _optionsMenu.style.display = DisplayStyle.None;
@@ -94,15 +144,8 @@ namespace MainMenu
         //// GRAPHICS ////
         
         
+        //// DIFFICULTY ////
         
-        private void OnAudioOptionsButtonPressed()
-        {
-            _optionsMenuManager.Show(MenuType.AudioMenu);
-        }
-        private void OnGraphicsOptionsButtonPressed()
-        {
-            _optionsMenuManager.Show(MenuType.GraphicsMenu);
-        }
         private void OnBackToMainMenuButtonPressed()
         {
             _optionsMenu.style.display = DisplayStyle.None;

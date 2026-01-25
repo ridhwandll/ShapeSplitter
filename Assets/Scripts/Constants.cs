@@ -11,4 +11,14 @@ public static class Constants
     public static int OwnBulletDamage = 1;
     public static int DashDamage = 5;
     public static int PlayerMaxHealth = 50;
+
+    public static bool Bloom = true;
+    public static bool Vignette = true;
+    public static bool Tonemapping = true;
+
+    public static float MasterVolume = 1.0f;
+    public static float SoundFXVolume = 1.0f;
+    public static float MusicVolume = 0.2f;
+    
+    public static DifficultyLevel Difficulty = 0;
 }
