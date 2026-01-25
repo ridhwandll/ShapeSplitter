@@ -6,18 +6,42 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
-    private bool _paused = false;
+    //Health Bar
     public Slider healthSlider;
     public TMP_Text healthText;
+    public TMP_Text difficultyText;
     public Image healthBarBorder;
+    
     public GameObject pauseMenu;
+    public GameObject deathMenu;
+
+    public EnemySpawner enemySpawner;
+    
+    // Dash bar
+    public Slider dashSlider;
     
     private void Awake()
     {
+        dashSlider.minValue = 0;
+        dashSlider.maxValue = Constants.PlayerDashCooldown;
+            
         healthSlider.minValue = 0;
         healthSlider.maxValue = Constants.PlayerMaxHealth;
     }
-        
+
+    void Start()
+    {
+        GameManager.Instance.OnPauseChanged += OnPauseChanged;
+        GameManager.Instance.OnPlayerDied += OnPlayerDied;
+        difficultyText.text = "Wave: " + enemySpawner.GetDifficultyLevel();
+        enemySpawner.OnDifficultyChanged += OnDifficultyChanged;
+    }
+
+    public void UpdateDashSlider(float timeLeftTillNextDash)
+    {
+        dashSlider.value = timeLeftTillNextDash;
+    }
+
     public void UpdatePlayerHealth(int playerHealth)
     {
         healthSlider.value = playerHealth;
@@ -36,32 +60,25 @@ public class UIManager : MonoBehaviour
             
     }
 
-    private void Update()
+    private void OnPauseChanged(bool paused)
     {
-        //TODO: Implement Real Escape Here
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (_paused)
-            {
-                _paused = false;
-                pauseMenu.SetActive(false);
-            }
-            else
-            {
-                pauseMenu.SetActive(true);
-                _paused = true;
-                
-            }
-        }
+        deathMenu.SetActive(false);
+        pauseMenu.SetActive(paused);
     }
 
+    private void OnPlayerDied()
+    {
+        pauseMenu.SetActive(false);
+        deathMenu.SetActive(true);
+    }
+
+    private void OnDifficultyChanged(int difficulty)
+    {
+        difficultyText.text = "Wave: " + difficulty;
+    }
+    
     public void OnReturnToMMPressed()
     {
         SceneManager.LoadSceneAsync(0);
-    }
-    
-    private void OnBackToMMButtonPressed()
-    {
-        SceneManager.LoadScene(0); // Load main menu   
     }
 }

@@ -24,6 +24,29 @@ public class LifeShard : MonoBehaviour
         sr.color = colorAtSpawn;
         Destroy(gameObject, lifetime);
     }
+
+    public void Initiate(EnemyType enemyType)
+    {
+        switch (enemyType)
+        {
+            case EnemyType.BigChonk:
+                healthAtSpawn = 8;
+                healthAfter3s = 10;
+                healthAfter6s = 15;
+                transform.localScale = new Vector3(transform.localScale.x * 2.5f, transform.localScale.y * 2.5f, 1f);
+                break;
+            case EnemyType.LongRanged:
+                healthAtSpawn = 2;
+                healthAfter3s = 3;
+                healthAfter6s = 5;
+                transform.localScale = new Vector3(transform.localScale.x * 1.5f, transform.localScale.y * 1.5f, 1f);
+                break;
+            case EnemyType.ShortRanged:
+                //Default
+                break;
+        }
+    }
+    
     void Update()
     {
         float elapsed = Time.time - _spawnTime;

@@ -1,7 +1,16 @@
 using UnityEngine;
 
+public enum EnemyType
+{
+    ShortRanged,
+    LongRanged,
+    BigChonk
+}
+
 public class Enemy : MonoBehaviour, IHealth
 {
+    private EnemyType _enemyType;
+    
     // Health
     private int _health;
     private int _maxHealth = 3;
@@ -9,35 +18,71 @@ public class Enemy : MonoBehaviour, IHealth
     public float moveSpeed = 3f;
     public float stopDistance = 1.5f;
     public float smoothTime = 0.3f;
+    public float fireRate = 0.3f;
+    
     private Vector3 _velocity; // required for SmoothDamp
     
     public LayerMask enemyLayer;
     public GameObject bulletPrefab;
     public GameObject lifeShardPrefab;
-    public float fireRate = 0.3f;
 
     //On Death
     public ParticleSystem enemyDeathParticleSystem;
     public AudioClip deathClip;
-        
+
+    private SpriteRenderer _spriteRenderer;
+    private Color _baseColor; 
+    
+    private EnemySpawner _mySpawner;
     public float personalSpace = 0.7f;
     private Transform _player;
     private float _nextFireTime;
     private float _currentDistanceFromTarget;
-
+    private bool _paused;
     
     void Start()
     {
-        _health =  _maxHealth;
+        _spriteRenderer = GetComponent<SpriteRenderer>();
+        _baseColor = _spriteRenderer.color;
+        
         _player = GameObject.FindGameObjectWithTag("Player").transform;
+        GameManager.Instance.OnPauseChanged += OnGamePaused;
     }
 
+    // Must Call after instantiating enemy
+    public void Initiate(EnemySpawner mySpawner, EnemyType type)
+    {
+        _mySpawner = mySpawner;
+        _enemyType = type;
+        switch (type)
+        {  
+            case EnemyType.ShortRanged:
+                _maxHealth = 3;
+                moveSpeed = 3f;
+                stopDistance = 2.0f;
+                break;
+            case EnemyType.LongRanged:
+                _maxHealth = 2;
+                moveSpeed = 1.5f;
+                stopDistance = 4.5f;
+                fireRate = 0.5f;
+                break;
+            case EnemyType.BigChonk:
+                _maxHealth = 10;
+                moveSpeed = 1.0f;
+                stopDistance = 3.0f;
+                break;
+        }
+        _health = _maxHealth;
+    }
+    
     void Update()
     {
-        if (!_player)
+        if (!_player || _paused)
             return;
         
         MoveEnemy();
+        UpdateColor();
         
         if (Time.time >= _nextFireTime && _currentDistanceFromTarget <= stopDistance)
         {
@@ -69,6 +114,12 @@ public class Enemy : MonoBehaviour, IHealth
             return;
         }
 
+        //Rotate the enemy
+        float angle = Mathf.Atan2(toPlayer.y, toPlayer.x) * Mathf.Rad2Deg;
+        Quaternion targetRot = Quaternion.Euler(0f, 0f, angle);
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRot, 720.0f * Time.deltaTime);
+        
+        // Move the enemy
         Vector3 desiredPos = targetPos - toPlayer.normalized * stopDistance;
         Vector3 newPos = Vector3.SmoothDamp(currentPos, desiredPos, ref _velocity, smoothTime, moveSpeed);
         transform.position = new Vector3(newPos.x, newPos.y, transform.position.z);
@@ -105,7 +156,9 @@ public class Enemy : MonoBehaviour, IHealth
             enemyDeathParticleSystem.Play();
             Destroy(enemyDeathParticleSystem.gameObject, enemyDeathParticleSystem.main.duration + enemyDeathParticleSystem.main.startLifetime.constantMax);
             
-            Instantiate(lifeShardPrefab, transform.position, Quaternion.identity);
+            GameObject lifeShard = Instantiate(lifeShardPrefab, transform.position, Quaternion.identity);
+            lifeShard.GetComponent<LifeShard>().Initiate(_enemyType);
+            _mySpawner.OnEnemyDied(_enemyType);
             Destroy(gameObject);
         }
     }
@@ -113,5 +166,31 @@ public class Enemy : MonoBehaviour, IHealth
     public void Heal(int amount)
     {
         _health = Mathf.Min(_maxHealth, _health + amount);
+    }
+    
+    private void OnGamePaused(bool isPaused)
+    {
+        _paused =  isPaused;
+    }
+    
+    private void UpdateColor()
+    {
+        if (_spriteRenderer == null)
+            return;
+
+        float healthRatio = Mathf.Clamp01((float)_health / _maxHealth);
+
+        // Convert base color to HSV
+        Color.RGBToHSV(_baseColor, out float h, out float s, out float v);
+
+        // Decide saturation based on health
+        if (healthRatio > 0.8f) // 100% - 60%
+            s = 1.0f;
+        else if (healthRatio > 0.5f) // 60% - 30%
+            s = 0.7f;
+        else // 30% - 0%
+            s = 0.4f;
+
+        _spriteRenderer.color = Color.HSVToRGB(h, s, v);
     }
 }

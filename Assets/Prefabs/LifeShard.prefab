@@ -83,8 +83,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
-  m_Color: {r: 1, g: 0.88183403, b: 0.5235849, a: 1}
+  m_Sprite: {fileID: -189007543781055118, guid: 80577bbab4f70e645a6eb7260f457f13, type: 3}
+  m_Color: {r: 1, g: 0.75206614, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -146,5 +146,5 @@ MonoBehaviour:
   healthAfter6s: 4
   colorAtSpawn: {r: 1, g: 0.9297743, b: 0.7216981, a: 1}
   colorAfter3s: {r: 1, g: 0.86883825, b: 0.4669811, a: 1}
-  colorAfter6s: {r: 0.9686275, g: 0.73333335, b: 0.13333334, a: 1}
-  lifetime: 10
+  colorAfter6s: {r: 1, g: 0.7183099, b: 0, a: 1}
+  lifetime: 20

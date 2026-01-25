@@ -12,7 +12,6 @@ public class PlayerController : MonoBehaviour, IHealth
     
     public float dashSpeed = 15f;
     public float dashDuration = 0.15f;
-    public float dashCooldown = 1f;
     public UIManager gameScreenUIManager;
     
     public ParticleSystem playerParticleSystem;
@@ -34,7 +33,7 @@ public class PlayerController : MonoBehaviour, IHealth
     private Camera _mainCamera;
     public GameObject bulletPrefab;
     private float _nextFireTime;
-    
+    private bool _paused = false;
     
     void Awake()
     {
@@ -43,26 +42,35 @@ public class PlayerController : MonoBehaviour, IHealth
         _lineRenderer = GetComponent<LineRenderer>();
         _trailRenderer = GetComponent<TrailRenderer>();
         _trailRenderer.emitting = false;
-        Constants.IsPlayerAlive = true; // Reset this value everytime scene is loaded
     }
 
     void Start()
     {
         _health = _maxHealth;
         gameScreenUIManager.UpdatePlayerHealth(_health);
+        GameManager.Instance.OnPauseChanged += OnGamePaused;
     }
     
     void Update()
     {
+        if (_paused)
+            return;
+        
         _input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        if (!_isDashing && Input.GetKeyDown(KeyCode.Space) && Time.time >= _lastDashTime + dashCooldown)
+        if (!_isDashing && Input.GetKeyDown(KeyCode.Space) && Time.time >= _lastDashTime + Constants.PlayerDashCooldown)
             TryStartDash();
+
+        if (!_isDashing)
+        {
+            float elapsedDash = Time.time - _lastDashTime;
+            gameScreenUIManager.UpdateDashSlider(Mathf.Clamp(elapsedDash, 0f, Constants.PlayerDashCooldown));
+        }
 
         if (_isDashing)
         {
             transform.position += _dashDirection * dashSpeed * Time.deltaTime;
             _dashTimeLeft -= Time.deltaTime;
-
+            
             if (_dashTimeLeft <= 0f)
             {
                 _trailRenderer.emitting = false;
@@ -138,7 +146,7 @@ public class PlayerController : MonoBehaviour, IHealth
         if (_health == 0) //TODO: LEVEL END HERE
         {
             Destroy(gameObject);
-            Constants.IsPlayerAlive = false;
+            GameManager.Instance.SetPlayerAlive(false);
         }
         
         if (!isDamagingByOwnBullet)               
@@ -161,5 +169,10 @@ public class PlayerController : MonoBehaviour, IHealth
             IHealth health = other.GetComponent<IHealth>();
             health.TakeDamage(Constants.DashDamage);            
         }
+    }
+    
+    private void OnGamePaused(bool isPaused)
+    {
+        _paused =  isPaused;
     }
 }
