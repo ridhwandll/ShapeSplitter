@@ -8,7 +8,7 @@ public class EnemySpawnIntro : MonoBehaviour
 
     private Enemy _enemyScript;
     private Vector3 _initialScale;
-        
+    
     void Awake()
     {
         _enemyScript = GetComponent<Enemy>();
@@ -28,7 +28,7 @@ public class EnemySpawnIntro : MonoBehaviour
     IEnumerator SpawnRoutine()
     {
         float t = 0f;
-
+        yield return new WaitWhile(() => GameManager.Instance.IsPaused);
         while (t < spawnTime)
         {
             t += Time.deltaTime;

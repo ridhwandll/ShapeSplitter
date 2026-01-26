@@ -38,6 +38,12 @@ public class UIManager : MonoBehaviour
     public Slider repulsorSlider;
     public Image repulseBar;
     
+    [Header("Tips")]
+    public TMP_Text howToDashText;
+    public TMP_Text howToRepulseText;
+    public float showDuration = 5f;
+    public float fadeOutDuration = 2f;
+    
     void Start()
     {
         GameManager.Instance.OnPauseChanged += OnPauseChanged;
@@ -54,7 +60,14 @@ public class UIManager : MonoBehaviour
     {
         dashSlider.value = timeLeftTillNextDash;
         if (dashSlider.value >= Globals.PlayerDashCooldown)
+        {
             dashBar.color = Color.gold;
+            if (Globals.DashTipShown == false)
+            {
+                StartCoroutine(ShowFadeInAndOut(howToDashText));
+                Globals.DashTipShown = true;
+            }
+        }
         else
             dashBar.color = Color.gray1;
             
@@ -64,7 +77,14 @@ public class UIManager : MonoBehaviour
     {
         repulsorSlider.value = timeLeftTillNextRepulse;
         if (repulsorSlider.value >= Globals.RepulsorCooldown)
+        {
             repulseBar.color = Color.darkOrange;
+            if (Globals.RepulseTipShown == false)
+            {
+                StartCoroutine(ShowFadeInAndOut(howToRepulseText));
+                Globals.RepulseTipShown = true;
+            }
+        }
         else
             repulseBar.color = Color.gray1;
             
@@ -133,5 +153,47 @@ public class UIManager : MonoBehaviour
     public void OnReturnToMMPressed()
     {
         SceneManager.LoadSceneAsync(0); //Return to main menu
+    }
+    
+    IEnumerator ShowFadeInAndOut(TMP_Text text)
+    {
+        text.gameObject.SetActive(true);
+
+        Color c = text.color;
+        c.a = 0f;
+        text.color = c;
+        
+        // FadeIN
+        float t = 0f;
+        float fadeInDuration = 2f;
+        while (t < fadeInDuration)
+        {
+            t += Time.deltaTime;
+            c.a = Mathf.Lerp(0f, 1f, t / fadeInDuration);
+            text.color = c;
+            yield return null;
+        }
+
+        // Ensure fully visible
+        c.a = 0.7f;
+        text.color = c;
+
+        // Stay visible
+        yield return new WaitForSeconds(showDuration);
+
+        // Fade OUT
+        t = 0f;
+        while (t < fadeOutDuration)
+        {
+            t += Time.deltaTime;
+            c.a = Mathf.Lerp(1f, 0f, t / fadeOutDuration);
+            text.color = c;
+            yield return null;
+        }
+
+        // Ensure invisible & disable
+        c.a = 0f;
+        text.color = c;
+        text.gameObject.SetActive(false);
     }
 }

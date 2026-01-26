@@ -59,4 +59,7 @@ public static class Globals
     }
 
     public static readonly int MaxShopItemLevel = 15;
+    
+    public static bool DashTipShown = false;
+    public static bool RepulseTipShown = false;
 }

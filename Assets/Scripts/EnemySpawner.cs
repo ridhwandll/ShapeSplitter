@@ -31,7 +31,6 @@ public class EnemySpawner : MonoBehaviour
     public int maxEnemiesIncreasePerWave = 2;
 
     private int _currentEnemies;
-    private bool _paused;
     private int _wave = 1;
     private float _waveTimer;
     public Action<int> OnDifficultyChanged;
@@ -45,7 +44,6 @@ public class EnemySpawner : MonoBehaviour
     {
         _score = 0;
         
-        GameManager.Instance.OnPauseChanged += OnGamePaused;
         StartCoroutine(SpawnRoutine());
         _canSpawnBigChonk = true;
 
@@ -73,7 +71,7 @@ public class EnemySpawner : MonoBehaviour
 
     void Update()
     {
-        if (_paused || !GameManager.Instance.IsPlayerAlive)
+        if (GameManager.Instance.IsPaused || !GameManager.Instance.IsPlayerAlive)
             return;
 
         _waveTimer += Time.deltaTime;
@@ -90,7 +88,7 @@ public class EnemySpawner : MonoBehaviour
     {
         while (GameManager.Instance.IsPlayerAlive)
         {
-            yield return new WaitWhile(() => _paused);
+            yield return new WaitWhile(() => GameManager.Instance.IsPaused);
 
             int scaledMaxEnemies = baseMaxEnemies + (_wave - 1) * maxEnemiesIncreasePerWave;
 
@@ -204,10 +202,5 @@ public class EnemySpawner : MonoBehaviour
                 break;
         }
         return result;
-    }
-    
-    private void OnGamePaused(bool isPaused)
-    {
-        _paused = isPaused;
     }
 }

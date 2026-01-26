@@ -39,6 +39,7 @@ public class GameManager : MonoBehaviour
             return;
 
         _isPaused = pause;
+
         OnPauseChanged?.Invoke(_isPaused);
     }
 

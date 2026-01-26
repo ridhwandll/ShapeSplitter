@@ -36,6 +36,7 @@ public class PlayerController : MonoBehaviour, IHealth
     
     //Repulsor
     private float _repulsorTimer = 0f;
+    public AudioClip repulsorSound;
     
     private Vector3 _currentVelocity;
     private Vector2 _input;
@@ -46,7 +47,6 @@ public class PlayerController : MonoBehaviour, IHealth
     public GameObject bulletPrefab;
     public GameObject repulsorPrefab;
     private float _nextFireTime;
-    private bool _paused = false;
     
     private ChromaticAberration _chromaticAberration;
     
@@ -62,11 +62,11 @@ public class PlayerController : MonoBehaviour, IHealth
 
     void Start()
     {
-        GameManager.Instance.OnPauseChanged += OnGamePaused;
         GameObject.FindGameObjectWithTag("PostProcessStack").GetComponent<Volume>().profile .TryGet<ChromaticAberration>(out var b);
         _chromaticAberration = b;
         _chromaticAberration.active = false;
         _repulsorTimer = Globals.RepulsorCooldown;
+        
     }
 
     public void ApplyShopItemLevels()
@@ -102,7 +102,7 @@ public class PlayerController : MonoBehaviour, IHealth
     
     void Update()
     {
-        if (_paused)
+        if (GameManager.Instance.IsPaused)
             return;
 
         //DASH
@@ -151,6 +151,8 @@ public class PlayerController : MonoBehaviour, IHealth
         _mainCamera.gameObject.GetComponent<CameraShake>().Shake(0.4f, 3, 0.01f);
         SoundFXManager.instance.PlaySoundFXClip(dashSound, transform, 0.5f);
         playerParticleSystem.Play();
+        
+        TakeDamage(Globals.OwnBulletDamage * 3, true); //Dashing does 4 damage to self
     }
     
     private void MovePlayer()
@@ -234,17 +236,9 @@ public class PlayerController : MonoBehaviour, IHealth
             health.TakeDamage(Globals.DashDamage);            
         }
     }
-    
-    private void OnGamePaused(bool isPaused)
-    {
-        _paused =  isPaused;
-    }
 
     void HandleLifeRegen()
     {
-        if (!GameManager.Instance.IsPlayerAlive && _paused == false)
-            return;
-        
         _regenTimer += Time.deltaTime;
 
         if (_regenTimer >= _regenInterval)
@@ -276,5 +270,8 @@ public class PlayerController : MonoBehaviour, IHealth
     private void ActivateRepulsor()
     {
         Instantiate(repulsorPrefab, transform.position, Quaternion.identity);
+        TakeDamage(Globals.OwnBulletDamage * 8, true); //Repulsing does 8 damage to self
+        SoundFXManager.instance.PlaySoundFXClip(repulsorSound, transform, 0.8f);
+        _mainCamera.gameObject.GetComponent<CameraShake>().Shake(0.3f, 8, 0.4f);
     }
 }
