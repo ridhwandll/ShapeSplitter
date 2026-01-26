@@ -39,6 +39,8 @@ namespace MainMenu
         
         // Difficulty
         private RadioButtonGroup _difficultyOptionsGroup;
+
+        private Label _highscoreLabel;
         
         void Start()
         {
@@ -49,11 +51,12 @@ namespace MainMenu
             _optionsMenuManager.Initialize(uiDocument);
             _shopMenuManager.Initialize(root);
             
+            _highscoreLabel = root.Q<Label>("Highscore");
             _optionsMenu = root.Q<VisualElement>("OptionsMenu");
             _mainMenu = root.Q<VisualElement>("MainMenu");
             _shopMenu = root.Q<VisualElement>("ShopMenu");
         
-            _backToMainMenuButton =  root.Q<Button>("BackButton");
+            _backToMainMenuButton = root.Q<Button>("BackButton");
             _playButton = root.Q<Button>("PlayButton");
             _optionsButton = root.Q<Button>("OptionsButton");
             _shopButton = root.Q<Button>("ShopButton"); 
@@ -121,8 +124,10 @@ namespace MainMenu
             
             _mainMenu.style.display = DisplayStyle.Flex;
             _optionsMenu.style.display = DisplayStyle.None;
-        }
 
+            PlayerProgress.Instance.Load();
+            _highscoreLabel.text = "HIGHSCORE: " + Globals.Highscore;
+        }
 
         private void OnPlayButtonPressed()
         {
@@ -165,6 +170,7 @@ namespace MainMenu
             _shopMenu.style.display = DisplayStyle.None;
             _optionsMenu.style.display = DisplayStyle.None;
             _backToMainMenuButton.style.display = DisplayStyle.None;
+            PlayerProgress.Instance.Save();
             AnimateAndShowMenu(_mainMenu);
         }
 

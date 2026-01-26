@@ -45,7 +45,10 @@ public class Enemy : MonoBehaviour, IHealth
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _baseColor = _spriteRenderer.color;
         
-        _player = GameObject.FindGameObjectWithTag("Player").transform;
+        var p = GameObject.FindGameObjectWithTag("Player");
+        if (p != null)
+            _player = p.transform;
+        
         GameManager.Instance.OnPauseChanged += OnGamePaused;
     }
 

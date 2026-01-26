@@ -35,11 +35,16 @@ public class EnemySpawner : MonoBehaviour
     private int _wave = 1;
     private float _waveTimer;
     public Action<int> OnDifficultyChanged;
+    public Action OnEnemyKilled;
     
     private bool _canSpawnBigChonk = true;
     
+    private int _score;
+    
     void Start()
     {
+        _score = 0;
+        
         GameManager.Instance.OnPauseChanged += OnGamePaused;
         StartCoroutine(SpawnRoutine());
         _canSpawnBigChonk = true;
@@ -142,7 +147,7 @@ public class EnemySpawner : MonoBehaviour
         _currentEnemies++;
     }
 
-    public int GetDifficultyLevel()
+    public int GetWaveNumber()
     {
         return _wave;
     }
@@ -151,10 +156,57 @@ public class EnemySpawner : MonoBehaviour
     {
         if (type == EnemyType.BigChonk)
             _canSpawnBigChonk = true;
+
+        switch (type)
+        {
+            case EnemyType.ShortRanged:
+                _score += Globals.KillUnitShortRangedScore;
+                break;
+            case EnemyType.LongRanged:
+                _score += Globals.KillUnitLongRangedScore;
+                break;
+            case EnemyType.BigChonk:
+                _score += Globals.KillUnitBigChonkScore;
+                break;
+        }
         
+        OnEnemyKilled?.Invoke();
         _currentEnemies--;
     }
 
+    public int GetEnemyKillScore()
+    {
+        return _score;
+    }
+    
+    public int GetFinalScore()
+    {
+        _score += GetDifficultyScore(Globals.Difficulty);
+        return _score;
+    }
+
+    public int GetDifficultyScore(DifficultyLevel difficultyLevel)
+    {
+        int result = 0;
+        switch (difficultyLevel)
+        {
+            case DifficultyLevel.Easy:
+                result += 150;
+                break;  
+            case DifficultyLevel.Medium:
+                result += 150 * 3;
+                break;
+            case DifficultyLevel.Hard:
+                result += 150 * 6;
+                break;
+            case DifficultyLevel.Impossible:
+                result += 150 * 16;
+                break;
+        }
+        return result;
+    }
+    
+    
     private void OnGamePaused(bool isPaused)
     {
         _paused = isPaused;

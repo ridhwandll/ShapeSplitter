@@ -42,7 +42,7 @@ public class PlayerProgress : MonoBehaviour
         Debug.Log("Saved Progress to: " + SavePath);
     }
     
-    private bool Load()
+    public bool Load()
     {
         if (!File.Exists(SavePath))
         {

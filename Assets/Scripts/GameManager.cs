@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -6,12 +7,13 @@ using UnityEngine.Rendering.Universal;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
+    
     public Volume volume;
     public AudioClip gameOverClip;
     
     private bool _isPlayerAlive = true;
     private bool _isPaused = false;
-
+    
     public event Action<bool> OnPauseChanged;
     public event Action OnPlayerDied;
     
