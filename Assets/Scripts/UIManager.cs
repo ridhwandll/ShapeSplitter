@@ -152,7 +152,7 @@ public class UIManager : MonoBehaviour
     
     public void OnReturnToMMPressed()
     {
-        SceneManager.LoadSceneAsync(0); //Return to main menu
+        GameObject.FindGameObjectWithTag("LevelTransition").GetComponent<LevelTransition>().LoadMainMenu();
     }
     
     IEnumerator ShowFadeInAndOut(TMP_Text text)

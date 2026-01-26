@@ -131,7 +131,7 @@ namespace MainMenu
 
         private void OnPlayButtonPressed()
         {
-            SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().buildIndex + 1);
+            GameObject.FindGameObjectWithTag("LevelTransition").GetComponent<LevelTransition>().LoadGame();
         }
         private void OnOptionsButtonPressed()
         {

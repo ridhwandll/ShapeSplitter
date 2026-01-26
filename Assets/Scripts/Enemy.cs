@@ -183,7 +183,7 @@ public class Enemy : MonoBehaviour, IHealth
                 switch (type)
                 {  
                     case EnemyType.ShortRanged:
-                        _maxHealth = 2;
+                        _maxHealth = 1;
                         moveSpeed = 2.5f;
                         stopDistance = 3.5f;
                         fireRate = 1.4f;
@@ -195,7 +195,7 @@ public class Enemy : MonoBehaviour, IHealth
                         fireRate = 0.4f;
                         break;
                     case EnemyType.BigChonk:
-                        _maxHealth = 8;
+                        _maxHealth = 10;
                         moveSpeed = 0.9f;
                         stopDistance = 3.5f;
                         fireRate = 0.8f;
@@ -206,10 +206,10 @@ public class Enemy : MonoBehaviour, IHealth
                 switch (type)
                 {  
                     case EnemyType.ShortRanged:
-                        _maxHealth = 3;
-                        moveSpeed = 3.5f;
+                        _maxHealth = 2;
+                        moveSpeed = 3.7f;
                         stopDistance = 3.8f;
-                        fireRate = 1f;
+                        fireRate = 1.2f;
                         break;
                     case EnemyType.LongRanged:
                         _maxHealth = 2;
@@ -218,7 +218,7 @@ public class Enemy : MonoBehaviour, IHealth
                         fireRate = 0.35f;
                         break;
                     case EnemyType.BigChonk:
-                        _maxHealth = 12;
+                        _maxHealth = 18;
                         moveSpeed = 0.9f;
                         stopDistance = 4f;
                         fireRate = 0.6f;
@@ -229,19 +229,19 @@ public class Enemy : MonoBehaviour, IHealth
                 switch (type)
                 {  
                     case EnemyType.ShortRanged:
-                        _maxHealth = 3;
-                        moveSpeed = 3.8f;
+                        _maxHealth = 2;
+                        moveSpeed = 4f;
                         stopDistance = 4f;
                         fireRate = 0.9f;
                         break;
                     case EnemyType.LongRanged:
-                        _maxHealth = 2;
+                        _maxHealth = 3;
                         moveSpeed = 1.9f;
                         stopDistance = 6f;
                         fireRate = 0.24f;
                         break;
                     case EnemyType.BigChonk:
-                        _maxHealth = 16;
+                        _maxHealth = 20;
                         moveSpeed = 1f;
                         stopDistance = 4.5f;
                         fireRate = 0.5f;
@@ -253,7 +253,7 @@ public class Enemy : MonoBehaviour, IHealth
                 {  
                     case EnemyType.ShortRanged:
                         _maxHealth = 4;
-                        moveSpeed = 4f;
+                        moveSpeed = 4.2f;
                         stopDistance = 5f;
                         fireRate = 0.8f;
                         break;
@@ -264,7 +264,7 @@ public class Enemy : MonoBehaviour, IHealth
                         fireRate = 0.22f;
                         break;
                     case EnemyType.BigChonk:
-                        _maxHealth = 20;
+                        _maxHealth = 23;
                         moveSpeed = 1.4f;
                         stopDistance = 4.9f;
                         fireRate = 0.4f;

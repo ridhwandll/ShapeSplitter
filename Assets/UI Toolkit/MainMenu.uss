@@ -88,7 +88,7 @@
 }
 
 .unity-label {
-    -unity-font-definition: url("project://database/Assets/Fonts/Jersey25-Regular.ttf?fileID=12800000&guid=1eb73ee2b53cb9c448c3124d13717fef&type=3#Jersey25-Regular");
+    -unity-font-definition: url("project://database/Assets/Fonts/JockeyOne-Regular.ttf?fileID=12800000&guid=9bfcf3d790dfce044ae0bb94c9434f5f&type=3#JockeyOne-Regular");
     -unity-font-style: normal;
 }
 
@@ -149,8 +149,6 @@
     background-color: rgba(156, 156, 156, 0);
     align-self: stretch;
 }
-
-
 
 .unity-radio-button-group > .unity-base-field__label {
     font-size: 100px;

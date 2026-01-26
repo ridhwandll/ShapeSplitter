@@ -9,6 +9,7 @@ TagManager:
   - UIManager
   - LifeShard
   - PostProcessStack
+  - LevelTransition
   layers:
   - Default
   - TransparentFX
