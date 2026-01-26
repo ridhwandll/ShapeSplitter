@@ -98,6 +98,7 @@ public class PlayerController : MonoBehaviour, IHealth
         _isDashing = true;
         _mainCamera.gameObject.GetComponent<CameraShake>().Shake(0.4f, 3, 0.01f);
         SoundFXManager.instance.PlaySoundFXClip(dashSound, transform, 0.5f);
+        playerParticleSystem.Play();
     }
     
     private void MovePlayer()
