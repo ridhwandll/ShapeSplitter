@@ -8,6 +8,7 @@ namespace MainMenu
         AudioMenu,
         GraphicsMenu,
         DifficultyMenu,
+        HowToPlayMenu
     }
 
     public class OptionsMenuManager
@@ -15,12 +16,14 @@ namespace MainMenu
         private VisualElement _audioMenu;
         private VisualElement _graphicsMenu;
         private VisualElement _difficultyMenu;
+        private VisualElement _howToPlayMenu;
 
         public void Initialize(UIDocument document)
         {
             _audioMenu = document.rootVisualElement.Q<VisualElement>("AudioMenu");
             _graphicsMenu = document.rootVisualElement.Q<VisualElement>("GraphicsMenu");
             _difficultyMenu = document.rootVisualElement.Q<VisualElement>("DifficultyMenu");
+            _howToPlayMenu = document.rootVisualElement.Q<VisualElement>("HowToPlayMenu");
         }
     
         public void Show(MenuType menuType)
@@ -31,6 +34,7 @@ namespace MainMenu
             _audioMenu.style.display = DisplayStyle.None;
             _graphicsMenu.style.display = DisplayStyle.None;
             _difficultyMenu.style.display = DisplayStyle.None;
+            _howToPlayMenu.style.display = DisplayStyle.None;
 
             menu.style.display = DisplayStyle.Flex;
             menu.style.opacity = 0f;
@@ -54,6 +58,8 @@ namespace MainMenu
                     return _graphicsMenu;
                 case MenuType.DifficultyMenu:
                     return _difficultyMenu;
+                case MenuType.HowToPlayMenu:
+                    return _howToPlayMenu;
             }
             return null;
         }

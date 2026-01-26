@@ -21,7 +21,7 @@ namespace MainMenu
         private Slider _masterVolSlider;
         private Slider _soundFXVolSlider;
         private Slider _musicVolSlider;
-    
+        
         private OptionsMenuManager _optionsMenuManager;
         private VisualElement _optionsMenu;
         private VisualElement _mainMenu;
@@ -29,6 +29,7 @@ namespace MainMenu
 
         private Button _backToMainMenuButton;
         private Button _audioOptionsButton;
+        private Button _howToPlayOptionsButton;
         private Button _graphicsOptionsButton;
         private Button _difficultyOptionsButton;
         
@@ -62,6 +63,7 @@ namespace MainMenu
             _shopButton = root.Q<Button>("ShopButton"); 
             _exitButton = root.Q<Button>("ExitButton");
             _audioOptionsButton = root.Q<Button>("AudioButton");
+            _howToPlayOptionsButton = root.Q<Button>("HowToPlayButton");
             _graphicsOptionsButton = root.Q<Button>("GraphicsButton");
             _difficultyOptionsButton = root.Q<Button>("DifficultyButton");
             
@@ -118,6 +120,7 @@ namespace MainMenu
             _shopButton.clicked += OnShopButtonPressed;
             _exitButton.clicked += OnExitButtonPressed;
             _backToMainMenuButton.clicked += OnBackToMainMenuButtonPressed;
+            _howToPlayOptionsButton.clicked += () => { _optionsMenuManager.Show(MenuType.HowToPlayMenu); };
             _audioOptionsButton.clicked += () => { _optionsMenuManager.Show(MenuType.AudioMenu); };
             _graphicsOptionsButton.clicked += () => { _optionsMenuManager.Show(MenuType.GraphicsMenu); };
             _difficultyOptionsButton.clicked += () => { _optionsMenuManager.Show(MenuType.DifficultyMenu); };
