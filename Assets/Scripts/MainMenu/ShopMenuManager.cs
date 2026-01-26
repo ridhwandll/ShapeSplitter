@@ -73,7 +73,7 @@ public class ShopMenuManager
         for (int i = 0; i < _shopElementsUIs.Length; i++)
         {
             ShopElementUI shopElementUI = _shopElementsUIs[i];
-
+            
             int costOfNextLevel = FindCost(_shopElements[i].Level);
             shopElementUI.LevelLabel.text = "LEVEL: 0" + _shopElements[i].Level;
             shopElementUI.CostLabel.text = "COST: " + costOfNextLevel;
@@ -82,6 +82,13 @@ public class ShopMenuManager
                 shopElementUI.BuyButton.SetEnabled(false);
             else
                 shopElementUI.BuyButton.SetEnabled(true);
+            
+            if (_shopElements[i].Level == Globals.MaxShopItemLevel)
+            {
+                shopElementUI.BuyButton.style.display = DisplayStyle.None;
+                shopElementUI.CostLabel.text = "MAX";
+
+            }
         }
         _coinsLabel.text = "COINS: " + Globals.Coins;
     }
@@ -96,12 +103,13 @@ public class ShopMenuManager
         // Check for coins, take coins
         int currentItemLevel = _shopElements[(int)elementType].Level; 
         int costToUpgrade = FindCost(currentItemLevel);
-
+        
         if (costToUpgrade <= Globals.Coins)
         {
             _shopElements[(int)elementType].Level++;
             Globals.Coins -= costToUpgrade;
         }
+        Globals.ShopElements = _shopElements;
         
         InvalidateShopElementsUI();
         Save();
@@ -124,16 +132,6 @@ public class ShopMenuManager
 
         Debug.Log("Saved to: " + SavePath);
     }
-
-    private bool SavedDataExists()
-    {
-        if (!File.Exists(SavePath))
-        {
-            Debug.Log("No save file");
-            return false;
-        }
-        return true;
-    }
     
     private bool Load()
     {
@@ -152,7 +150,8 @@ public class ShopMenuManager
             _shopElements[i] = save.shopElements[i];
             InvalidateShopElementsUI();
         }
-        
+
+        Globals.ShopElements = _shopElements;
         Debug.Log("Loaded Shop");
         return true;
     }

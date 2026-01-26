@@ -1,17 +1,21 @@
 using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class PlayerController : MonoBehaviour, IHealth
 {
     // Movement
-    public float moveSpeed = 35;
-    public float acceleration = 10f; // Higher = snappier
+    public float moveSpeed = 17;
+    public float acceleration = 80; // Higher = snappier
     
-    public float maxAimLineDistance = 5.0f;
-    public float fireRate = 0.2f;
+    public float maxAimLineDistance = 4.0f;
+    public float fireRate = 0.3f;
     
-    public float dashSpeed = 15f;
-    public float dashDuration = 0.15f;
+    public float dashSpeed = 20;
+    public float dashDuration = 0.2f;
     public UIManager gameScreenUIManager;
     
     public ParticleSystem playerParticleSystem;
@@ -24,7 +28,14 @@ public class PlayerController : MonoBehaviour, IHealth
     
     // Health
     private int _health;
-    private int _maxHealth = 50;
+    
+    // Health Regen
+    private int _regenAmount = 5;
+    private float _regenInterval = 1.0f;
+    private float _regenTimer = 0f;
+    
+    //Repulsor
+    private float _repulsorTimer = 0f;
     
     private Vector3 _currentVelocity;
     private Vector2 _input;
@@ -33,8 +44,11 @@ public class PlayerController : MonoBehaviour, IHealth
     private TrailRenderer _trailRenderer;
     private Camera _mainCamera;
     public GameObject bulletPrefab;
+    public GameObject repulsorPrefab;
     private float _nextFireTime;
     private bool _paused = false;
+    
+    private ChromaticAberration _chromaticAberration;
     
     void Awake()
     {
@@ -43,20 +57,55 @@ public class PlayerController : MonoBehaviour, IHealth
         _lineRenderer = GetComponent<LineRenderer>();
         _trailRenderer = GetComponent<TrailRenderer>();
         _trailRenderer.emitting = false;
+        ApplyShopItemLevels();
     }
 
     void Start()
     {
-        _health = _maxHealth;
-        gameScreenUIManager.UpdatePlayerHealth(_health);
         GameManager.Instance.OnPauseChanged += OnGamePaused;
+        GameObject.FindGameObjectWithTag("PostProcessStack").GetComponent<Volume>().profile .TryGet<ChromaticAberration>(out var b);
+        _chromaticAberration = b;
+        _chromaticAberration.active = false;
+        _repulsorTimer = Globals.RepulsorCooldown;
+    }
+
+    public void ApplyShopItemLevels()
+    {
+        // Dash buffs
+        int dashLevel = Globals.GetShopElementLevel(ShopElementType.Dash);
+        Globals.PlayerDashCooldown = 12f - (dashLevel - 1) * Globals.DashCooldownDecreasePerLevel;
+        
+        float dashSpeedIncreasePerLevel = (30f - 20f) / 14f;
+        dashSpeed = 20f + (dashLevel - 1) * dashSpeedIncreasePerLevel;
+        
+        int lifeLevel = Globals.GetShopElementLevel(ShopElementType.Life);
+        Globals.PlayerMaxHealth = Mathf.RoundToInt(50f + (lifeLevel - 1) * Globals.HealthIncreasePerLevel);
+        
+        int lifeRegen = Globals.GetShopElementLevel(ShopElementType.LifeRegen);
+        _regenInterval = Mathf.Lerp(30f, 10f, (lifeRegen - 1f) / 14f); // 30f sec regen at level 1, 10f s at level 15
+        
+        int speedLevel = Globals.GetShopElementLevel(ShopElementType.Speed);
+        moveSpeed = Mathf.Lerp(12f, 22f, (speedLevel - 1f) / 14f);
+        
+        int repulsorLevel = Globals.GetShopElementLevel(ShopElementType.Repulsor);
+        Globals.RepulsorCooldown = 65.0f - (repulsorLevel - 1) * Globals.RepulsorCooldownDecreasePerLevel;
+        
+        _health = Globals.PlayerMaxHealth;
+        gameScreenUIManager.UpdatePlayerHealth(_health);
+        
+        Debug.Log("PlayerDashCooldown: " + Globals.PlayerDashCooldown);
+        Debug.Log("DashSpeed: " + dashSpeed);
+        Debug.Log("MoveSpeed: " + moveSpeed);
+        Debug.Log("PlayerMaxHealth: " + Globals.PlayerMaxHealth);
+        Debug.Log("Life Regen Interval: " + _regenInterval);
     }
     
     void Update()
     {
         if (_paused)
             return;
-        
+
+        //DASH
         _input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         if (!_isDashing && Input.GetKeyDown(KeyCode.Space) && Time.time >= _lastDashTime + Globals.PlayerDashCooldown)
             TryStartDash();
@@ -79,6 +128,9 @@ public class PlayerController : MonoBehaviour, IHealth
                 _lastDashTime = Time.time;
             }
         }
+        
+        HandleLifeRegen();
+        UpdateRepulsor();
         MovePlayer();
         AimAndShoot();
     }
@@ -142,11 +194,15 @@ public class PlayerController : MonoBehaviour, IHealth
     }
     
     public int GetCurrentHealth() => _health;
-    public int GetMaxHealth() => _maxHealth;
+    public int GetMaxHealth() => Globals.PlayerMaxHealth;
 
     public void TakeDamage(int amount, bool isDamagingByOwnBullet = false)
     {
         _health = Mathf.Max(0, _health - amount);
+        
+        if (_health <= 15&& _chromaticAberration)
+            _chromaticAberration.active = true;
+        
         if (_health == 0) //TODO: LEVEL END HERE
         {
             Destroy(gameObject);
@@ -161,7 +217,11 @@ public class PlayerController : MonoBehaviour, IHealth
     
     public void Heal(int amount)
     {
-        _health = Mathf.Min(_maxHealth, _health + amount);
+        _health = Mathf.Min(Globals.PlayerMaxHealth, _health + amount);
+
+        if (_health > 15 && _chromaticAberration)
+            _chromaticAberration.active = false;
+        
         gameScreenUIManager.UpdatePlayerHealth(_health);
     }
 
@@ -178,5 +238,43 @@ public class PlayerController : MonoBehaviour, IHealth
     private void OnGamePaused(bool isPaused)
     {
         _paused =  isPaused;
+    }
+
+    void HandleLifeRegen()
+    {
+        if (!GameManager.Instance.IsPlayerAlive && _paused == false)
+            return;
+        
+        _regenTimer += Time.deltaTime;
+
+        if (_regenTimer >= _regenInterval)
+        {
+            _regenTimer -= _regenInterval;
+            Heal(_regenAmount);
+        }
+    }
+
+    private void UpdateRepulsor()
+    {
+        if (_repulsorTimer > 0f)
+            _repulsorTimer -= Time.deltaTime;
+
+        float progress = Mathf.Clamp01((Globals.RepulsorCooldown - _repulsorTimer) / Globals.RepulsorCooldown);
+        gameScreenUIManager.UpdateRepulsorSlider(progress * Globals.RepulsorCooldown);
+        
+        // Trigger Repulsor ability
+        if (Input.GetKeyDown(KeyCode.X) && _repulsorTimer <= 0f)
+        {
+            ActivateRepulsor();
+            _repulsorTimer = Globals.RepulsorCooldown;
+        }
+    }
+    
+    public float GetRepulsorTimer() => _repulsorTimer;
+    
+    
+    private void ActivateRepulsor()
+    {
+        Instantiate(repulsorPrefab, transform.position, Quaternion.identity);
     }
 }

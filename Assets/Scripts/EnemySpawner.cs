@@ -26,7 +26,7 @@ public class EnemySpawner : MonoBehaviour
     public int baseMaxEnemies = 10;
 
     [Header("Difficulty Scaling")]
-    public float difficultyInterval = 10.0f; // seconds per level
+    public float difficultyInterval = 25.0f; // seconds per level
     public float spawnDelayDecreasePerWave = 0.1f;
     public int maxEnemiesIncreasePerWave = 2;
 
@@ -60,12 +60,12 @@ public class EnemySpawner : MonoBehaviour
                 maxEnemiesIncreasePerWave = 2;
                 break;
             case DifficultyLevel.Hard:
-                difficultyInterval = 18.0f;
+                difficultyInterval = 25.0f;
                 maxEnemiesIncreasePerWave = 4;
                 break;
             case DifficultyLevel.Impossible:
-                difficultyInterval = 12.0f;
-                maxEnemiesIncreasePerWave = 6;
+                difficultyInterval = 20.0f;
+                maxEnemiesIncreasePerWave = 5;
                 break;
         }
         Debug.Log("Playing in: " + Globals.Difficulty + "Mode");
@@ -116,25 +116,25 @@ public class EnemySpawner : MonoBehaviour
         GameObject enemyPrefab;
         EnemyType enemyType;
 
-        if (rand < 0.65f) // 65% chance for short range
+        if (rand < 0.5f)
         {
             enemyPrefab = shortRangeEnemyPrefab;
             enemyType = EnemyType.ShortRanged;
         }
-        else if (rand < 0.95f) // next 30% for long range
+        else if (rand < 0.9f)
         {
             enemyPrefab = longRangeEnemyPrefab;
             enemyType = EnemyType.LongRanged;
         }
-        else // last 5% for big chonk
+        else
         {
-            if (_canSpawnBigChonk) // Allow only one big chonk
+            if (_canSpawnBigChonk)
             {
                 enemyPrefab = bigChonkEnemyPrefab;
                 enemyType = EnemyType.BigChonk;
                 _canSpawnBigChonk = false;
             }
-            else // spawn a long range instead
+            else
             {
                 enemyPrefab = longRangeEnemyPrefab;
                 enemyType = EnemyType.LongRanged;
@@ -205,7 +205,6 @@ public class EnemySpawner : MonoBehaviour
         }
         return result;
     }
-    
     
     private void OnGamePaused(bool isPaused)
     {

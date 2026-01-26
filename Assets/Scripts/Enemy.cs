@@ -57,27 +57,7 @@ public class Enemy : MonoBehaviour, IHealth
     {
         _mySpawner = mySpawner;
         _enemyType = type;
-        switch (type)
-        {  
-            case EnemyType.ShortRanged:
-                _maxHealth = 3;
-                moveSpeed = 3f;
-                stopDistance = 2.0f;
-                fireRate = 1.2f;
-                break;
-            case EnemyType.LongRanged:
-                _maxHealth = 2;
-                moveSpeed = 1.5f;
-                stopDistance = 5f;
-                fireRate = 0.35f;
-                break;
-            case EnemyType.BigChonk:
-                _maxHealth = 15;
-                moveSpeed = 0.9f;
-                stopDistance = 3.5f;
-                fireRate = 0.7f;
-                break;
-        }
+        SetDifficultyLevelOfEnemy(Globals.Difficulty, type);
         _health = _maxHealth;
     }
     
@@ -164,8 +144,11 @@ public class Enemy : MonoBehaviour, IHealth
             enemyDeathParticleSystem.Play();
             Destroy(enemyDeathParticleSystem.gameObject, enemyDeathParticleSystem.main.duration + enemyDeathParticleSystem.main.startLifetime.constantMax);
             
-            GameObject lifeShard = Instantiate(lifeShardPrefab, transform.position, Quaternion.identity);
-            lifeShard.GetComponent<LifeShard>().Initiate(_enemyType);
+            if (amount != 169) // DO NOT Give Life shard it killed by REPULSOR
+            {
+                GameObject lifeShard = Instantiate(lifeShardPrefab, transform.position, Quaternion.identity);
+                lifeShard.GetComponent<LifeShard>().Initiate(_enemyType);
+            }
             _mySpawner.OnEnemyDied(_enemyType);
             Destroy(gameObject);
         }
@@ -200,5 +183,104 @@ public class Enemy : MonoBehaviour, IHealth
             s = 0.4f;
 
         _spriteRenderer.color = Color.HSVToRGB(h, s, v);
+    }
+    
+    private void SetDifficultyLevelOfEnemy(DifficultyLevel level, EnemyType type)
+    {
+        switch (level)
+        {
+            case DifficultyLevel.Easy:
+                switch (type)
+                {  
+                    case EnemyType.ShortRanged:
+                        _maxHealth = 2;
+                        moveSpeed = 2.5f;
+                        stopDistance = 2.0f;
+                        fireRate = 1.6f;
+                        break;
+                    case EnemyType.LongRanged:
+                        _maxHealth = 1;
+                        moveSpeed = 1.5f;
+                        stopDistance = 5f;
+                        fireRate = 0.4f;
+                        break;
+                    case EnemyType.BigChonk:
+                        _maxHealth = 8;
+                        moveSpeed = 0.9f;
+                        stopDistance = 3.5f;
+                        fireRate = 0.9f;
+                        break;
+                }
+                break;
+            case DifficultyLevel.Medium:
+                switch (type)
+                {  
+                    case EnemyType.ShortRanged:
+                        _maxHealth = 3;
+                        moveSpeed = 3f;
+                        stopDistance = 2.0f;
+                        fireRate = 1.2f;
+                        break;
+                    case EnemyType.LongRanged:
+                        _maxHealth = 2;
+                        moveSpeed = 1.5f;
+                        stopDistance = 5f;
+                        fireRate = 0.35f;
+                        break;
+                    case EnemyType.BigChonk:
+                        _maxHealth = 12;
+                        moveSpeed = 0.9f;
+                        stopDistance = 3.5f;
+                        fireRate = 0.7f;
+                        break;
+                }
+                break;
+            case DifficultyLevel.Hard:
+                switch (type)
+                {  
+                    case EnemyType.ShortRanged:
+                        _maxHealth = 3;
+                        moveSpeed = 3.5f;
+                        stopDistance = 2.8f;
+                        fireRate = 1f;
+                        break;
+                    case EnemyType.LongRanged:
+                        _maxHealth = 2;
+                        moveSpeed = 1.9f;
+                        stopDistance = 6f;
+                        fireRate = 0.24f;
+                        break;
+                    case EnemyType.BigChonk:
+                        _maxHealth = 16;
+                        moveSpeed = 1f;
+                        stopDistance = 4f;
+                        fireRate = 0.6f;
+                        break;
+                }
+                break;
+            case DifficultyLevel.Impossible:
+                switch (type)
+                {  
+                    case EnemyType.ShortRanged:
+                        _maxHealth = 4;
+                        moveSpeed = 3.7f;
+                        stopDistance = 2.8f;
+                        fireRate = 1f;
+                        break;
+                    case EnemyType.LongRanged:
+                        _maxHealth = 3;
+                        moveSpeed = 2.5f;
+                        stopDistance = 6.7f;
+                        fireRate = 0.2f;
+                        break;
+                    case EnemyType.BigChonk:
+                        _maxHealth = 20;
+                        moveSpeed = 1.4f;
+                        stopDistance = 4.3f;
+                        fireRate = 0.5f;
+                        break;
+                }
+                break;
+        }
     }
 }

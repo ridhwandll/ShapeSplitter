@@ -8,6 +8,7 @@ TagManager:
   - Wall
   - UIManager
   - LifeShard
+  - PostProcessStack
   layers:
   - Default
   - TransparentFX

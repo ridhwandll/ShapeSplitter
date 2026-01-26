@@ -7,7 +7,13 @@ public static class Globals
     public static readonly int InitialShopItemCost = 100;
     public static readonly float CostMultiplier = 1.4f;
 
-    public static float PlayerDashCooldown = 8.0f;
+    public static float RepulsorCooldown = 65f;
+    public static float RepulsorCooldownDecreasePerLevel = 1.5f;
+    
+    public static float PlayerDashCooldown = 12.0f;
+    public static float DashCooldownDecreasePerLevel = 0.3f;
+
+    public static int HealthIncreasePerLevel = 5; //5 HP
         
     public static int OwnBulletDamage = 1;
     public static int DashDamage = 5;
@@ -21,12 +27,27 @@ public static class Globals
     public static float SoundFXVolume = 1.0f;
     public static float MusicVolume = 0.1f;
     
-    public static DifficultyLevel Difficulty = 0;
+    public static DifficultyLevel Difficulty = DifficultyLevel.Medium;
     
     // Sore
-    public static int Coins = 00;
+    public static int Coins = 9999;
     public static int Highscore = 00;
 
+    //Shop
+    public static ShopElement[] ShopElements = new ShopElement[5];
+    public static int GetShopElementLevel(ShopElementType type)
+    {
+        if (ShopElements[(int)type] == null)
+            return 0;
+        
+        foreach (var shopElement in ShopElements)
+        {
+            if (shopElement.ElementType == type)
+                return shopElement.Level;
+        }
+        return 0;
+    }
+    
     // Score Awards
     public static readonly int KillUnitShortRangedScore = 25;
     public static readonly int KillUnitLongRangedScore = 30;
@@ -36,4 +57,6 @@ public static class Globals
     {
         return Mathf.RoundToInt(score / 12f);
     }
+
+    public static readonly int MaxShopItemLevel = 15;
 }

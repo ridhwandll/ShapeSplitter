@@ -34,16 +34,10 @@ public class UIManager : MonoBehaviour
 
     // Dash bar
     public Slider dashSlider;
+    public Image dashBar;
+    public Slider repulsorSlider;
+    public Image repulseBar;
     
-    private void Awake()
-    {
-        dashSlider.minValue = 0;
-        dashSlider.maxValue = Globals.PlayerDashCooldown;
-
-        healthSlider.minValue = 0;
-        healthSlider.maxValue = Globals.PlayerMaxHealth;
-    }
-
     void Start()
     {
         GameManager.Instance.OnPauseChanged += OnPauseChanged;
@@ -59,10 +53,29 @@ public class UIManager : MonoBehaviour
     public void UpdateDashSlider(float timeLeftTillNextDash)
     {
         dashSlider.value = timeLeftTillNextDash;
+        if (dashSlider.value >= Globals.PlayerDashCooldown)
+            dashBar.color = Color.gold;
+        else
+            dashBar.color = Color.gray1;
+            
+    }
+    
+    public void UpdateRepulsorSlider(float timeLeftTillNextRepulse)
+    {
+        repulsorSlider.value = timeLeftTillNextRepulse;
+        if (repulsorSlider.value >= Globals.RepulsorCooldown)
+            repulseBar.color = Color.darkOrange;
+        else
+            repulseBar.color = Color.gray1;
+            
     }
 
     public void UpdatePlayerHealth(int playerHealth) // NOT CALLED EVERY FRAME
     {
+        repulsorSlider.maxValue = Globals.RepulsorCooldown;
+        dashSlider.maxValue = Globals.PlayerDashCooldown;
+        healthSlider.maxValue = Globals.PlayerMaxHealth;
+        
         healthSlider.value = playerHealth;
         healthText.text = playerHealth + "/" + Globals.PlayerMaxHealth;
 
