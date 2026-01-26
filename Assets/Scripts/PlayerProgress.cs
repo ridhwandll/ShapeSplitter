@@ -12,7 +12,7 @@ public class PlayerProgress : MonoBehaviour
 {
     public static PlayerProgress Instance;
 
-    private string SavePath => Path.Combine(Application.persistentDataPath, "ShapeSplitter_Progress_Beta001.json");
+    private string SavePath => Path.Combine(Application.persistentDataPath, "ShapeSplitter_Progress.json");
         
     void Awake()
     {
@@ -36,8 +36,8 @@ public class PlayerProgress : MonoBehaviour
         save.highscore = Globals.Highscore;
         
         string json = JsonUtility.ToJson(save, true);
-        //string encrypted = SaveCrypto.Encrypt(json);
-        File.WriteAllText(SavePath, json);
+        string encrypted = SaveCrypto.Encrypt(json);
+        File.WriteAllText(SavePath, encrypted);
 
         Debug.Log("Saved Progress to: " + SavePath);
     }
@@ -51,8 +51,8 @@ public class PlayerProgress : MonoBehaviour
         }
         
         string encrypted = File.ReadAllText(SavePath);
-        //string json = SaveCrypto.Decrypt(encrypted);
-        PlayerProgressData save =  JsonUtility.FromJson<PlayerProgressData>(encrypted);
+        string json = SaveCrypto.Decrypt(encrypted);
+        PlayerProgressData save =  JsonUtility.FromJson<PlayerProgressData>(json);
 
         Globals.Coins = save.coins;
         Globals.Highscore = save.highscore;

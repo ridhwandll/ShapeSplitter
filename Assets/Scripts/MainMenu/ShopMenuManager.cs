@@ -36,7 +36,7 @@ public class ShopMenuManager
     private Label _coinsLabel;
     private ShopElementUI[] _shopElementsUIs;
     private ShopElement[] _shopElements;
-    private string SavePath => Path.Combine(Application.persistentDataPath, "ShapeSplitter_Shop_Beta001.json");
+    private string SavePath => Path.Combine(Application.persistentDataPath, "ShapeSplitter_Shop.json");
     
     public void Initialize(VisualElement root)
     {
@@ -127,8 +127,8 @@ public class ShopMenuManager
         
 
         string json = JsonUtility.ToJson(save, true);
-        //string encrypted = SaveCrypto.Encrypt(json);
-        File.WriteAllText(SavePath, json);
+        string encrypted = SaveCrypto.Encrypt(json);
+        File.WriteAllText(SavePath, encrypted);
 
         Debug.Log("Saved to: " + SavePath);
     }
@@ -142,8 +142,8 @@ public class ShopMenuManager
         }
         
         string encrypted = File.ReadAllText(SavePath);
-        //string json = SaveCrypto.Decrypt(encrypted);
-        ShopElementsSaveData save =  JsonUtility.FromJson<ShopElementsSaveData>(encrypted);
+        string json = SaveCrypto.Decrypt(encrypted);
+        ShopElementsSaveData save =  JsonUtility.FromJson<ShopElementsSaveData>(json);
         
         for (int i = 0; i < 5; i++)
         {

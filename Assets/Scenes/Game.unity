@@ -389,7 +389,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: LASER
+  m_text: REPULSE
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9fd5881ed843b70429506fa219f8b216, type: 2}
   m_sharedMaterial: {fileID: -623901698568665719, guid: 9fd5881ed843b70429506fa219f8b216, type: 2}
@@ -1516,10 +1516,10 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Press X to use REPULSE
 
-    Using laser will kill all nearby enemies
+    Using REPULSE will kill all nearby enemies
 
     and
-    take 8HP
+    take 8HP from you
 
     Enemies killed by laser will NOT drop Life Shards'
   m_isRightToLeft: 0
@@ -1845,7 +1845,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 6
+  orthographic size: 6.7
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -2106,7 +2106,7 @@ Transform:
   m_GameObject: {fileID: 619394800}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 11.78, y: 6.51, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2735,7 +2735,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_text: "Press SPACE to DASH\nUsing Dash on enemies will deal damage \nto enemies
-    and take 3HP\nEnemies killed by dash will drop Life Shards"
+    and take 3HP"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9fd5881ed843b70429506fa219f8b216, type: 2}
   m_sharedMaterial: {fileID: -623901698568665719, guid: 9fd5881ed843b70429506fa219f8b216, type: 2}
@@ -9737,6 +9737,8 @@ MonoBehaviour:
   gameScreenUIManager: {fileID: 1289266151}
   playerParticleSystem: {fileID: 1401706095}
   dashSound: {fileID: 8300000, guid: d21b8de8e1fdb56469d9c88ebef77f9a, type: 3}
+  minBounds: {x: -11.75, y: -6.5}
+  maxBounds: {x: 11.75, y: 6.5}
   repulsorSound: {fileID: 8300000, guid: 6aa16b783f6092849aad50f96c85784e, type: 3}
   bulletPrefab: {fileID: 6469692633469274891, guid: 5ae21c41bb09599429ecb8ad37ddfaad, type: 3}
   repulsorPrefab: {fileID: 5780267670328676405, guid: f4a141b95e04e9e43a8eb355e1e668f6, type: 3}

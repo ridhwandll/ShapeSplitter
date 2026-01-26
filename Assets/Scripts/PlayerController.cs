@@ -26,6 +26,9 @@ public class PlayerController : MonoBehaviour, IHealth
     private float _lastDashTime;
     private Vector3 _dashDirection;
     
+    public Vector2 minBounds;
+    public Vector2 maxBounds;
+    
     // Health
     private int _health;
     
@@ -165,6 +168,12 @@ public class PlayerController : MonoBehaviour, IHealth
         _currentVelocity = Vector3.Lerp(_currentVelocity, inputDir * moveSpeed, acceleration * Time.deltaTime);
         
         transform.position += _currentVelocity * Time.deltaTime;
+        
+        //clamp the movement
+        Vector3 pos = transform.position;
+        pos.x = Mathf.Clamp(pos.x, minBounds.x, maxBounds.x);
+        pos.y = Mathf.Clamp(pos.y, minBounds.y, maxBounds.y);
+        transform.position = pos;
     }
     
     private void AimAndShoot()

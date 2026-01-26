@@ -5,7 +5,7 @@ public static class Globals
     public static readonly Color PlayerColor = new Color32(255,191,0, 255);
     public static readonly Color EnemyColor = new Color32(255,75,51, 255);
     public static readonly int InitialShopItemCost = 100;
-    public static readonly float CostMultiplier = 1.4f;
+    public static readonly float CostMultiplier = 1.5f;
 
     public static float RepulsorCooldown = 65f;
     public static float RepulsorCooldownDecreasePerLevel = 1.5f;
@@ -30,8 +30,8 @@ public static class Globals
     public static DifficultyLevel Difficulty = DifficultyLevel.Medium;
     
     // Sore
-    public static int Coins = 1000;
-    public static int Highscore = 00;
+    public static int Coins = 670;
+    public static int Highscore = 0;
 
     //Shop
     public static ShopElement[] ShopElements = new ShopElement[5];
