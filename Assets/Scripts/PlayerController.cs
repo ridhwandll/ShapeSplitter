@@ -82,13 +82,13 @@ public class PlayerController : MonoBehaviour, IHealth
         dashSpeed = 20f + (dashLevel - 1) * dashSpeedIncreasePerLevel;
         
         int lifeLevel = Globals.GetShopElementLevel(ShopElementType.Life);
-        Globals.PlayerMaxHealth = Mathf.RoundToInt(50f + (lifeLevel - 1) * Globals.HealthIncreasePerLevel);
+        Globals.PlayerMaxHealth = 50 + (lifeLevel - 1) * Globals.HealthIncreasePerLevel;
         
         int lifeRegen = Globals.GetShopElementLevel(ShopElementType.LifeRegen);
-        _regenInterval = Mathf.Lerp(30f, 10f, (lifeRegen - 1f) / 14f); // 30f sec regen at level 1, 10f s at level 15
+        _regenInterval = Mathf.Lerp(30f, 10f, (lifeRegen - 1) / 14f); // 30f sec regen at level 1, 10f s at level 15
         
         int speedLevel = Globals.GetShopElementLevel(ShopElementType.Speed);
-        moveSpeed = Mathf.Lerp(12f, 22f, (speedLevel - 1f) / 14f);
+        moveSpeed = Mathf.Lerp(12f, 22f, (speedLevel - 1) / 14f);
         
         int repulsorLevel = Globals.GetShopElementLevel(ShopElementType.Repulsor);
         Globals.RepulsorCooldown = 65.0f - (repulsorLevel - 1) * Globals.RepulsorCooldownDecreasePerLevel;

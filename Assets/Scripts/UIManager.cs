@@ -53,7 +53,7 @@ public class UIManager : MonoBehaviour
         enemySpawner.OnEnemyKilled += OnEnemyDied;
         difficultyText.text = Globals.Difficulty.ToString().ToUpper();
         scoreText.text = "SCORE: " + enemySpawner.GetEnemyKillScore();
-        coinsText.text = "COINS: 00";
+        coinsText.text = "COINS: 0";
     }
 
     public void UpdateDashSlider(float timeLeftTillNextDash)

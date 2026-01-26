@@ -38,14 +38,14 @@ public static class Globals
     public static int GetShopElementLevel(ShopElementType type)
     {
         if (ShopElements[(int)type] == null)
-            return 0;
+            return 1;
         
         foreach (var shopElement in ShopElements)
         {
             if (shopElement.ElementType == type)
                 return shopElement.Level;
         }
-        return 0;
+        return 1;
     }
     
     // Score Awards
