@@ -62,4 +62,5 @@ public static class Globals
     
     public static bool DashTipShown = false;
     public static bool RepulseTipShown = false;
+    public static bool LifeShardTipShown = false;
 }

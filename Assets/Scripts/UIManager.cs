@@ -41,7 +41,8 @@ public class UIManager : MonoBehaviour
     [Header("Tips")]
     public TMP_Text howToDashText;
     public TMP_Text howToRepulseText;
-    public float showDuration = 5f;
+    public TMP_Text howLifeShardWorksText;
+    public float showDuration = 7f;
     public float fadeOutDuration = 2f;
     
     void Start()
@@ -140,6 +141,12 @@ public class UIManager : MonoBehaviour
 
     private void OnEnemyDied()
     {
+        if (Globals.LifeShardTipShown == false)
+        {
+            StartCoroutine(ShowFadeInAndOut(howLifeShardWorksText));
+            Globals.LifeShardTipShown = true;
+        }
+        
         var score = enemySpawner.GetEnemyKillScore();
         scoreText.text = "SCORE: " + score;
         coinsText.text = "COINS: " + Globals.ScoreToCoinConv(score);
@@ -154,6 +161,8 @@ public class UIManager : MonoBehaviour
     {
         GameObject.FindGameObjectWithTag("LevelTransition").GetComponent<LevelTransition>().LoadMainMenu();
     }
+    
+    
     
     IEnumerator ShowFadeInAndOut(TMP_Text text)
     {
