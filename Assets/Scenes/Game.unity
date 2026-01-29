@@ -9289,7 +9289,7 @@ MonoBehaviour:
   maxAimLineDistance: 4
   fireRate: 0.18
   dashSpeed: 20
-  dashDuration: 0.2
+  dashDuration: 0.4
   gameScreenUIManager: {fileID: 1289266151}
   playerParticleSystem: {fileID: 1401706095}
   dashSound: {fileID: 8300000, guid: d21b8de8e1fdb56469d9c88ebef77f9a, type: 3}
@@ -9466,7 +9466,7 @@ TrailRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Time: 0.15
+  m_Time: 0.3
   m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3

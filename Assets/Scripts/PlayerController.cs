@@ -25,7 +25,9 @@ public class PlayerController : MonoBehaviour, IHealth
     private float _dashTimeLeft;
     private float _lastDashTime;
     private Vector3 _dashDirection;
-    
+    private  CircleCollider2D _circleCollider2D;
+    private float _initialColliderRadius;
+        
     public Vector2 minBounds;
     public Vector2 maxBounds;
     
@@ -33,7 +35,7 @@ public class PlayerController : MonoBehaviour, IHealth
     private int _health;
     
     // Health Regen
-    private int _regenAmount = 5;
+    private readonly int _regenAmount = 8;
     private float _regenInterval = 1.0f;
     private float _regenTimer = 0f;
     
@@ -42,8 +44,7 @@ public class PlayerController : MonoBehaviour, IHealth
     public AudioClip repulsorSound;
     
     private Vector3 _currentVelocity;
-    private Vector2 _input;
-    private Rigidbody2D _rigidBody2D;
+
     private LineRenderer _lineRenderer;
     private TrailRenderer _trailRenderer;
     private Camera _mainCamera;
@@ -56,9 +57,9 @@ public class PlayerController : MonoBehaviour, IHealth
     void Awake()
     {
         _mainCamera = Camera.main;
-        _rigidBody2D = GetComponent<Rigidbody2D>();
         _lineRenderer = GetComponent<LineRenderer>();
         _trailRenderer = GetComponent<TrailRenderer>();
+        _circleCollider2D = GetComponent<CircleCollider2D>();
         _trailRenderer.emitting = false;
         ApplyShopItemLevels();
     }
@@ -69,7 +70,7 @@ public class PlayerController : MonoBehaviour, IHealth
         _chromaticAberration = b;
         _chromaticAberration.active = false;
         _repulsorTimer = Globals.RepulsorCooldown;
-        
+        _initialColliderRadius = _circleCollider2D.radius;
     }
 
     public void ApplyShopItemLevels()
@@ -109,7 +110,6 @@ public class PlayerController : MonoBehaviour, IHealth
             return;
 
         //DASH
-        _input = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         if (!_isDashing && Input.GetKeyDown(KeyCode.Space) && Time.time >= _lastDashTime + Globals.PlayerDashCooldown)
             TryStartDash();
 
@@ -125,11 +125,7 @@ public class PlayerController : MonoBehaviour, IHealth
             _dashTimeLeft -= Time.deltaTime;
             
             if (_dashTimeLeft <= 0f)
-            {
-                _trailRenderer.emitting = false;
-                _isDashing = false;
-                _lastDashTime = Time.time;
-            }
+                EndDash();
         }
         
         HandleLifeRegen();
@@ -155,7 +151,17 @@ public class PlayerController : MonoBehaviour, IHealth
         SoundFXManager.instance.PlaySoundFXClip(dashSound, transform, 0.5f);
         playerParticleSystem.Play();
         
+        _circleCollider2D.radius = _initialColliderRadius + 0.2f;
+        
         TakeDamage(Globals.OwnBulletDamage * 3, true); //Dashing does 4 damage to self
+    }
+
+    private void EndDash()
+    {
+        _trailRenderer.emitting = false;
+        _isDashing = false;
+        _lastDashTime = Time.time;
+        _circleCollider2D.radius = _initialColliderRadius;
     }
     
     private void MovePlayer()
