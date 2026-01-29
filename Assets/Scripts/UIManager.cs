@@ -123,19 +123,27 @@ public class UIManager : MonoBehaviour
         pauseMenu.SetActive(false);
         deathMenu.SetActive(true);
         
-        enemyKillScoreText.text = "Kill Score: " + enemySpawner.GetEnemyKillScore();
-        difficultyAwardedText.text = "Difficulty Award: " + enemySpawner.GetDifficultyScore(Globals.Difficulty);
-
         int finalScore = enemySpawner.GetFinalScore();
-        totalScoreText.text = "Total Score: " + finalScore;
-
-        int coinsEarned = Globals.ScoreToCoinConv(finalScore);
-        coinsEarnedText.text = "COINS: +" + coinsEarned;
-        Globals.Coins += coinsEarned;
+        if (Globals.Difficulty == DifficultyLevel.Easy)
+        {
+            enemyKillScoreText.text = "";
+            difficultyAwardedText.text = "Difficulty Award: EASY MODE";
+            totalScoreText.text = "Total Score: 00";
+            coinsEarnedText.text = "COINS: +100";
+            Globals.Coins += 100;
+        }
+        else
+        {
+            enemyKillScoreText.text = "Kill Score: " + enemySpawner.GetEnemyKillScore();
+            difficultyAwardedText.text = "Wave Award: " + enemySpawner.GetWaveScore(Globals.Difficulty) + " // " + enemySpawner.GetWaveNumber() + " waves in " + Globals.Difficulty.ToString().ToUpper();
+            totalScoreText.text = "Total Score: " + finalScore;
+            int coinsEarned = Globals.ScoreToCoinConv(finalScore);
+            coinsEarnedText.text = "COINS: +" + coinsEarned;
+            Globals.Coins += coinsEarned;
         
-        if (Globals.Highscore < finalScore)
-            Globals.Highscore = finalScore;
-        
+            if (Globals.Highscore < finalScore)
+                Globals.Highscore = finalScore;
+        }
         PlayerProgress.Instance.Save();
     }
 
@@ -148,8 +156,16 @@ public class UIManager : MonoBehaviour
         }
         
         var score = enemySpawner.GetEnemyKillScore();
-        scoreText.text = "SCORE: " + score;
-        coinsText.text = "COINS: " + Globals.ScoreToCoinConv(score);
+        if (Globals.Difficulty == DifficultyLevel.Easy)
+        {
+            scoreText.text = "EASY";
+            coinsText.text = "COINS: +100";   
+        }
+        else
+        {
+            scoreText.text = "SCORE: " + score;
+            coinsText.text = "COINS: " + Globals.ScoreToCoinConv(score);   
+        }
     }
     
     private void OnDifficultyChanged(int difficulty)

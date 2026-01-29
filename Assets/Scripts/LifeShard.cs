@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class LifeShard : MonoBehaviour
@@ -12,16 +13,19 @@ public class LifeShard : MonoBehaviour
     
     public float lifetime = 17.0f;
 
-    private SpriteRenderer sr;
-    private int healthValue;
+    private SpriteRenderer _sr;
+    private int _healthValue;
     private float _spawnTime; 
+
+    Vector3 _startPos;
+    Vector3 _targetPos;
     
     void Start()
     {
         _spawnTime = Time.time;
         
-        sr = GetComponent<SpriteRenderer>();
-        sr.color = colorAtSpawn;
+        _sr = GetComponent<SpriteRenderer>();
+        _sr.color = colorAtSpawn;
         Destroy(gameObject, lifetime);
     }
 
@@ -31,21 +35,28 @@ public class LifeShard : MonoBehaviour
         {
             case EnemyType.BigChonk:
                 healthAtSpawn = 8;
-                healthAfter3s = 10;
-                healthAfter6s = 15;
+                healthAfter3s = 15;
+                healthAfter6s = 20;
                 transform.localScale = new Vector3(transform.localScale.x * 2.5f, transform.localScale.y * 2.5f, 1f);
                 break;
             case EnemyType.LongRanged:
                 healthAtSpawn = 2;
                 healthAfter3s = 3;
-                healthAfter6s = 5;
+                healthAfter6s = 6;
                 transform.localScale = new Vector3(transform.localScale.x * 1.5f, transform.localScale.y * 1.5f, 1f);
                 break;
             case EnemyType.ShortRanged:
-                //Default
+                healthAtSpawn = 1;
+                healthAfter3s = 2;
+                healthAfter6s = 3;
                 break;
         }
         transform.rotation = Quaternion.Euler(0f, 0f, Random.Range(0f, 360f));
+        
+        Rigidbody2D rb = GetComponent<Rigidbody2D>();
+        Vector2 dir = Random.insideUnitCircle.normalized;
+        rb.AddForce(dir * 2.5f, ForceMode2D.Impulse);
+        Destroy(rb, 0.3f);
     }
     
     void Update()
@@ -53,11 +64,11 @@ public class LifeShard : MonoBehaviour
         float elapsed = Time.time - _spawnTime;
         
         if (elapsed >= 6f)
-            sr.color = colorAfter6s;
+            _sr.color = colorAfter6s;
         else if (elapsed >= 3f)
-            sr.color = colorAfter3s;
+            _sr.color = colorAfter3s;
         else
-            sr.color = colorAtSpawn;
+            _sr.color = colorAtSpawn;
     }
     
     // Give health to player on pickup

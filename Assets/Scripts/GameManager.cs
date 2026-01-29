@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
     
     public event Action<bool> OnPauseChanged;
     public event Action OnPlayerDied;
+    public event Action JustBeforePlayerDied;
     
     private void Awake()
     {
@@ -49,6 +50,7 @@ public class GameManager : MonoBehaviour
 
         if (!_isPlayerAlive) //Game over here
         {
+            JustBeforePlayerDied?.Invoke();
             OnPlayerDied?.Invoke();
             SoundFXManager.instance.PlaySoundFXClip(gameOverClip, transform, 1.0f);
         }

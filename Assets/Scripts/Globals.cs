@@ -49,7 +49,7 @@ public static class Globals
     }
     
     // Score Awards
-    public static readonly int KillUnitShortRangedScore = 25;
+    public static readonly int KillUnitShortRangedScore = 15;
     public static readonly int KillUnitLongRangedScore = 30;
     public static readonly int KillUnitBigChonkScore = 60;
 

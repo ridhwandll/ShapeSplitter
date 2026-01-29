@@ -38,15 +38,19 @@ public class EnemySpawner : MonoBehaviour
     
     private bool _canSpawnBigChonk = true;
     
-    private int _score;
+    private int _enemyKillScore;
+    private int _waveScore;
     
     void Start()
     {
-        _score = 0;
+        _enemyKillScore = 0;
+        _waveScore = 0;
         
         StartCoroutine(SpawnRoutine());
         _canSpawnBigChonk = true;
 
+        GameManager.Instance.JustBeforePlayerDied += () => { _waveScore += GetWaveScore(Globals.Difficulty); };
+        
         switch (Globals.Difficulty)
         {
             case DifficultyLevel.Easy:
@@ -114,12 +118,12 @@ public class EnemySpawner : MonoBehaviour
         GameObject enemyPrefab;
         EnemyType enemyType;
 
-        if (rand < 0.5f)
+        if (rand < 0.4f)
         {
             enemyPrefab = shortRangeEnemyPrefab;
             enemyType = EnemyType.ShortRanged;
         }
-        else if (rand < 0.9f)
+        else if (rand < 0.4f)
         {
             enemyPrefab = longRangeEnemyPrefab;
             enemyType = EnemyType.LongRanged;
@@ -155,50 +159,54 @@ public class EnemySpawner : MonoBehaviour
         if (type == EnemyType.BigChonk)
             _canSpawnBigChonk = true;
 
-        switch (type)
+        // Dont award score in easy mode
+        if (Globals.Difficulty != DifficultyLevel.Easy)
         {
-            case EnemyType.ShortRanged:
-                _score += Globals.KillUnitShortRangedScore;
-                break;
-            case EnemyType.LongRanged:
-                _score += Globals.KillUnitLongRangedScore;
-                break;
-            case EnemyType.BigChonk:
-                _score += Globals.KillUnitBigChonkScore;
-                break;
+            switch (type)
+            {
+                case EnemyType.ShortRanged:
+                    _enemyKillScore += Globals.KillUnitShortRangedScore;
+                    break;
+                case EnemyType.LongRanged:
+                    _enemyKillScore += Globals.KillUnitLongRangedScore;
+                    break;
+                case EnemyType.BigChonk:
+                    _enemyKillScore += Globals.KillUnitBigChonkScore;
+                    break;
+            }
         }
-        
+
         OnEnemyKilled?.Invoke();
         _currentEnemies--;
     }
 
     public int GetEnemyKillScore()
     {
-        return _score;
+        return _enemyKillScore;
     }
     
     public int GetFinalScore()
     {
-        _score += GetDifficultyScore(Globals.Difficulty);
-        return _score;
+        int finalScore = _enemyKillScore + _waveScore; 
+        return finalScore;
     }
 
-    public int GetDifficultyScore(DifficultyLevel difficultyLevel)
+    public int GetWaveScore(DifficultyLevel difficultyLevel)
     {
         int result = 0;
         switch (difficultyLevel)
         {
             case DifficultyLevel.Easy:
-                result += 150;
+                result = 0; // Dont give score in Easy difficulty
                 break;  
             case DifficultyLevel.Medium:
-                result += 150 * 3;
+                result += 100 * _wave;
                 break;
             case DifficultyLevel.Hard:
-                result += 150 * 6;
+                result += 125 * _wave;
                 break;
             case DifficultyLevel.Impossible:
-                result += 150 * 16;
+                result += 150 * _wave;
                 break;
         }
         return result;
