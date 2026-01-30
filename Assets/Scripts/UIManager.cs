@@ -17,7 +17,6 @@ public class UIManager : MonoBehaviour
     public TMP_Text waveNumber;
     public TMP_Text difficultyText;
     public TMP_Text scoreText;
-    public TMP_Text coinsText;
     
     [Header("Pause Menu")]
     public GameObject pauseMenu;
@@ -32,14 +31,22 @@ public class UIManager : MonoBehaviour
     
     public EnemySpawner enemySpawner;
 
-    // Dash bar
+    [Header("Dash ChainShot and Repulsor bar")]
     public Slider dashSlider;
     public Image dashBar;
+    public TMP_Text dashBarText;
+    
+    public Slider chainShotSlider;
+    public Image chainShotBar;
+    public TMP_Text chainShotBarText;
+    
     public Slider repulsorSlider;
     public Image repulseBar;
+    public TMP_Text repulseBarText;
     
     [Header("Tips")]
     public TMP_Text howToDashText;
+    public TMP_Text howToChainShotText;
     public TMP_Text howToRepulseText;
     public TMP_Text howLifeShardWorksText;
     public float showDuration = 7f;
@@ -54,7 +61,6 @@ public class UIManager : MonoBehaviour
         enemySpawner.OnEnemyKilled += OnEnemyDied;
         difficultyText.text = Globals.Difficulty.ToString().ToUpper();
         scoreText.text = "SCORE: " + enemySpawner.GetEnemyKillScore();
-        coinsText.text = "COINS: 0";
     }
 
     public void UpdateDashSlider(float timeLeftTillNextDash)
@@ -62,7 +68,9 @@ public class UIManager : MonoBehaviour
         dashSlider.value = timeLeftTillNextDash;
         if (dashSlider.value >= Globals.PlayerDashCooldown)
         {
+            dashBarText.text = "DASH [-" + Globals.DashSelfDamage + "]";
             dashBar.color = Color.gold;
+            dashBarText.color = Color.gray1;
             if (Globals.DashTipShown == false)
             {
                 StartCoroutine(ShowFadeInAndOut(howToDashText));
@@ -70,7 +78,11 @@ public class UIManager : MonoBehaviour
             }
         }
         else
+        {
+            dashBarText.text = "DASH";
             dashBar.color = Color.gray1;
+            dashBarText.color = Color.gray8;
+        }
             
     }
     
@@ -79,7 +91,9 @@ public class UIManager : MonoBehaviour
         repulsorSlider.value = timeLeftTillNextRepulse;
         if (repulsorSlider.value >= Globals.RepulsorCooldown)
         {
+            repulseBarText.text = "REPULSE [-" + Globals.RepulsorSelfDamage + "]";
             repulseBar.color = Color.darkOrange;
+            repulseBarText.color = Color.gray1;
             if (Globals.RepulseTipShown == false)
             {
                 StartCoroutine(ShowFadeInAndOut(howToRepulseText));
@@ -87,14 +101,46 @@ public class UIManager : MonoBehaviour
             }
         }
         else
+        {
+            repulseBarText.text = "REPULSE";
             repulseBar.color = Color.gray1;
+            repulseBarText.color = Color.whiteSmoke;
+        }
             
+    }
+
+    public void UpdateChainShotSlider(float timeLeftTillNextcs)
+    {
+        chainShotSlider.value = timeLeftTillNextcs;
+        if (chainShotSlider.value >= Globals.ChainShotCooldown)
+        {
+            chainShotBarText.text = "CHAIN SHOT [-" + Globals.ChainShotSelfDamage + "]";
+            chainShotBar.color = new Color(1f, 0.6f, 0.1f, 1f);
+            chainShotBarText.color = Color.gray1;
+            if (Globals.ChainShotTipShown == false)
+            {
+                StartCoroutine(ShowFadeInAndOut(howToChainShotText));
+                Globals.ChainShotTipShown = true;
+            }
+        }
+        else
+        {
+            chainShotBarText.text = "CHAIN SHOT";
+            chainShotBar.color = Color.gray1;
+            chainShotBarText.color = Color.whiteSmoke;
+        }
     }
 
     public void UpdatePlayerHealth(int playerHealth) // NOT CALLED EVERY FRAME
     {
+        repulsorSlider.minValue = 0;
+        dashSlider.minValue = 0;
+        chainShotSlider.minValue = 0;
+        healthSlider.minValue = 0;
+            
         repulsorSlider.maxValue = Globals.RepulsorCooldown;
         dashSlider.maxValue = Globals.PlayerDashCooldown;
+        chainShotSlider.maxValue = Globals.ChainShotCooldown;
         healthSlider.maxValue = Globals.PlayerMaxHealth;
         
         healthSlider.value = playerHealth;
@@ -158,13 +204,11 @@ public class UIManager : MonoBehaviour
         var score = enemySpawner.GetEnemyKillScore();
         if (Globals.Difficulty == DifficultyLevel.Easy)
         {
-            scoreText.text = "EASY";
-            coinsText.text = "COINS: +100";   
+            scoreText.text = "";
         }
         else
         {
             scoreText.text = "SCORE: " + score;
-            coinsText.text = "COINS: " + Globals.ScoreToCoinConv(score);   
         }
     }
     
@@ -178,8 +222,6 @@ public class UIManager : MonoBehaviour
         GameObject.FindGameObjectWithTag("LevelTransition").GetComponent<LevelTransition>().LoadMainMenu();
     }
     
-    
-    
     IEnumerator ShowFadeInAndOut(TMP_Text text)
     {
         text.gameObject.SetActive(true);
@@ -187,6 +229,7 @@ public class UIManager : MonoBehaviour
         Color c = text.color;
         c.a = 0f;
         text.color = c;
+        float maxAlpha = 0.7f;
         
         // FadeIN
         float t = 0f;
@@ -194,13 +237,13 @@ public class UIManager : MonoBehaviour
         while (t < fadeInDuration)
         {
             t += Time.deltaTime;
-            c.a = Mathf.Lerp(0f, 1f, t / fadeInDuration);
+            c.a = Mathf.Lerp(0f, maxAlpha, t / fadeInDuration);
             text.color = c;
             yield return null;
         }
 
         // Ensure fully visible
-        c.a = 0.7f;
+        c.a = maxAlpha;
         text.color = c;
 
         // Stay visible
@@ -211,7 +254,7 @@ public class UIManager : MonoBehaviour
         while (t < fadeOutDuration)
         {
             t += Time.deltaTime;
-            c.a = Mathf.Lerp(1f, 0f, t / fadeOutDuration);
+            c.a = Mathf.Lerp(maxAlpha, 0f, t / fadeOutDuration);
             text.color = c;
             yield return null;
         }

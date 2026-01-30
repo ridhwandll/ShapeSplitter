@@ -21,9 +21,8 @@ public class EnemySpawner : MonoBehaviour
     public Vector2 maxBounds;
 
     [Header("Base Spawning")]
-    public float baseMinSpawnDelay = 1.5f;
-    public float baseMaxSpawnDelay = 3f;
-    public int baseMaxEnemies = 10;
+    public float baseSpawnDelay = 3f;
+    public int baseMaxEnemies = 2;
 
     [Header("Difficulty Scaling")]
     public float difficultyInterval = 25.0f; // seconds per level
@@ -99,9 +98,7 @@ public class EnemySpawner : MonoBehaviour
             if (_currentEnemies < scaledMaxEnemies)
                 SpawnEnemy();
 
-            float minDelay = Mathf.Max(0.2f, baseMinSpawnDelay - (_wave - 1) * spawnDelayDecreasePerWave);
-            float maxDelay = Mathf.Max(minDelay + 0.1f, baseMaxSpawnDelay - (_wave - 1) * spawnDelayDecreasePerWave);
-            float delay = Random.Range(minDelay, maxDelay);
+            float delay = baseSpawnDelay - ((_wave - 1) * spawnDelayDecreasePerWave);
             
             yield return new WaitForSeconds(delay);
         }

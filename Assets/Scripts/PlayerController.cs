@@ -36,6 +36,7 @@ public class PlayerController : MonoBehaviour, IHealth
     private int _health;
     
     // ChainShot
+    private float _chainShotTimer = 0f;
     private int _maxChains = 6;
     private float _chainRange = 15f;
     public float _chainDelay = 0.2f;
@@ -57,6 +58,7 @@ public class PlayerController : MonoBehaviour, IHealth
     private float _nextFireTime;
     
     private ChromaticAberration _chromaticAberration;
+    private Vignette _vignette;
     
     void Awake()
     {
@@ -70,9 +72,12 @@ public class PlayerController : MonoBehaviour, IHealth
 
     void Start()
     {
-        GameObject.FindGameObjectWithTag("PostProcessStack").GetComponent<Volume>().profile .TryGet<ChromaticAberration>(out var b);
+        GameObject.FindGameObjectWithTag("PostProcessStack").GetComponent<Volume>().profile.TryGet<ChromaticAberration>(out var b);
+        GameObject.FindGameObjectWithTag("PostProcessStack").GetComponent<Volume>().profile.TryGet<Vignette>(out var v);
         _chromaticAberration = b;
+        _vignette = v;
         _chromaticAberration.active = false;
+        _chainShotTimer = Globals.ChainShotCooldown;
         _repulsorTimer = Globals.RepulsorCooldown;
         _initialColliderRadius = _circleCollider2D.radius;
     }
@@ -90,13 +95,13 @@ public class PlayerController : MonoBehaviour, IHealth
         Globals.PlayerMaxHealth = 50 + (lifeLevel - 1) * Globals.HealthIncreasePerLevel;
         
         int chainBulletLevel = Globals.GetShopElementLevel(ShopElementType.ChainBullet);
-        _maxChains = 2 + (chainBulletLevel - 1); // Add one chain per level
+        _maxChains = 5 + (chainBulletLevel - 1); // Add one chain per level. 5 chains in level 1
         
         int speedLevel = Globals.GetShopElementLevel(ShopElementType.Speed);
-        moveSpeed = Mathf.Lerp(12f, 22f, (speedLevel - 1) / 14f);
+        moveSpeed = Mathf.Lerp(12f, 20f, (speedLevel - 1) / 14f);
         
         int repulsorLevel = Globals.GetShopElementLevel(ShopElementType.Repulsor);
-        Globals.RepulsorCooldown = 65.0f - (repulsorLevel - 1) * Globals.RepulsorCooldownDecreasePerLevel;
+        Globals.RepulsorCooldown = 150.0f - (repulsorLevel - 1) * Globals.RepulsorCooldownDecreasePerLevel;
         
         _health = Globals.PlayerMaxHealth;
         gameScreenUIManager.UpdatePlayerHealth(_health);
@@ -106,6 +111,7 @@ public class PlayerController : MonoBehaviour, IHealth
         Debug.Log("MoveSpeed: " + moveSpeed);
         Debug.Log("PlayerMaxHealth: " + Globals.PlayerMaxHealth);
         Debug.Log("MaxChains: " + _maxChains);
+        Debug.Log("Repulsor cooldown: " + Globals.RepulsorCooldown);
     }
     
     void Update()
@@ -132,10 +138,7 @@ public class PlayerController : MonoBehaviour, IHealth
                 EndDash();
         }
         
-        //ChainShot
-        if (Input.GetKeyDown(KeyCode.E))
-            TryChainShot();
-        
+        UpdateChainShot();
         UpdateRepulsor();
         MovePlayer();
         AimAndShoot();
@@ -160,7 +163,7 @@ public class PlayerController : MonoBehaviour, IHealth
         
         _circleCollider2D.radius = _initialColliderRadius + 0.2f;
         
-        TakeDamage(Globals.OwnBulletDamage * 3, true); //Dashing does 4 damage to self
+        TakeDamage(Globals.DashSelfDamage, true);
     }
 
     private void EndDash()
@@ -223,9 +226,12 @@ public class PlayerController : MonoBehaviour, IHealth
     public void TakeDamage(int amount, bool isDamagingByOwnBullet = false)
     {
         _health = Mathf.Max(0, _health - amount);
-        
-        if (_health <= 15&& _chromaticAberration)
+
+        if (_health <= 15 && _chromaticAberration)
+        {
             _chromaticAberration.active = true;
+            _vignette.color.value = Color.red;
+        }
         
         if (_health == 0) //TODO: LEVEL END HERE
         {
@@ -244,7 +250,10 @@ public class PlayerController : MonoBehaviour, IHealth
         _health = Mathf.Min(Globals.PlayerMaxHealth, _health + amount);
 
         if (_health > 15 && _chromaticAberration)
+        {
             _chromaticAberration.active = false;
+            _vignette.color.value = Color.black;
+        }
         
         gameScreenUIManager.UpdatePlayerHealth(_health);
     }
@@ -259,6 +268,22 @@ public class PlayerController : MonoBehaviour, IHealth
         }
     }
 
+    private void UpdateChainShot()
+    {
+        if (_chainShotTimer > 0f)
+            _chainShotTimer -= Time.deltaTime;
+
+        float progress = Mathf.Clamp01((Globals.ChainShotCooldown - _chainShotTimer) / Globals.ChainShotCooldown);
+        gameScreenUIManager.UpdateChainShotSlider(progress * Globals.ChainShotCooldown);
+        
+        // Trigger ChainShot ability
+        if (Input.GetKeyDown(KeyCode.E) && _chainShotTimer <= 0f)
+        {
+            ActivateChainShot();
+            _chainShotTimer = Globals.ChainShotCooldown;
+        }
+    }
+    
     private void UpdateRepulsor()
     {
         if (_repulsorTimer > 0f)
@@ -278,7 +303,7 @@ public class PlayerController : MonoBehaviour, IHealth
     private void ActivateRepulsor()
     {
         Instantiate(repulsorPrefab, transform.position, Quaternion.identity);
-        TakeDamage(Globals.OwnBulletDamage * 8, true); //Repulsing does 8 damage to self
+        TakeDamage(Globals.RepulsorSelfDamage, true);
         SoundFXManager.instance.PlaySoundFXClip(repulsorSound, transform, 0.8f);
         _mainCamera.gameObject.GetComponent<CameraShake>().Shake(0.3f, 8, 0.4f);
     }
@@ -311,11 +336,14 @@ public class PlayerController : MonoBehaviour, IHealth
         return best;
     }
     
-    void TryChainShot()
+    void ActivateChainShot()
     {
         Transform first = FindNextTarget(transform.position, new HashSet<Transform>());
         if (first != null)
+        {
             StartCoroutine(ChainShotRoutine(first));
+            TakeDamage(Globals.ChainShotSelfDamage, true);
+        }
     }
     
     IEnumerator ChainLineFadeOut(LineRenderer lineRenderer)
