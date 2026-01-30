@@ -7,7 +7,7 @@ public enum ShopElementType
     Life = 0,
     Dash = 1,
     Speed = 2,
-    LifeRegen = 3,
+    ChainBullet = 3,
     Repulsor = 4
 }
 

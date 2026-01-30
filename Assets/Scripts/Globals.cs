@@ -31,7 +31,7 @@ public static class Globals
     public static DifficultyLevel Difficulty = DifficultyLevel.Medium;
     
     // Sore
-    public static int Coins = 670;
+    public static int Coins = 9999999;
     public static int Highscore = 0;
 
     //Shop

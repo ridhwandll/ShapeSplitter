@@ -89,8 +89,8 @@ public class PlayerController : MonoBehaviour, IHealth
         int lifeLevel = Globals.GetShopElementLevel(ShopElementType.Life);
         Globals.PlayerMaxHealth = 50 + (lifeLevel - 1) * Globals.HealthIncreasePerLevel;
         
-        //int lifeRegen = Globals.GetShopElementLevel(ShopElementType.LifeRegen);
-        //_regenInterval = Mathf.Lerp(30f, 10f, (lifeRegen - 1) / 14f); // 30f sec regen at level 1, 10f s at level 15
+        int chainBulletLevel = Globals.GetShopElementLevel(ShopElementType.ChainBullet);
+        _maxChains = 2 + (chainBulletLevel - 1); // Add one chain per level
         
         int speedLevel = Globals.GetShopElementLevel(ShopElementType.Speed);
         moveSpeed = Mathf.Lerp(12f, 22f, (speedLevel - 1) / 14f);
@@ -105,6 +105,7 @@ public class PlayerController : MonoBehaviour, IHealth
         Debug.Log("DashSpeed: " + dashSpeed);
         Debug.Log("MoveSpeed: " + moveSpeed);
         Debug.Log("PlayerMaxHealth: " + Globals.PlayerMaxHealth);
+        Debug.Log("MaxChains: " + _maxChains);
     }
     
     void Update()

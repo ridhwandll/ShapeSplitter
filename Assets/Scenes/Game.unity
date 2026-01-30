@@ -9993,6 +9993,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: LevelTransition
       objectReference: {fileID: 0}
+    - target: {fileID: 2160042016270962186, guid: 2258bea8063f5d44b921b4463125843f, type: 3}
+      propertyPath: m_Camera
+      value: 
+      objectReference: {fileID: 519420031}
     - target: {fileID: 3763283493345791389, guid: 2258bea8063f5d44b921b4463125843f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 488.72195
