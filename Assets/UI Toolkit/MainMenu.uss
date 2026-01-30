@@ -4,7 +4,7 @@
 .button {
     font-size: 70px;
     -unity-font-style: normal;
-    background-color: rgb(51, 51, 51);
+    background-color: rgb(29, 29, 29);
     color: rgb(255, 221, 119);
     border-left-color: rgb(255, 191, 0);
     border-right-color: rgb(255, 191, 0);
@@ -34,7 +34,7 @@
 .button:hover {
     font-size: 70px;
     -unity-font-style: normal;
-    background-color: rgb(51, 51, 51);
+    background-color: rgb(29, 29, 29);
     color: rgb(255, 221, 119);
     border-left-color: rgb(51, 51, 51);
     border-right-color: rgb(51, 51, 51);
@@ -58,12 +58,13 @@
     padding-bottom: 10px;
     margin-bottom: 10px;
     -unity-font-definition: url("project://database/Assets/Fonts/JockeyOne-Regular.ttf?fileID=12800000&guid=9bfcf3d790dfce044ae0bb94c9434f5f&type=3#JockeyOne-Regular");
+    transition-timing-function: ease;
 }
 
 .button:active {
     font-size: 70px;
     -unity-font-style: normal;
-    background-color: rgb(51, 51, 51);
+    background-color: rgb(29, 29, 29);
     color: rgb(255, 221, 119);
     border-left-color: rgb(255, 121, 0);
     border-right-color: rgb(255, 121, 0);
@@ -87,6 +88,7 @@
     padding-bottom: 10px;
     margin-bottom: 10px;
     -unity-font-definition: url("project://database/Assets/Fonts/JockeyOne-Regular.ttf?fileID=12800000&guid=9bfcf3d790dfce044ae0bb94c9434f5f&type=3#JockeyOne-Regular");
+    transition-timing-function: ease-in-out-cubic;
 }
 
 .unity-label {

@@ -28,7 +28,7 @@ public static class Globals
 
     public static float MasterVolume = 1.0f;
     public static float SoundFXVolume = 1.0f;
-    public static float MusicVolume = 0.1f;
+    public static float MusicVolume = 0.05f;
     
     public static DifficultyLevel Difficulty = DifficultyLevel.Medium;
     

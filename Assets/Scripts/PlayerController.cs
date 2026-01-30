@@ -294,7 +294,7 @@ public class PlayerController : MonoBehaviour, IHealth
         gameScreenUIManager.UpdateRepulsorSlider(progress * Globals.RepulsorCooldown);
         
         // Trigger Repulsor ability
-        if (Input.GetKeyDown(KeyCode.X))// && _repulsorTimer <= 0f)
+        if (Input.GetKeyDown(KeyCode.X) && _repulsorTimer <= 0f)
         {
             ActivateRepulsor();
             _repulsorTimer = Globals.RepulsorCooldown;

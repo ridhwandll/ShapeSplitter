@@ -9593,7 +9593,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   moveSpeed: 12
   acceleration: 100
-  maxAimLineDistance: 4
+  maxAimLineDistance: 8
   fireRate: 0.15
   dashSpeed: 20
   dashDuration: 0.4
