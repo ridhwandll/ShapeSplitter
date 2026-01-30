@@ -36,10 +36,12 @@ public class ShopMenuManager
     private Label _coinsLabel;
     private ShopElementUI[] _shopElementsUIs;
     private ShopElement[] _shopElements;
-    private string SavePath => Path.Combine(Application.persistentDataPath, "ShapeSplitter_Shop.json");
+    private string SavePath => Path.Combine(Application.persistentDataPath, "ShapeSplitter_Shop.surge");
+    private AudioClip _buyButtonSound;
     
-    public void Initialize(VisualElement root)
+    public void Initialize(VisualElement root, AudioClip buyButtonSound)
     {
+        _buyButtonSound = buyButtonSound;
         _coinsLabel = root.Q<Label>("CoinsLabel");
         
         _shopElements = new ShopElement[5];
@@ -108,6 +110,7 @@ public class ShopMenuManager
         {
             _shopElements[(int)elementType].Level++;
             Globals.Coins -= costToUpgrade;
+            SoundFXManager.instance.PlaySoundFXClip(_buyButtonSound, 1f);
         }
         Globals.ShopElements = _shopElements;
         

@@ -12,7 +12,7 @@ public class PlayerProgress : MonoBehaviour
 {
     public static PlayerProgress Instance;
 
-    private string SavePath => Path.Combine(Application.persistentDataPath, "ShapeSplitter_Progress.json");
+    private string SavePath => Path.Combine(Application.persistentDataPath, "ShapeSplitter_Progress.surge");
         
     void Awake()
     {

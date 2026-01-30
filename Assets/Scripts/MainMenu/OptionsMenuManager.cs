@@ -17,9 +17,12 @@ namespace MainMenu
         private VisualElement _graphicsMenu;
         private VisualElement _difficultyMenu;
         private VisualElement _howToPlayMenu;
-
-        public void Initialize(UIDocument document)
+        private AudioClip _buttonPressedClip;
+        
+        
+        public void Initialize(UIDocument document, AudioClip buttonPressed)
         {
+            _buttonPressedClip = buttonPressed;
             _audioMenu = document.rootVisualElement.Q<VisualElement>("AudioMenu");
             _graphicsMenu = document.rootVisualElement.Q<VisualElement>("GraphicsMenu");
             _difficultyMenu = document.rootVisualElement.Q<VisualElement>("DifficultyMenu");
@@ -39,7 +42,7 @@ namespace MainMenu
             menu.style.display = DisplayStyle.Flex;
             menu.style.opacity = 0f;
             menu.style.scale = Vector3.one * 0.95f;
-
+            PlayButtonPressedSound();
             menu.experimental.animation
                 .Start(0f, 1f, 369, (VisualElement m, float value) =>
                 {
@@ -62,6 +65,11 @@ namespace MainMenu
                     return _howToPlayMenu;
             }
             return null;
+        }
+        
+        private void PlayButtonPressedSound()
+        {
+            SoundFXManager.instance.PlaySoundFXClip(_buttonPressedClip, 0.5f);
         }
     }
 }

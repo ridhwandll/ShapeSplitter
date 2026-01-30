@@ -42,6 +42,8 @@ namespace MainMenu
         private RadioButtonGroup _difficultyOptionsGroup;
 
         private Label _highscoreLabel;
+        public AudioClip buttonClickSound;
+        public AudioClip buyButtonClickSound;
         
         void Start()
         {
@@ -49,8 +51,8 @@ namespace MainMenu
 
             _shopMenuManager = new ShopMenuManager();
             _optionsMenuManager = new OptionsMenuManager();
-            _optionsMenuManager.Initialize(uiDocument);
-            _shopMenuManager.Initialize(root);
+            _optionsMenuManager.Initialize(uiDocument, buttonClickSound);
+            _shopMenuManager.Initialize(root, buyButtonClickSound);
             
             _highscoreLabel = root.Q<Label>("Highscore");
             _optionsMenu = root.Q<VisualElement>("OptionsMenu");
@@ -134,22 +136,26 @@ namespace MainMenu
 
         private void OnPlayButtonPressed()
         {
+            PlayButtonPressedSound();
             GameObject.FindGameObjectWithTag("LevelTransition").GetComponent<LevelTransition>().LoadGame();
         }
         private void OnOptionsButtonPressed()
         {
+            PlayButtonPressedSound();
             _backToMainMenuButton.style.display = DisplayStyle.Flex;
             _mainMenu.style.display = DisplayStyle.None;
             AnimateAndShowMenu(_optionsMenu);
         }
         private void OnShopButtonPressed()
         {
+            PlayButtonPressedSound();
             _backToMainMenuButton.style.display = DisplayStyle.Flex;
             _mainMenu.style.display = DisplayStyle.None;
             AnimateAndShowMenu(_shopMenu);
         }
         private void OnExitButtonPressed()
         {
+            PlayButtonPressedSound();
             Application.Quit();
         }
 
@@ -175,6 +181,7 @@ namespace MainMenu
             _backToMainMenuButton.style.display = DisplayStyle.None;
             PlayerProgress.Instance.Save();
             AnimateAndShowMenu(_mainMenu);
+            PlayButtonPressedSound();
         }
 
         private void AnimateAndShowMenu(VisualElement menuToShow)
@@ -189,6 +196,11 @@ namespace MainMenu
                     menuToShow.style.opacity = value;
                     menuToShow.style.scale = Vector3.one * Mathf.Lerp(0.95f, 1f, value);
                 });
+        }
+
+        private void PlayButtonPressedSound()
+        {
+            SoundFXManager.instance.PlaySoundFXClip(buttonClickSound, 0.5f);
         }
     }
 }

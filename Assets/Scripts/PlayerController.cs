@@ -42,6 +42,7 @@ public class PlayerController : MonoBehaviour, IHealth
     public float _chainDelay = 0.2f;
     public float chainLineLifetime = 0.4f;
     public LayerMask enemyMask;
+    public AudioClip chainShotSound;
     public LineRenderer chainLinePrefab;
     
     //Repulsor
@@ -158,7 +159,7 @@ public class PlayerController : MonoBehaviour, IHealth
         _dashTimeLeft = dashDuration;
         _isDashing = true;
         _mainCamera.gameObject.GetComponent<CameraShake>().Shake(0.4f, 3, 0.01f);
-        SoundFXManager.instance.PlaySoundFXClip(dashSound, transform, 0.5f);
+        SoundFXManager.instance.PlaySoundFXClip(dashSound, 0.5f);
         playerParticleSystem.Play();
         
         _circleCollider2D.radius = _initialColliderRadius + 0.2f;
@@ -239,7 +240,7 @@ public class PlayerController : MonoBehaviour, IHealth
             GameManager.Instance.SetPlayerAlive(false);
         }
         
-        if (!isDamagingByOwnBullet)               
+        if (!isDamagingByOwnBullet) 
             playerParticleSystem.Play();
         
         gameScreenUIManager.UpdatePlayerHealth(_health);
@@ -293,7 +294,7 @@ public class PlayerController : MonoBehaviour, IHealth
         gameScreenUIManager.UpdateRepulsorSlider(progress * Globals.RepulsorCooldown);
         
         // Trigger Repulsor ability
-        if (Input.GetKeyDown(KeyCode.X) && _repulsorTimer <= 0f)
+        if (Input.GetKeyDown(KeyCode.X))// && _repulsorTimer <= 0f)
         {
             ActivateRepulsor();
             _repulsorTimer = Globals.RepulsorCooldown;
@@ -304,7 +305,7 @@ public class PlayerController : MonoBehaviour, IHealth
     {
         Instantiate(repulsorPrefab, transform.position, Quaternion.identity);
         TakeDamage(Globals.RepulsorSelfDamage, true);
-        SoundFXManager.instance.PlaySoundFXClip(repulsorSound, transform, 0.8f);
+        SoundFXManager.instance.PlaySoundFXClip(repulsorSound, 0.8f);
         _mainCamera.gameObject.GetComponent<CameraShake>().Shake(0.3f, 8, 0.4f);
     }
     
@@ -382,7 +383,10 @@ public class PlayerController : MonoBehaviour, IHealth
         lr.endWidth = 0.05f;
         lr.numCornerVertices = 5;
         lr.numCapVertices = 5;
-
+        
+        SoundFXManager.instance.PlaySoundFXClip(chainShotSound, 0.6f);
+        _mainCamera.gameObject.GetComponent<CameraShake>().Shake(0.4f, 3, 0.1f);
+        
         StartCoroutine(ChainLineFadeOut(lr));
     }
     

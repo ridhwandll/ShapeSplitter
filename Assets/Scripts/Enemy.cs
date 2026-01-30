@@ -134,7 +134,7 @@ public class Enemy : MonoBehaviour, IHealth
             if (Camera.main != null)
                 Camera.main.gameObject.GetComponent<CameraShake>().Shake();
 
-            SoundFXManager.instance.PlaySoundFXClip(deathClip, transform, 1.0f);
+            SoundFXManager.instance.PlaySoundFXClip(deathClip, 1.0f);
             
             // Play Enemy Death effect
             enemyDeathParticleSystem.transform.SetParent(null);

@@ -52,7 +52,7 @@ public class GameManager : MonoBehaviour
         {
             JustBeforePlayerDied?.Invoke();
             OnPlayerDied?.Invoke();
-            SoundFXManager.instance.PlaySoundFXClip(gameOverClip, transform, 1.0f);
+            SoundFXManager.instance.PlaySoundFXClip(gameOverClip, 1.0f);
         }
     }
     

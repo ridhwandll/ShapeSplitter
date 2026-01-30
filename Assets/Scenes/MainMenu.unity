@@ -277,7 +277,7 @@ SpriteRenderer:
   m_SortingOrder: -10
   m_MaskInteraction: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 0.047169805, g: 0.047169805, b: 0.047169805, a: 1}
+  m_Color: {r: 0.09433961, g: 0.09433961, b: 0.09433961, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -371,6 +371,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MainMenuUI
   soundMixerManager: {fileID: 2113252944}
   uiDocument: {fileID: 326774947}
+  buttonClickSound: {fileID: 8300000, guid: 496206ba31fc5414b8aae5abafe9c63b, type: 3}
+  buyButtonClickSound: {fileID: 8300000, guid: e4c46c334b6e32f42bb93b696272f1e3, type: 3}
 --- !u!1 &361282120
 GameObject:
   m_ObjectHideFlags: 0
@@ -414,9 +416,9 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 1260767615509318405, guid: 1b64b5cb568af5a418caed2e80ea65b5, type: 2}
   m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 05fe328ad4ee55241a324c85d8ecfd52, type: 3}
+  m_Resource: {fileID: 8300000, guid: f19ca4c5ed441304ab3ce1167e343e35, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.8
   m_Pitch: 1
   Loop: 1
   Mute: 0

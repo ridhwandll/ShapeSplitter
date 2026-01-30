@@ -52,6 +52,8 @@ public class UIManager : MonoBehaviour
     public float showDuration = 7f;
     public float fadeOutDuration = 2f;
     
+    public AudioClip buttonClickSound;
+    
     void Start()
     {
         GameManager.Instance.OnPauseChanged += OnPauseChanged;
@@ -81,7 +83,7 @@ public class UIManager : MonoBehaviour
         {
             dashBarText.text = "DASH";
             dashBar.color = Color.gray1;
-            dashBarText.color = Color.gray8;
+            dashBarText.color = Color.whiteSmoke;
         }
             
     }
@@ -160,6 +162,9 @@ public class UIManager : MonoBehaviour
 
     private void OnPauseChanged(bool paused)
     {
+        if (SoundFXManager.instance)
+            SoundFXManager.instance.PlaySoundFXClip(buttonClickSound, 0.9f);
+        
         deathMenu.SetActive(false);
         pauseMenu.SetActive(paused);
     }
@@ -219,6 +224,8 @@ public class UIManager : MonoBehaviour
     
     public void OnReturnToMMPressed()
     {
+        if (SoundFXManager.instance)
+            SoundFXManager.instance.PlaySoundFXClip(buttonClickSound, 0.5f);
         GameObject.FindGameObjectWithTag("LevelTransition").GetComponent<LevelTransition>().LoadMainMenu();
     }
     

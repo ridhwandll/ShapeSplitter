@@ -8,7 +8,7 @@ public static class Globals
     public static readonly float CostMultiplier = 1.8f;
 
     public static float RepulsorCooldown = 150f;
-    public static float RepulsorCooldownDecreasePerLevel = 1.8f;
+    public static float RepulsorCooldownDecreasePerLevel = 1.5f;
     
     public static float ChainShotCooldown = 60f;
     
@@ -33,7 +33,7 @@ public static class Globals
     public static DifficultyLevel Difficulty = DifficultyLevel.Medium;
     
     // Sore
-    public static int Coins = 9999999;
+    public static int Coins = 1500;
     public static int Highscore = 0;
 
     //Shop
@@ -64,8 +64,8 @@ public static class Globals
     public static readonly int MaxShopItemLevel = 15;
 
     public static readonly int DashSelfDamage = 4;
-    public static readonly int ChainShotSelfDamage = 8;
-    public static readonly int RepulsorSelfDamage = 15;
+    public static readonly int ChainShotSelfDamage = 13;
+    public static readonly int RepulsorSelfDamage = 20;
     
     public static bool DashTipShown = false;
     public static bool RepulseTipShown = false;
