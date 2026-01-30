@@ -17,6 +17,7 @@ public static class Globals
         
     public static int OwnBulletDamage = 1;
     public static int DashDamage = 5;
+    public static int ChainShotDamage = 15;
     public static int PlayerMaxHealth = 50;
 
     public static bool Bloom = true;

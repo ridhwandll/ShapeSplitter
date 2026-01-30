@@ -9181,7 +9181,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 1, g: 0.7490196, b: 0, a: 1}
@@ -9295,6 +9295,12 @@ MonoBehaviour:
   dashSound: {fileID: 8300000, guid: d21b8de8e1fdb56469d9c88ebef77f9a, type: 3}
   minBounds: {x: -11.75, y: -6.5}
   maxBounds: {x: 11.75, y: 6.5}
+  _chainDelay: 0.07
+  chainLineLifetime: 2.5
+  enemyMask:
+    serializedVersion: 2
+    m_Bits: 8
+  chainLinePrefab: {fileID: 8748133168194543757, guid: e314fc32be9a4e2449e169a37463a9e1, type: 3}
   repulsorSound: {fileID: 8300000, guid: 6aa16b783f6092849aad50f96c85784e, type: 3}
   bulletPrefab: {fileID: 6469692633469274891, guid: 5ae21c41bb09599429ecb8ad37ddfaad, type: 3}
   repulsorPrefab: {fileID: 5780267670328676405, guid: f4a141b95e04e9e43a8eb355e1e668f6, type: 3}

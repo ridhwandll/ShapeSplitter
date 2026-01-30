@@ -146,6 +146,7 @@ public class Enemy : MonoBehaviour, IHealth
                 GameObject lifeShard = Instantiate(lifeShardPrefab, transform.position, Quaternion.identity);
                 lifeShard.GetComponent<LifeShard>().Initiate(_enemyType);
             }
+
             _mySpawner.OnEnemyDied(_enemyType);
             Destroy(gameObject);
         }

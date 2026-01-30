@@ -15,6 +15,38 @@ public class Bullet : MonoBehaviour
         gameObject.GetComponent<SpriteRenderer>().color = bulletColor;        
         direction = shootDirection.normalized;
         Destroy(gameObject, lifetime); // auto destroy after lifetime
+        SetupTrailRenderer();
+    }
+    
+    void Update()
+    {
+        transform.position += (Vector3)direction * speed * Time.deltaTime;
+    }
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        IHealth health = collision.gameObject.GetComponent<IHealth>();
+        
+        if (collision.gameObject.CompareTag("Enemy") && !_isEnemyBullet)
+        {
+            health.TakeDamage(_damage);
+            Destroy(gameObject);
+        }
+    }
+
+    void OnTriggerEnter2D(Collider2D collision) // Player is a Trigger Only
+    {
+        IHealth health = collision.gameObject.GetComponent<IHealth>();
+        if (collision.gameObject.CompareTag("Player") && _isEnemyBullet)
+        {
+            health.TakeDamage(_damage);
+            Destroy(gameObject);
+        }
+    }
+
+    private void SetupTrailRenderer()
+    {
+        Color bulletColor = _isEnemyBullet ? Globals.EnemyColor : Globals.PlayerColor;
         
         // Set the color of the trail
         Gradient gradient = new Gradient();
@@ -31,38 +63,5 @@ public class Bullet : MonoBehaviour
 
         // Assign the new gradient to the TrailRenderer's colorGradient property
         GetComponent<TrailRenderer>().colorGradient = gradient;
-    }
-
-    void Update()
-    {
-        transform.position += (Vector3)direction * speed * Time.deltaTime;
-    }
-
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        IHealth health = collision.gameObject.GetComponent<IHealth>();
-
-        // Check for enemy hit
-        if (collision.gameObject.CompareTag("Enemy") && !_isEnemyBullet)
-        {
-            health.TakeDamage(_damage);
-            Destroy(gameObject); 
-        }
-        
-        //Destroy if hits walls
-        if (collision.gameObject.CompareTag("Wall"))
-        {
-            Destroy(gameObject);
-        }
-    }
-
-    void OnTriggerEnter2D(Collider2D collision) // Player is a Trigger Only
-    {
-        IHealth health = collision.gameObject.GetComponent<IHealth>();
-        if (collision.gameObject.CompareTag("Player") && _isEnemyBullet)
-        {
-            health.TakeDamage(_damage);
-            Destroy(gameObject); 
-        }
     }
 }

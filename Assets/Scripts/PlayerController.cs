@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
@@ -34,10 +35,13 @@ public class PlayerController : MonoBehaviour, IHealth
     // Health
     private int _health;
     
-    // Health Regen
-    private readonly int _regenAmount = 8;
-    private float _regenInterval = 1.0f;
-    private float _regenTimer = 0f;
+    // ChainShot
+    private int _maxChains = 6;
+    private float _chainRange = 15f;
+    public float _chainDelay = 0.2f;
+    public float chainLineLifetime = 0.4f;
+    public LayerMask enemyMask;
+    public LineRenderer chainLinePrefab;
     
     //Repulsor
     private float _repulsorTimer = 0f;
@@ -85,8 +89,8 @@ public class PlayerController : MonoBehaviour, IHealth
         int lifeLevel = Globals.GetShopElementLevel(ShopElementType.Life);
         Globals.PlayerMaxHealth = 50 + (lifeLevel - 1) * Globals.HealthIncreasePerLevel;
         
-        int lifeRegen = Globals.GetShopElementLevel(ShopElementType.LifeRegen);
-        _regenInterval = Mathf.Lerp(30f, 10f, (lifeRegen - 1) / 14f); // 30f sec regen at level 1, 10f s at level 15
+        //int lifeRegen = Globals.GetShopElementLevel(ShopElementType.LifeRegen);
+        //_regenInterval = Mathf.Lerp(30f, 10f, (lifeRegen - 1) / 14f); // 30f sec regen at level 1, 10f s at level 15
         
         int speedLevel = Globals.GetShopElementLevel(ShopElementType.Speed);
         moveSpeed = Mathf.Lerp(12f, 22f, (speedLevel - 1) / 14f);
@@ -101,7 +105,6 @@ public class PlayerController : MonoBehaviour, IHealth
         Debug.Log("DashSpeed: " + dashSpeed);
         Debug.Log("MoveSpeed: " + moveSpeed);
         Debug.Log("PlayerMaxHealth: " + Globals.PlayerMaxHealth);
-        Debug.Log("Life Regen Interval: " + _regenInterval);
     }
     
     void Update()
@@ -112,7 +115,7 @@ public class PlayerController : MonoBehaviour, IHealth
         //DASH
         if (!_isDashing && Input.GetKeyDown(KeyCode.Space) && Time.time >= _lastDashTime + Globals.PlayerDashCooldown)
             TryStartDash();
-
+        
         if (!_isDashing)
         {
             float elapsedDash = Time.time - _lastDashTime;
@@ -128,7 +131,10 @@ public class PlayerController : MonoBehaviour, IHealth
                 EndDash();
         }
         
-        HandleLifeRegen();
+        //ChainShot
+        if (Input.GetKeyDown(KeyCode.E))
+            TryChainShot();
+        
         UpdateRepulsor();
         MovePlayer();
         AimAndShoot();
@@ -252,17 +258,6 @@ public class PlayerController : MonoBehaviour, IHealth
         }
     }
 
-    void HandleLifeRegen()
-    {
-        _regenTimer += Time.deltaTime;
-
-        if (_regenTimer >= _regenInterval)
-        {
-            _regenTimer -= _regenInterval;
-            Heal(_regenAmount);
-        }
-    }
-
     private void UpdateRepulsor()
     {
         if (_repulsorTimer > 0f)
@@ -279,14 +274,111 @@ public class PlayerController : MonoBehaviour, IHealth
         }
     }
     
-    public float GetRepulsorTimer() => _repulsorTimer;
-    
-    
     private void ActivateRepulsor()
     {
         Instantiate(repulsorPrefab, transform.position, Quaternion.identity);
         TakeDamage(Globals.OwnBulletDamage * 8, true); //Repulsing does 8 damage to self
         SoundFXManager.instance.PlaySoundFXClip(repulsorSound, transform, 0.8f);
         _mainCamera.gameObject.GetComponent<CameraShake>().Shake(0.3f, 8, 0.4f);
+    }
+    
+    // ChainShot
+    Transform FindNextTarget(Vector2 from, HashSet<Transform> hit)
+    {
+        Collider2D[] hits = Physics2D.OverlapCircleAll(from, _chainRange, enemyMask);
+
+        float closest = float.MaxValue;
+        Transform best = null;
+
+        foreach (var c in hits)
+        {
+            Transform t = c.transform;
+            if (hit.Contains(t))
+                continue;
+
+            IHealth h = t.GetComponent<IHealth>();
+            if (h == null)
+                continue;
+
+            float d = Vector2.Distance(from, t.position);
+            if (d < closest)
+            {
+                closest = d;
+                best = t;
+            }
+        }
+        return best;
+    }
+    
+    void TryChainShot()
+    {
+        Transform first = FindNextTarget(transform.position, new HashSet<Transform>());
+        if (first != null)
+            StartCoroutine(ChainShotRoutine(first));
+    }
+    
+    IEnumerator ChainLineFadeOut(LineRenderer lineRenderer)
+    {
+        float timeElapsed = 0f;
+        Color startColor = lineRenderer.startColor;
+        Color endColor = lineRenderer.endColor;
+
+        while (timeElapsed < chainLineLifetime)
+        {
+            timeElapsed += Time.deltaTime;
+            float alpha = Mathf.Lerp(1f, 0f, timeElapsed / chainLineLifetime);
+
+            // Update alpha for both start and end colors
+            lineRenderer.startColor = new Color(startColor.r, startColor.g, startColor.b, alpha);
+            lineRenderer.endColor = new Color(endColor.r, endColor.g, endColor.b, alpha);
+
+            yield return null;
+        }
+
+        // Ensure it is completely invisible
+        lineRenderer.startColor = new Color(startColor.r, startColor.g, startColor.b, 0f);
+        lineRenderer.endColor = new Color(endColor.r, endColor.g, endColor.b, 0f);
+
+        Destroy(lineRenderer.gameObject);
+    }
+    void SpawnChainLine(Vector3 from, Vector3 to)
+    {
+        LineRenderer lr = Instantiate(chainLinePrefab);
+        lr.positionCount = 2;
+        lr.SetPosition(0, from);
+        lr.SetPosition(1, to);
+        lr.startColor = Color.orange;
+        lr.endColor = Color.orangeRed;
+        lr.startWidth = 0.15f;
+        lr.endWidth = 0.05f;
+        lr.numCornerVertices = 5;
+        lr.numCapVertices = 5;
+
+        StartCoroutine(ChainLineFadeOut(lr));
+    }
+    
+    IEnumerator ChainShotRoutine(Transform firstTarget)
+    {
+        HashSet<Transform> hitEnemies = new HashSet<Transform>();
+        Transform currentTarget = firstTarget;
+        Vector3 lastTarget = transform.position; //Last target is player, initial line start
+
+        for (int i = 0; i < _maxChains; i++)
+        {
+            if (currentTarget == null)
+                yield break;
+
+            hitEnemies.Add(currentTarget);
+            Vector3 curerntPos = currentTarget.position; // Store it locally as we are destroying Enemy gameObject later
+            
+            SpawnChainLine(lastTarget, curerntPos);
+            
+            currentTarget.GetComponent<IHealth>()?.TakeDamage(Globals.ChainShotDamage, false);
+            
+            yield return new WaitForSeconds(_chainDelay);
+            
+            lastTarget = curerntPos;
+            currentTarget = FindNextTarget(curerntPos, hitEnemies);
+        }
     }
 }
