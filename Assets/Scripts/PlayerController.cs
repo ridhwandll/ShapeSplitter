@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.Windows;
 
 public class PlayerController : MonoBehaviour, IHealth
 {
@@ -203,21 +204,27 @@ public class PlayerController : MonoBehaviour, IHealth
     private void AimAndShoot()
     {
         // Draw Aim Line
-        Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-        mousePos.z = 0f;
+        Vector3 shootDirection = _input.Player.Shoot.ReadValue<Vector2>().normalized;
 
-        Vector2 start = transform.position;
-        Vector2 end = (mousePos - transform.position);
- 
-        if (end.magnitude > maxAimLineDistance)
-            end = end.normalized * maxAimLineDistance;
+        if (shootDirection.magnitude != 0.0f)
+        {
+            _lineRenderer.positionCount = 2;
+            Vector2 start = transform.position;
+            Vector2 end = (shootDirection - transform.position);
+
+            if (end.magnitude > maxAimLineDistance)
+                end = end.normalized * maxAimLineDistance;
+
+            _lineRenderer.SetPosition(0, start);
+            _lineRenderer.SetPosition(1, start + end);
+        }
+        else        
+            _lineRenderer.positionCount = 0;
         
-        _lineRenderer.SetPosition(0, start);
-        _lineRenderer.SetPosition(1, start + end);
-        
-        // SHOOT
-        Vector3 aimDir = mousePos - transform.position;
-        if (_input.Player.Shoot.IsPressed() && Time.time >= _nextFireTime)
+
+            // SHOOT
+        Vector3 aimDir = shootDirection - transform.position;
+        if (shootDirection.magnitude != 0.0f && Time.time >= _nextFireTime)
         {
             var bullerSpawnPos = transform.position + (aimDir.normalized * 0.5f);
             GameObject bullet = Instantiate(bulletPrefab, bullerSpawnPos, Quaternion.identity);

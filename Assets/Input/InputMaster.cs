@@ -130,9 +130,9 @@ public partial class @InputMaster: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": ""Shoot"",
-                    ""type"": ""Button"",
+                    ""type"": ""PassThrough"",
                     ""id"": ""5df6d4e4-2762-47e4-aa37-5cf11ec45909"",
-                    ""expectedControlType"": """",
+                    ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -196,6 +196,17 @@ public partial class @InputMaster: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""bc361146-7cf8-4e11-8c9b-04e8391a292f"",
+                    ""path"": ""<Gamepad>/leftStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""c320c444-af6a-4984-b4ba-6be0d5f3a265"",
                     ""path"": ""<Keyboard>/space"",
                     ""interactions"": ""Press"",
@@ -229,11 +240,11 @@ public partial class @InputMaster: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""df9ab135-e52b-4a15-bde8-f9697090372d"",
-                    ""path"": ""<Mouse>/leftButton"",
-                    ""interactions"": ""Press"",
+                    ""id"": ""938d9120-695b-4f01-8fcd-da77b3e5361a"",
+                    ""path"": ""<Gamepad>/rightStick"",
+                    ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""KeyboardAndMouse"",
+                    ""groups"": """",
                     ""action"": ""Shoot"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
