@@ -41,12 +41,16 @@ public class GameManager : MonoBehaviour
     }
     
 
-    private void SetPaused(bool pause)
+    public void InvalidatePaused()
     {
-        if (_isPaused == pause)
-            return;
-
-        _isPaused = pause;
+        if (_isPaused == false)
+        {
+            _isPaused = true;
+        }
+        else
+        {
+            _isPaused = false;
+        }
 
         OnPauseChanged?.Invoke(_isPaused);
     }
@@ -71,10 +75,7 @@ public class GameManager : MonoBehaviour
         // Pause
         if (_input.Game.Pause.WasPressedThisFrame() && _isPlayerAlive)
         {
-            if (_isPaused)
-                SetPaused(false);
-            else
-                SetPaused(true);
+            InvalidatePaused();
         }
     }
 }
