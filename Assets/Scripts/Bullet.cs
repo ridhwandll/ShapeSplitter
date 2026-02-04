@@ -12,7 +12,7 @@ public class Bullet : MonoBehaviour
     {
         _isEnemyBullet = isEnemyBullet;
         Color bulletColor = isEnemyBullet ? Globals.EnemyColor : Globals.PlayerColor;
-        gameObject.GetComponent<SpriteRenderer>().color = bulletColor;        
+        gameObject.GetComponent<SpriteRenderer>().color = bulletColor;
         direction = shootDirection.normalized;
         Destroy(gameObject, lifetime); // auto destroy after lifetime
         SetupTrailRenderer();

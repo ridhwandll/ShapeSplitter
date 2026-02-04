@@ -55,7 +55,7 @@ public class LifeShard : MonoBehaviour
         
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         Vector2 dir = Random.insideUnitCircle.normalized;
-        rb.AddForce(dir * 2.5f, ForceMode2D.Impulse);
+        rb.AddForce(dir * 4.0f, ForceMode2D.Impulse);
         Destroy(rb, 0.3f);
     }
     

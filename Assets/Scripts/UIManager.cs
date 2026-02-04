@@ -1,9 +1,25 @@
-using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Random = System.Random;
+
+public class ProTipStrings
+{
+    public static string[] Tips = new string[9]
+    {
+        "CREDITS\n TEAM SURGE\nFahim Fuad (BUET)//Developer\nFarhan Sadique (BUET)// Audio & Assets\n Made in 100hrs for BUET CSE Fest 2026 Game Jam",
+        "PRO TIP:\n Always keep moving to dodge the enemy bullets!\nAlso keep shooting while moving!",
+        "PRO TIP:\n REPULSE also destroys dropped life shards!\n It's just like a pocket Thanos Snap",
+        "PRO TIP:\n CHAIN SHOT sounds so good, but don't get carried away!\nUse it only when needed!",
+        "PRO TIP:\n Try to use dash on larger enemies, instead of tons of bullet!",
+        "PRO TIP:\n Use CHAIN SHOT & REPULSE less frequently\nSave them for danger times!",
+        "PRO TIP:\n Try to use DASH frequently, it provides\nGREAT VALUE if aimed correctly",
+        "PRO TIP:\n Keep your mouse cursor on enemy\nto AIM accurately, try to kill enemies quickly",
+        "RECORD:\n 13,125 points in MEDIUM difficulty!",
+    };
+}
+
 
 public class UIManager : MonoBehaviour
 {
@@ -49,20 +65,24 @@ public class UIManager : MonoBehaviour
     public TMP_Text howToChainShotText;
     public TMP_Text howToRepulseText;
     public TMP_Text howLifeShardWorksText;
+    public TMP_Text proTipsText;
     public float showDuration = 7f;
     public float fadeOutDuration = 2f;
     
     public AudioClip buttonClickSound;
+    private Coroutine _proTipCoroutine = null;
+    private int _tipIndex = 0;
     
     void Start()
     {
         GameManager.Instance.OnPauseChanged += OnPauseChanged;
         GameManager.Instance.OnPlayerDied += OnPlayerDied;
         waveNumber.text = "WAVE: " + enemySpawner.GetWaveNumber();
-        enemySpawner.OnDifficultyChanged += OnDifficultyChanged;
+        enemySpawner.OnDifficultyChanged += OnWaveChanged;
         enemySpawner.OnEnemyKilled += OnEnemyDied;
         difficultyText.text = Globals.Difficulty.ToString().ToUpper();
         scoreText.text = "SCORE: " + enemySpawner.GetEnemyKillScore();
+        StartCoroutine(ShowTipsEvery67Seconds());
     }
 
     public void UpdateDashSlider(float timeLeftTillNextDash)
@@ -217,7 +237,7 @@ public class UIManager : MonoBehaviour
         }
     }
     
-    private void OnDifficultyChanged(int difficulty)
+    private void OnWaveChanged(int difficulty)
     {
         waveNumber.text = "WAVE: " + difficulty;
     }
@@ -270,5 +290,27 @@ public class UIManager : MonoBehaviour
         c.a = 0f;
         text.color = c;
         text.gameObject.SetActive(false);
+    }
+    
+    private void UpdateAndShowProTipText()
+    {
+        if (_proTipCoroutine != null)
+            StopCoroutine(_proTipCoroutine);
+        
+        proTipsText.text = ProTipStrings.Tips[_tipIndex];
+        _proTipCoroutine = StartCoroutine(ShowFadeInAndOut(proTipsText));
+        _tipIndex++;
+        
+        if (_tipIndex >= ProTipStrings.Tips.Length)
+            _tipIndex = 0;
+    }
+    
+    IEnumerator ShowTipsEvery67Seconds()
+    {
+        while (true) // Infinite loop
+        {
+            UpdateAndShowProTipText();
+            yield return new WaitForSeconds(50f);
+        }
     }
 }

@@ -136,26 +136,26 @@ namespace MainMenu
 
         private void OnPlayButtonPressed()
         {
-            PlayButtonPressedSound();
+            ButtonPressedSound();
             GameObject.FindGameObjectWithTag("LevelTransition").GetComponent<LevelTransition>().LoadGame();
         }
         private void OnOptionsButtonPressed()
         {
-            PlayButtonPressedSound();
+            ButtonPressedSound();
             _backToMainMenuButton.style.display = DisplayStyle.Flex;
             _mainMenu.style.display = DisplayStyle.None;
             AnimateAndShowMenu(_optionsMenu);
         }
         private void OnShopButtonPressed()
         {
-            PlayButtonPressedSound();
+            ButtonPressedSound();
             _backToMainMenuButton.style.display = DisplayStyle.Flex;
             _mainMenu.style.display = DisplayStyle.None;
             AnimateAndShowMenu(_shopMenu);
         }
         private void OnExitButtonPressed()
         {
-            PlayButtonPressedSound();
+            ButtonPressedSound();
             Application.Quit();
         }
 
@@ -181,7 +181,7 @@ namespace MainMenu
             _backToMainMenuButton.style.display = DisplayStyle.None;
             PlayerProgress.Instance.Save();
             AnimateAndShowMenu(_mainMenu);
-            PlayButtonPressedSound();
+            ButtonPressedSound();
         }
 
         private void AnimateAndShowMenu(VisualElement menuToShow)
@@ -198,7 +198,7 @@ namespace MainMenu
                 });
         }
 
-        private void PlayButtonPressedSound()
+        private void ButtonPressedSound()
         {
             SoundFXManager.instance.PlaySoundFXClip(buttonClickSound, 0.5f);
         }

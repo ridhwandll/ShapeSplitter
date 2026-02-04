@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
@@ -17,11 +18,15 @@ public class GameManager : MonoBehaviour
     public event Action<bool> OnPauseChanged;
     public event Action OnPlayerDied;
     public event Action JustBeforePlayerDied;
-    
+
+    public InputMaster _input;
+
     private void Awake()
     {
         if (Instance == null)
             Instance = this;
+
+        _input = new InputMaster();
 
         if (volume.profile.TryGet<Bloom>(out var b))
             b.active = Globals.Bloom;
@@ -29,11 +34,13 @@ public class GameManager : MonoBehaviour
             v.active = Globals.Vignette;
         if (volume.profile.TryGet<Tonemapping>(out var t))
             t.active = Globals.Tonemapping;
-        
+
+        _input = InputManager.Instance.Input;
         _isPaused = false;
         OnPauseChanged?.Invoke(_isPaused);
     }
     
+
     private void SetPaused(bool pause)
     {
         if (_isPaused == pause)
@@ -62,7 +69,7 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         // Pause
-        if (Input.GetKeyDown(KeyCode.Escape) && _isPlayerAlive)
+        if (_input.Game.Pause.WasPressedThisFrame() && _isPlayerAlive)
         {
             if (_isPaused)
                 SetPaused(false);

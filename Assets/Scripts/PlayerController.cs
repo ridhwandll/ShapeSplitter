@@ -60,7 +60,9 @@ public class PlayerController : MonoBehaviour, IHealth
     
     private ChromaticAberration _chromaticAberration;
     private Vignette _vignette;
-    
+    private InputMaster _input;
+
+
     void Awake()
     {
         _mainCamera = Camera.main;
@@ -81,6 +83,7 @@ public class PlayerController : MonoBehaviour, IHealth
         _chainShotTimer = Globals.ChainShotCooldown;
         _repulsorTimer = Globals.RepulsorCooldown;
         _initialColliderRadius = _circleCollider2D.radius;
+        _input = InputManager.Instance.Input;
     }
 
     public void ApplyShopItemLevels()
@@ -121,7 +124,7 @@ public class PlayerController : MonoBehaviour, IHealth
             return;
 
         //DASH
-        if (!_isDashing && Input.GetKeyDown(KeyCode.Space) && Time.time >= _lastDashTime + Globals.PlayerDashCooldown)
+        if (!_isDashing && _input.Player.Dash.IsPressed() && Time.time >= _lastDashTime + Globals.PlayerDashCooldown)
             TryStartDash();
         
         if (!_isDashing)
@@ -147,7 +150,7 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private void TryStartDash()
     {
-        Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
         mousePos.z = 0f;
         Vector3 aimDir = mousePos - transform.position;
         
@@ -178,8 +181,12 @@ public class PlayerController : MonoBehaviour, IHealth
     private void MovePlayer()
     {
         ////// Translation Based Movement //////
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        float vertical = Input.GetAxisRaw("Vertical");
+        Vector2 move = _input.Player.Move.ReadValue<Vector2>().normalized;        
+
+        float horizontal = move.x;
+        float vertical = move.y;
+
+
         Vector3 inputDir = new Vector3(horizontal, vertical, 0f).normalized;
 
         _currentVelocity = Vector3.Lerp(_currentVelocity, inputDir * moveSpeed, acceleration * Time.deltaTime);
@@ -196,7 +203,7 @@ public class PlayerController : MonoBehaviour, IHealth
     private void AimAndShoot()
     {
         // Draw Aim Line
-        Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
         mousePos.z = 0f;
 
         Vector2 start = transform.position;
@@ -210,7 +217,7 @@ public class PlayerController : MonoBehaviour, IHealth
         
         // SHOOT
         Vector3 aimDir = mousePos - transform.position;
-        if (Input.GetMouseButton(0) && Time.time >= _nextFireTime)
+        if (_input.Player.Shoot.IsPressed() && Time.time >= _nextFireTime)
         {
             var bullerSpawnPos = transform.position + (aimDir.normalized * 0.5f);
             GameObject bullet = Instantiate(bulletPrefab, bullerSpawnPos, Quaternion.identity);
@@ -278,7 +285,7 @@ public class PlayerController : MonoBehaviour, IHealth
         gameScreenUIManager.UpdateChainShotSlider(progress * Globals.ChainShotCooldown);
         
         // Trigger ChainShot ability
-        if (Input.GetKeyDown(KeyCode.E) && _chainShotTimer <= 0f)
+        if (_input.Player.ChainShot.IsPressed() && _chainShotTimer <= 0f)
         {
             ActivateChainShot();
             _chainShotTimer = Globals.ChainShotCooldown;
@@ -294,7 +301,7 @@ public class PlayerController : MonoBehaviour, IHealth
         gameScreenUIManager.UpdateRepulsorSlider(progress * Globals.RepulsorCooldown);
         
         // Trigger Repulsor ability
-        if (Input.GetKeyDown(KeyCode.X) && _repulsorTimer <= 0f)
+        if (_input.Player.Repulse.IsPressed() && _repulsorTimer <= 0f)
         {
             ActivateRepulsor();
             _repulsorTimer = Globals.RepulsorCooldown;
