@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
     public event Action OnPlayerDied;
     public event Action JustBeforePlayerDied;
 
-    public InputMaster _input;
+    private InputMaster _input;
 
     private void Awake()
     {
@@ -35,11 +35,14 @@ public class GameManager : MonoBehaviour
         if (volume.profile.TryGet<Tonemapping>(out var t))
             t.active = Globals.Tonemapping;
 
-        _input = InputManager.Instance.Input;
         _isPaused = false;
         OnPauseChanged?.Invoke(_isPaused);
     }
-    
+
+    private void Start()
+    {
+        _input = GameObject.FindGameObjectWithTag("InputMaster").GetComponent<InputManager>().Input;
+    }
 
     public void InvalidatePaused()
     {

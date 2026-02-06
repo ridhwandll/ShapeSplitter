@@ -1,5 +1,7 @@
 using UnityEngine;
 
+// TODO: DELETE GLOBALS
+
 public static class Globals
 {
     public static readonly Color PlayerColor = new Color32(255,191,0, 255);
@@ -7,10 +9,10 @@ public static class Globals
     public static readonly int InitialShopItemCost = 100;
     public static readonly float CostMultiplier = 1.8f;
 
-    public static float RepulsorCooldown = 150f;
+    public static float RepulsorCooldown = 20f;//= 150f;
     public static float RepulsorCooldownDecreasePerLevel = 1.5f;
-    
-    public static float ChainShotCooldown = 60f;
+
+    public static float ChainShotCooldown = 20f;//= 60f;
     
     public static float PlayerDashCooldown = 12.0f;
     public static float DashCooldownDecreasePerLevel = 0.3f;
@@ -66,9 +68,4 @@ public static class Globals
     public static readonly int DashSelfDamage = 4;
     public static readonly int ChainShotSelfDamage = 13;
     public static readonly int RepulsorSelfDamage = 20;
-    
-    public static bool DashTipShown = false;
-    public static bool RepulseTipShown = false;
-    public static bool ChainShotTipShown = false;
-    public static bool LifeShardTipShown = false;
 }

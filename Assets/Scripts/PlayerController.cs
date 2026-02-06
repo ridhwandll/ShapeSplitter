@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.Windows;
 
 public class PlayerController : MonoBehaviour, IHealth
 {
@@ -15,10 +14,13 @@ public class PlayerController : MonoBehaviour, IHealth
     
     public float maxAimLineDistance = 4.0f;
     public float fireRate = 0.3f;
+
+    private Vector2 _aimJoystick;
+    private Vector2 _aimJoystickLast;
+    private bool _isAiming;
     
     public float dashSpeed = 20;
     public float dashDuration = 0.2f;
-    public UIManager gameScreenUIManager;
     
     public ParticleSystem playerParticleSystem;
     public AudioClip dashSound;
@@ -49,7 +51,6 @@ public class PlayerController : MonoBehaviour, IHealth
     //Repulsor
     private float _repulsorTimer = 0f;
     public AudioClip repulsorSound;
-    
     private Vector3 _currentVelocity;
 
     private LineRenderer _lineRenderer;
@@ -61,34 +62,44 @@ public class PlayerController : MonoBehaviour, IHealth
     
     private ChromaticAberration _chromaticAberration;
     private Vignette _vignette;
+
     private InputMaster _input;
 
 
+    // Public Events available for registering (Mainly used by UIManager)
+    public Action<int> OnPlayerHealthChange;
+    public Action<float> OnDashTimerChange;
+    public Action<float> OnRepulsorTimerChange;
+    public Action<float> OnChainShotTimerChange;
+
     void Awake()
     {
-        _mainCamera = Camera.main;
-        _lineRenderer = GetComponent<LineRenderer>();
-        _trailRenderer = GetComponent<TrailRenderer>();
-        _circleCollider2D = GetComponent<CircleCollider2D>();
-        _trailRenderer.emitting = false;
-        ApplyShopItemLevels();
     }
 
     void Start()
     {
-        GameObject.FindGameObjectWithTag("PostProcessStack").GetComponent<Volume>().profile.TryGet<ChromaticAberration>(out var b);
-        GameObject.FindGameObjectWithTag("PostProcessStack").GetComponent<Volume>().profile.TryGet<Vignette>(out var v);
-        _chromaticAberration = b;
-        _vignette = v;
+        _mainCamera = Camera.main;
+        GameObject postProcessStack = GameObject.FindGameObjectWithTag("PostProcessStack");
+        postProcessStack.GetComponent<Volume>().profile.TryGet<ChromaticAberration>(out var _chromaticAberration);
+        postProcessStack.GetComponent<Volume>().profile.TryGet<Vignette>(out var _vignette);
+        _lineRenderer = GetComponent<LineRenderer>();
+        _trailRenderer = GetComponent<TrailRenderer>();
+        _circleCollider2D = GetComponent<CircleCollider2D>();
+
+        _trailRenderer.emitting = false;
         _chromaticAberration.active = false;
-        _chainShotTimer = Globals.ChainShotCooldown;
-        _repulsorTimer = Globals.RepulsorCooldown;
+
         _initialColliderRadius = _circleCollider2D.radius;
-        _input = InputManager.Instance.Input;
+        _input = GameObject.FindGameObjectWithTag("InputMaster").GetComponent<InputManager>().Input;
+
+        ApplyShopItemLevels();
     }
 
     public void ApplyShopItemLevels()
     {
+        _chainShotTimer = Globals.ChainShotCooldown;
+        _repulsorTimer = Globals.RepulsorCooldown;
+
         // Dash buffs
         int dashLevel = Globals.GetShopElementLevel(ShopElementType.Dash);
         Globals.PlayerDashCooldown = 12f - (dashLevel - 1) * Globals.DashCooldownDecreasePerLevel;
@@ -106,17 +117,12 @@ public class PlayerController : MonoBehaviour, IHealth
         moveSpeed = Mathf.Lerp(12f, 20f, (speedLevel - 1) / 14f);
         
         int repulsorLevel = Globals.GetShopElementLevel(ShopElementType.Repulsor);
-        Globals.RepulsorCooldown = 150.0f - (repulsorLevel - 1) * Globals.RepulsorCooldownDecreasePerLevel;
+        //Globals.RepulsorCooldown = 150.0f - (repulsorLevel - 1) * Globals.RepulsorCooldownDecreasePerLevel;
+        Globals.RepulsorCooldown = 20f - (repulsorLevel - 1) * Globals.RepulsorCooldownDecreasePerLevel;
         
         _health = Globals.PlayerMaxHealth;
-        gameScreenUIManager.UpdatePlayerHealth(_health);
-        
-        Debug.Log("PlayerDashCooldown: " + Globals.PlayerDashCooldown);
-        Debug.Log("DashSpeed: " + dashSpeed);
-        Debug.Log("MoveSpeed: " + moveSpeed);
-        Debug.Log("PlayerMaxHealth: " + Globals.PlayerMaxHealth);
-        Debug.Log("MaxChains: " + _maxChains);
-        Debug.Log("Repulsor cooldown: " + Globals.RepulsorCooldown);
+
+        OnPlayerHealthChange?.Invoke(_health);
     }
     
     void Update()
@@ -124,51 +130,51 @@ public class PlayerController : MonoBehaviour, IHealth
         if (GameManager.Instance.IsPaused)
             return;
 
-        //DASH
-        if (!_isDashing && _input.Player.Dash.IsPressed() && Time.time >= _lastDashTime + Globals.PlayerDashCooldown)
-            TryStartDash();
-        
-        if (!_isDashing)
-        {
-            float elapsedDash = Time.time - _lastDashTime;
-            gameScreenUIManager.UpdateDashSlider(Mathf.Clamp(elapsedDash, 0f, Globals.PlayerDashCooldown));
-        }
-
-        if (_isDashing)
-        {
-            transform.position += _dashDirection * dashSpeed * Time.deltaTime;
-            _dashTimeLeft -= Time.deltaTime;
-            
-            if (_dashTimeLeft <= 0f)
-                EndDash();
-        }
-        
+        UpdateDash();
         UpdateChainShot();
         UpdateRepulsor();
         MovePlayer();
         AimAndShoot();
     }
 
-    private void TryStartDash()
+    public void ActivateDash()
     {
-        Vector3 mousePos = _mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-        mousePos.z = 0f;
-        Vector3 aimDir = mousePos - transform.position;
-        
         _trailRenderer.Clear();
         _trailRenderer.emitting = true;
         _trailRenderer.time = dashDuration;
-        
-        _dashDirection = (aimDir).normalized;
+
+        _dashDirection = _aimJoystickLast.normalized;
         _dashTimeLeft = dashDuration;
         _isDashing = true;
         _mainCamera.gameObject.GetComponent<CameraShake>().Shake(0.4f, 3, 0.01f);
         SoundFXManager.instance.PlaySoundFXClip(dashSound, 0.5f);
         playerParticleSystem.Play();
-        
+
         _circleCollider2D.radius = _initialColliderRadius + 0.2f;
-        
+
         TakeDamage(Globals.DashSelfDamage, true);
+    }
+
+
+    private void UpdateDash()
+    {
+        if (_input.Player.Dash.IsPressed() && !_isDashing && Time.time >= _lastDashTime + Globals.PlayerDashCooldown)
+            ActivateDash();        
+
+        if (!_isDashing)
+        {
+            float elapsedDash = Time.time - _lastDashTime;
+            OnDashTimerChange?.Invoke(Mathf.Clamp(elapsedDash, 0f, Globals.PlayerDashCooldown));
+        }
+
+        if (_isDashing)
+        {
+            transform.position += _dashDirection * dashSpeed * Time.deltaTime;
+            _dashTimeLeft -= Time.deltaTime;
+
+            if (_dashTimeLeft <= 0f)
+                EndDash();
+        }
     }
 
     private void EndDash()
@@ -181,20 +187,16 @@ public class PlayerController : MonoBehaviour, IHealth
     
     private void MovePlayer()
     {
-        ////// Translation Based Movement //////
-        Vector2 move = _input.Player.Move.ReadValue<Vector2>().normalized;        
-
+        Vector2 move = _input.Player.Move.ReadValue<Vector2>();        
         float horizontal = move.x;
         float vertical = move.y;
 
-
         Vector3 inputDir = new Vector3(horizontal, vertical, 0f).normalized;
 
-        _currentVelocity = Vector3.Lerp(_currentVelocity, inputDir * moveSpeed, acceleration * Time.deltaTime);
-        
+        _currentVelocity = Vector3.Lerp(_currentVelocity, inputDir * moveSpeed, acceleration * Time.deltaTime);        
         transform.position += _currentVelocity * Time.deltaTime;
         
-        //clamp the movement
+        // Clamp the movement so that the player does not go out of screen
         Vector3 pos = transform.position;
         pos.x = Mathf.Clamp(pos.x, minBounds.x, maxBounds.x);
         pos.y = Mathf.Clamp(pos.y, minBounds.y, maxBounds.y);
@@ -202,37 +204,47 @@ public class PlayerController : MonoBehaviour, IHealth
     }
     
     private void AimAndShoot()
-    {
-        // Draw Aim Line
-        Vector3 shootDirection = _input.Player.Shoot.ReadValue<Vector2>().normalized;
+    {        
+        _aimJoystick = _input.Player.Shoot.ReadValue<Vector2>();
 
-        if (shootDirection.magnitude != 0.0f)
+        // START AIM (finger touched)
+        if (!_isAiming && _aimJoystick != Vector2.zero)        
+            _isAiming = true;
+
+        // HOLD AIM (Draw aim line)
+        if (_isAiming && _aimJoystick != Vector2.zero)
         {
             _lineRenderer.positionCount = 2;
             Vector2 start = transform.position;
-            Vector2 end = (shootDirection - transform.position);
+            Vector2 end = _aimJoystick * maxAimLineDistance;
 
+            // cap the max aim line distance
             if (end.magnitude > maxAimLineDistance)
                 end = end.normalized * maxAimLineDistance;
 
             _lineRenderer.SetPosition(0, start);
             _lineRenderer.SetPosition(1, start + end);
+            _aimJoystickLast = _aimJoystick;
         }
-        else        
+
+        if (_isAiming && _aimJoystick == Vector2.zero)
+        {
             _lineRenderer.positionCount = 0;
-        
 
             // SHOOT
-        Vector3 aimDir = shootDirection - transform.position;
-        if (shootDirection.magnitude != 0.0f && Time.time >= _nextFireTime)
-        {
-            var bullerSpawnPos = transform.position + (aimDir.normalized * 0.5f);
-            GameObject bullet = Instantiate(bulletPrefab, bullerSpawnPos, Quaternion.identity);
-            bullet.GetComponent<Bullet>().Setup(aimDir);
-            _nextFireTime = Time.time + fireRate;
-            
-            TakeDamage(Globals.OwnBulletDamage, true); // Shooting 1 bullet does 1 damage to self
-        }
+            Vector3 aimDir = _aimJoystickLast;
+            if (Time.time >= _nextFireTime)
+            {
+                var bulletSpawnPos = transform.position + (aimDir.normalized * 0.5f);
+                GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPos, Quaternion.identity);
+                bullet.GetComponent<Bullet>().Setup(aimDir);
+                _nextFireTime = Time.time + fireRate;
+
+                TakeDamage(Globals.OwnBulletDamage, true); // Shooting 1 bullet does 1 damage to self
+            }
+
+            _isAiming = false;
+        }                            
     }
     
     public int GetCurrentHealth() => _health;
@@ -248,7 +260,7 @@ public class PlayerController : MonoBehaviour, IHealth
             _vignette.color.value = Color.red;
         }
         
-        if (_health == 0) //TODO: LEVEL END HERE
+        if (_health == 0) //LEVEL END HERE
         {
             Destroy(gameObject);
             GameManager.Instance.SetPlayerAlive(false);
@@ -256,8 +268,8 @@ public class PlayerController : MonoBehaviour, IHealth
         
         if (!isDamagingByOwnBullet) 
             playerParticleSystem.Play();
-        
-        gameScreenUIManager.UpdatePlayerHealth(_health);
+
+        OnPlayerHealthChange?.Invoke(_health);
     }
     
     public void Heal(int amount)
@@ -269,8 +281,8 @@ public class PlayerController : MonoBehaviour, IHealth
             _chromaticAberration.active = false;
             _vignette.color.value = Color.black;
         }
-        
-        gameScreenUIManager.UpdatePlayerHealth(_health);
+
+        OnPlayerHealthChange?.Invoke(_health);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -289,14 +301,11 @@ public class PlayerController : MonoBehaviour, IHealth
             _chainShotTimer -= Time.deltaTime;
 
         float progress = Mathf.Clamp01((Globals.ChainShotCooldown - _chainShotTimer) / Globals.ChainShotCooldown);
-        gameScreenUIManager.UpdateChainShotSlider(progress * Globals.ChainShotCooldown);
+        OnChainShotTimerChange?.Invoke(progress * Globals.ChainShotCooldown);
         
         // Trigger ChainShot ability
-        if (_input.Player.ChainShot.IsPressed() && _chainShotTimer <= 0f)
-        {
-            ActivateChainShot();
-            _chainShotTimer = Globals.ChainShotCooldown;
-        }
+        if (_input.Player.ChainShot.IsPressed() && _chainShotTimer <= 0f)        
+            ActivateChainShot();        
     }
     
     private void UpdateRepulsor()
@@ -305,21 +314,19 @@ public class PlayerController : MonoBehaviour, IHealth
             _repulsorTimer -= Time.deltaTime;
 
         float progress = Mathf.Clamp01((Globals.RepulsorCooldown - _repulsorTimer) / Globals.RepulsorCooldown);
-        gameScreenUIManager.UpdateRepulsorSlider(progress * Globals.RepulsorCooldown);
+        OnRepulsorTimerChange?.Invoke(progress * Globals.RepulsorCooldown);
         
         // Trigger Repulsor ability
-        if (_input.Player.Repulse.IsPressed() && _repulsorTimer <= 0f)
-        {
-            ActivateRepulsor();
-            _repulsorTimer = Globals.RepulsorCooldown;
-        }
+        if (_input.Player.Repulse.IsPressed() && _repulsorTimer <= 0f)        
+            ActivateRepulsor();        
     }
     
-    private void ActivateRepulsor()
+    public void ActivateRepulsor()
     {
         Instantiate(repulsorPrefab, transform.position, Quaternion.identity);
         TakeDamage(Globals.RepulsorSelfDamage, true);
         SoundFXManager.instance.PlaySoundFXClip(repulsorSound, 0.8f);
+        _repulsorTimer = Globals.RepulsorCooldown;
         _mainCamera.gameObject.GetComponent<CameraShake>().Shake(0.3f, 8, 0.4f);
     }
     
@@ -350,14 +357,15 @@ public class PlayerController : MonoBehaviour, IHealth
         }
         return best;
     }
-    
-    void ActivateChainShot()
+
+    public void ActivateChainShot()
     {
         Transform first = FindNextTarget(transform.position, new HashSet<Transform>());
         if (first != null)
         {
             StartCoroutine(ChainShotRoutine(first));
             TakeDamage(Globals.ChainShotSelfDamage, true);
+            _chainShotTimer = Globals.ChainShotCooldown;
         }
     }
     

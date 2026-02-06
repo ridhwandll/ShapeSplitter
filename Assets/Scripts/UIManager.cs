@@ -2,7 +2,6 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Random = System.Random;
 
 public class ProTipStrings
 {
@@ -23,6 +22,9 @@ public class ProTipStrings
 
 public class UIManager : MonoBehaviour
 {
+    [Header("Player")]
+    public PlayerController player;
+
     //Health Bar
     [Header("Health Bar")]
     public Slider healthSlider;
@@ -49,22 +51,14 @@ public class UIManager : MonoBehaviour
 
     [Header("Dash ChainShot and Repulsor bar")]
     public Slider dashSlider;
-    public Image dashBar;
-    public TMP_Text dashBarText;
-    
     public Slider chainShotSlider;
-    public Image chainShotBar;
-    public TMP_Text chainShotBarText;
-    
     public Slider repulsorSlider;
-    public Image repulseBar;
-    public TMP_Text repulseBarText;
-    
+
+    public Button dashButton;
+    public Button chainShotButton;
+    public Button repulsorButton;
+
     [Header("Tips")]
-    public TMP_Text howToDashText;
-    public TMP_Text howToChainShotText;
-    public TMP_Text howToRepulseText;
-    public TMP_Text howLifeShardWorksText;
     public TMP_Text proTipsText;
     public float showDuration = 7f;
     public float fadeOutDuration = 2f;
@@ -83,74 +77,47 @@ public class UIManager : MonoBehaviour
         difficultyText.text = Globals.Difficulty.ToString().ToUpper();
         scoreText.text = "SCORE: " + enemySpawner.GetEnemyKillScore();
         StartCoroutine(ShowTipsEvery67Seconds());
+
+        // Setup events which player controller notifies about
+        player.OnPlayerHealthChange += health => UpdatePlayerHealth(health);
+        player.OnDashTimerChange += dash => UpdateDashSlider(dash);
+        player.OnChainShotTimerChange += chainShot => UpdateChainShotSlider(chainShot);
+        player.OnRepulsorTimerChange += repulsor => UpdateRepulsorSlider(repulsor);
+
+        // Setup the ability buttons
+        dashButton.onClick.AddListener(player.ActivateDash);
+        chainShotButton.onClick.AddListener(player.ActivateChainShot);
+        repulsorButton.onClick.AddListener(player.ActivateRepulsor);
     }
 
     public void UpdateDashSlider(float timeLeftTillNextDash)
     {
         dashSlider.value = timeLeftTillNextDash;
-        if (dashSlider.value >= Globals.PlayerDashCooldown)
-        {
-            dashBarText.text = "DASH [-" + Globals.DashSelfDamage + "]";
-            dashBar.color = Color.gold;
-            dashBarText.color = Color.gray1;
-            if (Globals.DashTipShown == false)
-            {
-                StartCoroutine(ShowFadeInAndOut(howToDashText));
-                Globals.DashTipShown = true;
-            }
-        }
+
+        if (dashSlider.value == dashSlider.maxValue)
+            dashButton.interactable = true;
         else
-        {
-            dashBarText.text = "DASH";
-            dashBar.color = Color.gray1;
-            dashBarText.color = Color.whiteSmoke;
-        }
-            
+            dashButton.interactable = false;
     }
-    
+
     public void UpdateRepulsorSlider(float timeLeftTillNextRepulse)
     {
         repulsorSlider.value = timeLeftTillNextRepulse;
-        if (repulsorSlider.value >= Globals.RepulsorCooldown)
-        {
-            repulseBarText.text = "REPULSE [-" + Globals.RepulsorSelfDamage + "]";
-            repulseBar.color = Color.darkOrange;
-            repulseBarText.color = Color.gray1;
-            if (Globals.RepulseTipShown == false)
-            {
-                StartCoroutine(ShowFadeInAndOut(howToRepulseText));
-                Globals.RepulseTipShown = true;
-            }
-        }
+
+        if (repulsorSlider.value == repulsorSlider.maxValue)
+            repulsorButton.interactable = true;
         else
-        {
-            repulseBarText.text = "REPULSE";
-            repulseBar.color = Color.gray1;
-            repulseBarText.color = Color.whiteSmoke;
-        }
-            
+            repulsorButton.interactable = false;
     }
 
     public void UpdateChainShotSlider(float timeLeftTillNextcs)
     {
         chainShotSlider.value = timeLeftTillNextcs;
-        if (chainShotSlider.value >= Globals.ChainShotCooldown)
-        {
-            chainShotBarText.text = "CHAIN SHOT [-" + Globals.ChainShotSelfDamage + "]";
-            chainShotBar.color = new Color(1f, 0.6f, 0.1f, 1f);
-            chainShotBarText.color = Color.gray1;
-            if (Globals.ChainShotTipShown == false)
-            {
-                StartCoroutine(ShowFadeInAndOut(howToChainShotText));
-                Globals.ChainShotTipShown = true;
-            }
-        }
+
+        if (chainShotSlider.value == chainShotSlider.maxValue)
+            chainShotButton.interactable = true;
         else
-        {
-            chainShotBarText.text = "CHAIN SHOT";
-            chainShotBar.color = Color.gray1;
-            chainShotBarText.color = Color.whiteSmoke;
-        }
+            chainShotButton.interactable = false;
     }
 
     public void UpdatePlayerHealth(int playerHealth) // NOT CALLED EVERY FRAME
@@ -219,13 +186,7 @@ public class UIManager : MonoBehaviour
     }
 
     private void OnEnemyDied()
-    {
-        if (Globals.LifeShardTipShown == false)
-        {
-            StartCoroutine(ShowFadeInAndOut(howLifeShardWorksText));
-            Globals.LifeShardTipShown = true;
-        }
-        
+    {       
         var score = enemySpawner.GetEnemyKillScore();
         if (Globals.Difficulty == DifficultyLevel.Easy)
         {

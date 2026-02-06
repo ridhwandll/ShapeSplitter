@@ -132,12 +132,12 @@ TextureImporter:
       name: LifeRegen_0
       rect:
         serializedVersion: 2
-        x: 27
-        y: 96
-        width: 62
-        height: 60
+        x: 0
+        y: 0
+        width: 200
+        height: 200
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -159,7 +159,7 @@ TextureImporter:
         width: 134
         height: 145
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -176,7 +176,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 8ce639adcf4e0c24a860358d1d25e61b
     internalID: 0
     vertices: []
     indices: 
