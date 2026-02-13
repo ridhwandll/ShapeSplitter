@@ -12,26 +12,17 @@ public class PlayerController : MonoBehaviour, IHealth
     public float moveSpeed = 17;
     public float acceleration = 80; // Higher = snappier
     
-    public float maxAimLineDistance = 4.0f;
-    public float fireRate = 0.3f;
 
-    private Vector2 _aimJoystick;
-    private Vector2 _aimJoystickLast;
+    private Rigidbody2D _rigidbody2D;
+    private Vector2 _dragStartPosition;
+    private Vector2 _dragEndPosition;
     private bool _isAiming;
-    
-    public float dashSpeed = 20;
-    public float dashDuration = 0.2f;
-    
+    public float shootPower = 2.0f;
+    public float maxAimLineDistance = 4.0f;
+
+   
     public ParticleSystem playerParticleSystem;
-    public AudioClip dashSound;
-    
-    private bool _isDashing;
-    private float _dashTimeLeft;
-    private float _lastDashTime;
-    private Vector3 _dashDirection;
-    private  CircleCollider2D _circleCollider2D;
-    private float _initialColliderRadius;
-        
+            
     public Vector2 minBounds;
     public Vector2 maxBounds;
     
@@ -65,31 +56,24 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private InputMaster _input;
 
-
     // Public Events available for registering (Mainly used by UIManager)
     public Action<int> OnPlayerHealthChange;
-    public Action<float> OnDashTimerChange;
     public Action<float> OnRepulsorTimerChange;
     public Action<float> OnChainShotTimerChange;
-
-    void Awake()
-    {
-    }
 
     void Start()
     {
         _mainCamera = Camera.main;
+        _rigidbody2D = GetComponent<Rigidbody2D>();
         GameObject postProcessStack = GameObject.FindGameObjectWithTag("PostProcessStack");
-        postProcessStack.GetComponent<Volume>().profile.TryGet<ChromaticAberration>(out var _chromaticAberration);
-        postProcessStack.GetComponent<Volume>().profile.TryGet<Vignette>(out var _vignette);
+        postProcessStack.GetComponent<Volume>().profile.TryGet<ChromaticAberration>(out _chromaticAberration);
+        postProcessStack.GetComponent<Volume>().profile.TryGet<Vignette>(out _vignette);
         _lineRenderer = GetComponent<LineRenderer>();
         _trailRenderer = GetComponent<TrailRenderer>();
-        _circleCollider2D = GetComponent<CircleCollider2D>();
 
         _trailRenderer.emitting = false;
         _chromaticAberration.active = false;
 
-        _initialColliderRadius = _circleCollider2D.radius;
         _input = GameObject.FindGameObjectWithTag("InputMaster").GetComponent<InputManager>().Input;
 
         ApplyShopItemLevels();
@@ -99,13 +83,6 @@ public class PlayerController : MonoBehaviour, IHealth
     {
         _chainShotTimer = Globals.ChainShotCooldown;
         _repulsorTimer = Globals.RepulsorCooldown;
-
-        // Dash buffs
-        int dashLevel = Globals.GetShopElementLevel(ShopElementType.Dash);
-        Globals.PlayerDashCooldown = 12f - (dashLevel - 1) * Globals.DashCooldownDecreasePerLevel;
-        
-        float dashSpeedIncreasePerLevel = (30f - 20f) / 14f;
-        dashSpeed = 20f + (dashLevel - 1) * dashSpeedIncreasePerLevel;
         
         int lifeLevel = Globals.GetShopElementLevel(ShopElementType.Life);
         Globals.PlayerMaxHealth = 50 + (lifeLevel - 1) * Globals.HealthIncreasePerLevel;
@@ -130,123 +107,79 @@ public class PlayerController : MonoBehaviour, IHealth
         if (GameManager.Instance.IsPaused)
             return;
 
-        UpdateDash();
         UpdateChainShot();
         UpdateRepulsor();
-        MovePlayer();
         AimAndShoot();
     }
 
-    public void ActivateDash()
-    {
-        _trailRenderer.Clear();
-        _trailRenderer.emitting = true;
-        _trailRenderer.time = dashDuration;
-
-        _dashDirection = _aimJoystickLast.normalized;
-        _dashTimeLeft = dashDuration;
-        _isDashing = true;
-        _mainCamera.gameObject.GetComponent<CameraShake>().Shake(0.4f, 3, 0.01f);
-        SoundFXManager.instance.PlaySoundFXClip(dashSound, 0.5f);
-        playerParticleSystem.Play();
-
-        _circleCollider2D.radius = _initialColliderRadius + 0.2f;
-
-        TakeDamage(Globals.DashSelfDamage, true);
-    }
-
-
-    private void UpdateDash()
-    {
-        if (_input.Player.Dash.IsPressed() && !_isDashing && Time.time >= _lastDashTime + Globals.PlayerDashCooldown)
-            ActivateDash();        
-
-        if (!_isDashing)
-        {
-            float elapsedDash = Time.time - _lastDashTime;
-            OnDashTimerChange?.Invoke(Mathf.Clamp(elapsedDash, 0f, Globals.PlayerDashCooldown));
-        }
-
-        if (_isDashing)
-        {
-            transform.position += _dashDirection * dashSpeed * Time.deltaTime;
-            _dashTimeLeft -= Time.deltaTime;
-
-            if (_dashTimeLeft <= 0f)
-                EndDash();
-        }
-    }
-
-    private void EndDash()
-    {
-        _trailRenderer.emitting = false;
-        _isDashing = false;
-        _lastDashTime = Time.time;
-        _circleCollider2D.radius = _initialColliderRadius;
-    }
-    
-    private void MovePlayer()
-    {
-        Vector2 move = _input.Player.Move.ReadValue<Vector2>();        
-        float horizontal = move.x;
-        float vertical = move.y;
-
-        Vector3 inputDir = new Vector3(horizontal, vertical, 0f).normalized;
-
-        _currentVelocity = Vector3.Lerp(_currentVelocity, inputDir * moveSpeed, acceleration * Time.deltaTime);        
-        transform.position += _currentVelocity * Time.deltaTime;
-        
-        // Clamp the movement so that the player does not go out of screen
-        Vector3 pos = transform.position;
-        pos.x = Mathf.Clamp(pos.x, minBounds.x, maxBounds.x);
-        pos.y = Mathf.Clamp(pos.y, minBounds.y, maxBounds.y);
-        transform.position = pos;
-    }
-    
     private void AimAndShoot()
-    {        
-        _aimJoystick = _input.Player.Shoot.ReadValue<Vector2>();
+    {
+        if (_input.Player.Move.WasPressedThisFrame() && _isAiming == false)
+        {
+            Vector3 viewportPos = _mainCamera.WorldToViewportPoint(transform.position);
+            _vignette.center.value = new Vector2(viewportPos.x, viewportPos.y);
 
-        // START AIM (finger touched)
-        if (!_isAiming && _aimJoystick != Vector2.zero)        
+            _vignette.intensity.value = 0.45f;
+            _vignette.smoothness.value = 1f;
+
+            _dragStartPosition = _mainCamera.ScreenToWorldPoint(_input.Player.PointerPosition.ReadValue<Vector2>());
+            Debug.Log("START: " + _dragStartPosition);
+
             _isAiming = true;
 
-        // HOLD AIM (Draw aim line)
-        if (_isAiming && _aimJoystick != Vector2.zero)
+            // SlowMo
+            Time.timeScale = 0.3f;
+            Time.fixedDeltaTime = Time.timeScale * 0.02f;
+        }
+
+        // Draw the Aim Line
+        if (_input.Player.Move.IsPressed())
         {
+            // Keep updating the vignette center
+            Vector3 viewportPos = _mainCamera.WorldToViewportPoint(transform.position);
+            _vignette.center.value = new Vector2(viewportPos.x, viewportPos.y);
+
+            Vector3 screenPos = _input.Player.PointerPosition.ReadValue<Vector2>();
+            screenPos.z = Mathf.Abs(_mainCamera.transform.position.z);
+            Vector2 currentTouchPos = _mainCamera.ScreenToWorldPoint(screenPos);
+
+            Vector2 aimDirection = (currentTouchPos - _dragStartPosition).normalized;
+
             _lineRenderer.positionCount = 2;
             Vector2 start = transform.position;
-            Vector2 end = _aimJoystick * maxAimLineDistance;
+            Vector2 end = start + (aimDirection * maxAimLineDistance);
 
             // cap the max aim line distance
             if (end.magnitude > maxAimLineDistance)
                 end = end.normalized * maxAimLineDistance;
 
             _lineRenderer.SetPosition(0, start);
-            _lineRenderer.SetPosition(1, start + end);
-            _aimJoystickLast = _aimJoystick;
+            _lineRenderer.SetPosition(1, end);
+
         }
 
-        if (_isAiming && _aimJoystick == Vector2.zero)
+        if (_input.Player.Move.WasReleasedThisFrame() && _isAiming)
         {
+            _vignette.center.value = new Vector2(0.5f, 0.5f);
+            _vignette.intensity.value = 0.35f;
+            _vignette.smoothness.value = 0.3f;
+
+            _rigidbody2D.linearVelocity = Vector2.zero;
             _lineRenderer.positionCount = 0;
+            _dragEndPosition = _mainCamera.ScreenToWorldPoint(_input.Player.PointerPosition.ReadValue<Vector2>());
+            Debug.Log("END: " + _dragEndPosition);
 
-            // SHOOT
-            Vector3 aimDir = _aimJoystickLast;
-            if (Time.time >= _nextFireTime)
-            {
-                var bulletSpawnPos = transform.position + (aimDir.normalized * 0.5f);
-                GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPos, Quaternion.identity);
-                bullet.GetComponent<Bullet>().Setup(aimDir);
-                _nextFireTime = Time.time + fireRate;
-
-                TakeDamage(Globals.OwnBulletDamage, true); // Shooting 1 bullet does 1 damage to self
-            }
+            Vector2 dragDirection = _dragEndPosition - _dragStartPosition;
+            _rigidbody2D.AddForce(dragDirection.normalized * shootPower, ForceMode2D.Impulse);
 
             _isAiming = false;
-        }                            
+
+            // UNDO SlowMo
+            Time.timeScale = 1f;
+            Time.fixedDeltaTime = Time.timeScale * 0.02f;
+        }
     }
-    
+
     public int GetCurrentHealth() => _health;
     public int GetMaxHealth() => Globals.PlayerMaxHealth;
 
@@ -285,16 +218,6 @@ public class PlayerController : MonoBehaviour, IHealth
         OnPlayerHealthChange?.Invoke(_health);
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Enemy") && _isDashing)
-        {
-            Debug.Log("Enemy Hit");
-            IHealth health = other.GetComponent<IHealth>();
-            health.TakeDamage(Globals.DashDamage);            
-        }
-    }
-
     private void UpdateChainShot()
     {
         if (_chainShotTimer > 0f)
@@ -317,6 +240,7 @@ public class PlayerController : MonoBehaviour, IHealth
         OnRepulsorTimerChange?.Invoke(progress * Globals.RepulsorCooldown);
         
         // Trigger Repulsor ability
+        if (_input.Player.Repulse.IsPressed() && _repulsorTimer <= 0f)        
         if (_input.Player.Repulse.IsPressed() && _repulsorTimer <= 0f)        
             ActivateRepulsor();        
     }

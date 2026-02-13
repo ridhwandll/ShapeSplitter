@@ -50,11 +50,11 @@ public class UIManager : MonoBehaviour
     public EnemySpawner enemySpawner;
 
     [Header("Dash ChainShot and Repulsor bar")]
-    public Slider dashSlider;
+    //public Slider dashSlider;
     public Slider chainShotSlider;
     public Slider repulsorSlider;
 
-    public Button dashButton;
+    //public Button dashButton;
     public Button chainShotButton;
     public Button repulsorButton;
 
@@ -80,25 +80,23 @@ public class UIManager : MonoBehaviour
 
         // Setup events which player controller notifies about
         player.OnPlayerHealthChange += health => UpdatePlayerHealth(health);
-        player.OnDashTimerChange += dash => UpdateDashSlider(dash);
         player.OnChainShotTimerChange += chainShot => UpdateChainShotSlider(chainShot);
         player.OnRepulsorTimerChange += repulsor => UpdateRepulsorSlider(repulsor);
 
         // Setup the ability buttons
-        dashButton.onClick.AddListener(player.ActivateDash);
         chainShotButton.onClick.AddListener(player.ActivateChainShot);
         repulsorButton.onClick.AddListener(player.ActivateRepulsor);
     }
 
-    public void UpdateDashSlider(float timeLeftTillNextDash)
-    {
-        dashSlider.value = timeLeftTillNextDash;
-
-        if (dashSlider.value == dashSlider.maxValue)
-            dashButton.interactable = true;
-        else
-            dashButton.interactable = false;
-    }
+    //public void UpdateDashSlider(float timeLeftTillNextDash)
+    //{
+    //    dashSlider.value = timeLeftTillNextDash;
+    //
+    //    if (dashSlider.value == dashSlider.maxValue)
+    //        dashButton.interactable = true;
+    //    else
+    //        dashButton.interactable = false;
+    //}
 
     public void UpdateRepulsorSlider(float timeLeftTillNextRepulse)
     {
@@ -123,12 +121,10 @@ public class UIManager : MonoBehaviour
     public void UpdatePlayerHealth(int playerHealth) // NOT CALLED EVERY FRAME
     {
         repulsorSlider.minValue = 0;
-        dashSlider.minValue = 0;
         chainShotSlider.minValue = 0;
         healthSlider.minValue = 0;
             
         repulsorSlider.maxValue = Globals.RepulsorCooldown;
-        dashSlider.maxValue = Globals.PlayerDashCooldown;
         chainShotSlider.maxValue = Globals.ChainShotCooldown;
         healthSlider.maxValue = Globals.PlayerMaxHealth;
         

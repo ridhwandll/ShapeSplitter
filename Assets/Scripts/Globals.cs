@@ -14,13 +14,9 @@ public static class Globals
 
     public static float ChainShotCooldown = 20f;//= 60f;
     
-    public static float PlayerDashCooldown = 12.0f;
-    public static float DashCooldownDecreasePerLevel = 0.3f;
-
     public static int HealthIncreasePerLevel = 5; //5 HP
         
     public static int OwnBulletDamage = 1;
-    public static int DashDamage = 5;
     public static int ChainShotDamage = 15;
     public static int PlayerMaxHealth = 50;
 

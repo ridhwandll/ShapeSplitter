@@ -21,6 +21,7 @@ public class EnemySpawner : MonoBehaviour
     public Vector2 maxBounds;
 
     [Header("Base Spawning")]
+    public bool Spawn = true;
     public float baseSpawnDelay = 3f;
     public int baseMaxEnemies = 2;
 
@@ -74,7 +75,7 @@ public class EnemySpawner : MonoBehaviour
 
     void Update()
     {
-        if (GameManager.Instance.IsPaused || !GameManager.Instance.IsPlayerAlive)
+        if (GameManager.Instance.IsPaused || !GameManager.Instance.IsPlayerAlive || Spawn == false)
             return;
 
         _waveTimer += Time.deltaTime;
@@ -91,7 +92,7 @@ public class EnemySpawner : MonoBehaviour
     {
         while (GameManager.Instance.IsPlayerAlive)
         {
-            yield return new WaitWhile(() => GameManager.Instance.IsPaused);
+            yield return new WaitWhile(() => GameManager.Instance.IsPaused || Spawn == false);
 
             int scaledMaxEnemies = baseMaxEnemies + (_wave - 1) * maxEnemiesIncreasePerWave;
 
@@ -106,10 +107,7 @@ public class EnemySpawner : MonoBehaviour
 
     void SpawnEnemy()
     {
-        Vector2 spawnPos = new Vector2(
-            Random.Range(minBounds.x, maxBounds.x),
-            Random.Range(minBounds.y, maxBounds.y)
-        );
+        Vector2 spawnPos = new Vector2(Random.Range(minBounds.x, maxBounds.x), Random.Range(minBounds.y, maxBounds.y));
         
         float rand = Random.value; // 0 to 1
         GameObject enemyPrefab;
