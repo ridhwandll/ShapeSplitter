@@ -46,7 +46,6 @@ public class PlayerController : MonoBehaviour, IHealth
     private float _repulsorTimer = 0f;
     public AudioClip repulsorSound;
 
-    private LineRenderer _lineRenderer;
     private TrailRenderer _trailRenderer;
     private Camera _mainCamera;
     public GameObject bulletPrefab;
@@ -69,7 +68,6 @@ public class PlayerController : MonoBehaviour, IHealth
         GameObject postProcessStack = GameObject.FindGameObjectWithTag("PostProcessStack");
         postProcessStack.GetComponent<Volume>().profile.TryGet<ChromaticAberration>(out _chromaticAberration);
         postProcessStack.GetComponent<Volume>().profile.TryGet<Vignette>(out _vignette);
-        _lineRenderer = GetComponent<LineRenderer>();
         _trailRenderer = GetComponent<TrailRenderer>();
         _trajectorySimulator = GetComponent<TrajectorySimulator>();
 
@@ -136,15 +134,16 @@ public class PlayerController : MonoBehaviour, IHealth
             screenPos.z = Mathf.Abs(_mainCamera.transform.position.z);
             Vector2 currentTouchPos = _mainCamera.ScreenToWorldPoint(screenPos);
 
-            Vector2 aimDirection = (currentTouchPos - _dragStartPosition);
-            _trajectorySimulator.DrawTrajectory(transform.position, aimDirection, shootPower);
+            Vector2 bisector = (currentTouchPos - _dragStartPosition);
+            float spradAngle = 60;
+            _trajectorySimulator.DrawTrajectory(transform.position, bisector, shootPower, spradAngle);
         }
 
         if (_input.Player.Move.WasReleasedThisFrame() && _isAiming)
         {
             _rigidbody2D.linearVelocity = Vector2.zero;
             _rigidbody2D.angularVelocity = 0.0f;
-            _lineRenderer.positionCount = 0;
+            _trajectorySimulator.ClearLinePositions();
             _dragEndPosition = _mainCamera.ScreenToWorldPoint(_input.Player.PointerPosition.ReadValue<Vector2>());
 
             Vector2 dragDirection = _dragEndPosition - _dragStartPosition;
