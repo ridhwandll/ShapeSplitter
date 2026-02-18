@@ -2,16 +2,18 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.Windows;
 
 public class PlayerController : MonoBehaviour, IHealth
 {
     // Movement
     public float moveSpeed = 17;
     public float acceleration = 80; // Higher = snappier
-    
+
 
     private Rigidbody2D _rigidbody2D;
     private Vector2 _dragStartPosition;
@@ -19,16 +21,17 @@ public class PlayerController : MonoBehaviour, IHealth
     private bool _isAiming;
     public float shootPower = 2.0f;
     public float maxAimLineDistance = 4.0f;
+    
+    private TrajectorySimulator _trajectorySimulator;
 
-   
     public ParticleSystem playerParticleSystem;
-            
+
     public Vector2 minBounds;
     public Vector2 maxBounds;
-    
+
     // Health
     private int _health;
-    
+
     // ChainShot
     private float _chainShotTimer = 0f;
     private int _maxChains = 6;
@@ -38,19 +41,17 @@ public class PlayerController : MonoBehaviour, IHealth
     public LayerMask enemyMask;
     public AudioClip chainShotSound;
     public LineRenderer chainLinePrefab;
-    
+
     //Repulsor
     private float _repulsorTimer = 0f;
     public AudioClip repulsorSound;
-    private Vector3 _currentVelocity;
 
     private LineRenderer _lineRenderer;
     private TrailRenderer _trailRenderer;
     private Camera _mainCamera;
     public GameObject bulletPrefab;
     public GameObject repulsorPrefab;
-    private float _nextFireTime;
-    
+
     private ChromaticAberration _chromaticAberration;
     private Vignette _vignette;
 
@@ -70,10 +71,9 @@ public class PlayerController : MonoBehaviour, IHealth
         postProcessStack.GetComponent<Volume>().profile.TryGet<Vignette>(out _vignette);
         _lineRenderer = GetComponent<LineRenderer>();
         _trailRenderer = GetComponent<TrailRenderer>();
+        _trajectorySimulator = GetComponent<TrajectorySimulator>();
 
-        _trailRenderer.emitting = false;
-        _chromaticAberration.active = false;
-
+        _chromaticAberration.active = false; 
         _input = GameObject.FindGameObjectWithTag("InputMaster").GetComponent<InputManager>().Input;
 
         ApplyShopItemLevels();
@@ -83,25 +83,25 @@ public class PlayerController : MonoBehaviour, IHealth
     {
         _chainShotTimer = Globals.ChainShotCooldown;
         _repulsorTimer = Globals.RepulsorCooldown;
-        
+
         int lifeLevel = Globals.GetShopElementLevel(ShopElementType.Life);
         Globals.PlayerMaxHealth = 50 + (lifeLevel - 1) * Globals.HealthIncreasePerLevel;
-        
+
         int chainBulletLevel = Globals.GetShopElementLevel(ShopElementType.ChainBullet);
         _maxChains = 5 + (chainBulletLevel - 1); // Add one chain per level. 5 chains in level 1
-        
+
         int speedLevel = Globals.GetShopElementLevel(ShopElementType.Speed);
         moveSpeed = Mathf.Lerp(12f, 20f, (speedLevel - 1) / 14f);
-        
+
         int repulsorLevel = Globals.GetShopElementLevel(ShopElementType.Repulsor);
         //Globals.RepulsorCooldown = 150.0f - (repulsorLevel - 1) * Globals.RepulsorCooldownDecreasePerLevel;
         Globals.RepulsorCooldown = 20f - (repulsorLevel - 1) * Globals.RepulsorCooldownDecreasePerLevel;
-        
+
         _health = Globals.PlayerMaxHealth;
 
         OnPlayerHealthChange?.Invoke(_health);
     }
-    
+
     void Update()
     {
         if (GameManager.Instance.IsPaused)
@@ -111,73 +111,61 @@ public class PlayerController : MonoBehaviour, IHealth
         UpdateRepulsor();
         AimAndShoot();
     }
+    bool IsTouchBlockedByUI()
+    {
+        return false;
+        //return EventSystem.current.IsPointerOverGameObject();
+    }
 
     private void AimAndShoot()
     {
+        if (IsTouchBlockedByUI())
+            return;
+
         if (_input.Player.Move.WasPressedThisFrame() && _isAiming == false)
         {
-            Vector3 viewportPos = _mainCamera.WorldToViewportPoint(transform.position);
-            _vignette.center.value = new Vector2(viewportPos.x, viewportPos.y);
-
-            _vignette.intensity.value = 0.45f;
-            _vignette.smoothness.value = 1f;
-
             _dragStartPosition = _mainCamera.ScreenToWorldPoint(_input.Player.PointerPosition.ReadValue<Vector2>());
-            Debug.Log("START: " + _dragStartPosition);
-
             _isAiming = true;
-
-            // SlowMo
-            Time.timeScale = 0.3f;
-            Time.fixedDeltaTime = Time.timeScale * 0.02f;
+            StartSlowMotion();
         }
 
         // Draw the Aim Line
         if (_input.Player.Move.IsPressed())
         {
-            // Keep updating the vignette center
-            Vector3 viewportPos = _mainCamera.WorldToViewportPoint(transform.position);
-            _vignette.center.value = new Vector2(viewportPos.x, viewportPos.y);
-
             Vector3 screenPos = _input.Player.PointerPosition.ReadValue<Vector2>();
             screenPos.z = Mathf.Abs(_mainCamera.transform.position.z);
             Vector2 currentTouchPos = _mainCamera.ScreenToWorldPoint(screenPos);
 
-            Vector2 aimDirection = (currentTouchPos - _dragStartPosition).normalized;
-
-            _lineRenderer.positionCount = 2;
-            Vector2 start = transform.position;
-            Vector2 end = start + (aimDirection * maxAimLineDistance);
-
-            // cap the max aim line distance
-            if (end.magnitude > maxAimLineDistance)
-                end = end.normalized * maxAimLineDistance;
-
-            _lineRenderer.SetPosition(0, start);
-            _lineRenderer.SetPosition(1, end);
-
+            Vector2 aimDirection = (currentTouchPos - _dragStartPosition);
+            _trajectorySimulator.DrawTrajectory(transform.position, aimDirection, shootPower);
         }
 
         if (_input.Player.Move.WasReleasedThisFrame() && _isAiming)
         {
-            _vignette.center.value = new Vector2(0.5f, 0.5f);
-            _vignette.intensity.value = 0.35f;
-            _vignette.smoothness.value = 0.3f;
-
             _rigidbody2D.linearVelocity = Vector2.zero;
+            _rigidbody2D.angularVelocity = 0.0f;
             _lineRenderer.positionCount = 0;
             _dragEndPosition = _mainCamera.ScreenToWorldPoint(_input.Player.PointerPosition.ReadValue<Vector2>());
-            Debug.Log("END: " + _dragEndPosition);
 
             Vector2 dragDirection = _dragEndPosition - _dragStartPosition;
             _rigidbody2D.AddForce(dragDirection.normalized * shootPower, ForceMode2D.Impulse);
 
             _isAiming = false;
 
-            // UNDO SlowMo
-            Time.timeScale = 1f;
-            Time.fixedDeltaTime = Time.timeScale * 0.02f;
+            EndSlowMotion();
         }
+    }
+
+    private void StartSlowMotion()
+    {
+        Time.timeScale = 0.3f;
+        Time.fixedDeltaTime = Time.timeScale * 0.02f;
+    }
+
+    private void EndSlowMotion()
+    {
+        Time.timeScale = 1f;
+        Time.fixedDeltaTime = Time.timeScale * 0.02f;
     }
 
     public int GetCurrentHealth() => _health;

@@ -25,15 +25,6 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Dash",
-                    "type": "Button",
-                    "id": "297f2581-730b-4b06-9740-3922b7a82c27",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "ChainShot",
                     "type": "Button",
                     "id": "f7ab44ee-b60d-478b-99e2-f97abcd89291",
@@ -53,17 +44,6 @@
                 }
             ],
             "bindings": [
-                {
-                    "name": "",
-                    "id": "c320c444-af6a-4984-b4ba-6be0d5f3a265",
-                    "path": "<Keyboard>/space",
-                    "interactions": "Press",
-                    "processors": "",
-                    "groups": "KeyboardAndMouse",
-                    "action": "Dash",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
                 {
                     "name": "",
                     "id": "b7dd863c-4437-4baa-a6b0-2521eae86164",
@@ -88,23 +68,34 @@
                 },
                 {
                     "name": "",
-                    "id": "ddbdcf77-1f4c-4d17-ae6a-9fa224b9936e",
+                    "id": "ebe08e4f-ede8-4e9f-b6e0-5afd5525b6a5",
+                    "path": "<Pointer>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PointerPosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "249005e1-c053-40e9-8f8c-63d53fa198a9",
                     "path": "<Mouse>/leftButton",
                     "interactions": "Press(behavior=2)",
                     "processors": "",
-                    "groups": ";KeyboardAndMouse",
+                    "groups": "",
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "ebe08e4f-ede8-4e9f-b6e0-5afd5525b6a5",
-                    "path": "<Mouse>/position",
-                    "interactions": "",
+                    "id": "8370dc61-d8d5-4f80-ab4b-745a14ed5b62",
+                    "path": "<Touchscreen>/Press",
+                    "interactions": "Press(behavior=2)",
                     "processors": "",
                     "groups": "",
-                    "action": "PointerPosition",
+                    "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
