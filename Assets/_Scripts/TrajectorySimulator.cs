@@ -164,20 +164,16 @@ public class TrajectorySimulator : MonoBehaviour
     }
 
     // Call every frame while aiming
-    public void DrawTrajectory(Vector2 startPosition, Vector2 bisector, float shootPower, float spreadAngle)
+    public void DrawTrajectory(Vector2 startPosition, Vector2 dir1, Vector2 dir2, float shootPower)
     {
-        if (bisector.sqrMagnitude < 0.0001f)
-            return;
-
-        float halfAngle = spreadAngle * 0.5f;
-
-        Vector2 dir1 = Quaternion.Euler(0, 0, halfAngle) * bisector.normalized;
-        Vector2 dir2 = Quaternion.Euler(0, 0, -halfAngle) * bisector.normalized;
         SimulateSingleTrajectory(startPosition, dir1, shootPower, _lineRenderer1);
         SimulateSingleTrajectory(startPosition, dir2, shootPower, _lineRenderer2);
     }
     private void SimulateSingleTrajectory(Vector2 startPosition, Vector2 direction, float shootPower, LineRenderer lr)
     {
+        if (direction.sqrMagnitude < 0.0001f)
+            return;
+
         ghostObject.SetActive(true);
         ghostObject.transform.position = startPosition;
         ghostObject.transform.rotation = Quaternion.identity;
