@@ -7,28 +7,25 @@ using UnityEngine.InputSystem;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Windows;
+using UnityEngine.XR;
 using static UnityEditor.Experimental.GraphView.GraphView;
 
 public class PlayerController : MonoBehaviour, IHealth
 {
-    // Movement
-    public float moveSpeed = 17;
-    public float acceleration = 80; // Higher = snappier
-
     private Rigidbody2D _rigidbody2D;
     private Vector2 _dragStartPosition;
     private Vector2 _dragEndPosition;
     private bool _isAiming;
     public float shootPower = 2.0f;
-    public float maxAimLineDistance = 4.0f;
     
     private TrajectorySimulator _trajectorySimulator;
     private CircleCollider2D _collider2D;
     private SpriteRenderer _spriteRenderer;
+    [SerializeField] private float _maxDragDistance = 10.0f;
     [SerializeField] private float _maxSpreadAngle = 60.0f;
+    [SerializeField] private float _minSpreadAngle = 15.0f;
     [SerializeField] private Sprite _playerCore;
     [SerializeField] private Sprite _playerUnited;
-
 
     public ParticleSystem playerParticleSystem;
 
@@ -95,7 +92,7 @@ public class PlayerController : MonoBehaviour, IHealth
 
     public void ApplyShopItemLevels()
     {
-        _chainShotTimer = Globals.ChainShotCooldown;
+        /*_chainShotTimer = Globals.ChainShotCooldown;
         _repulsorTimer = Globals.RepulsorCooldown;
 
         int lifeLevel = Globals.GetShopElementLevel(ShopElementType.Life);
@@ -113,7 +110,7 @@ public class PlayerController : MonoBehaviour, IHealth
 
         _health = Globals.PlayerMaxHealth;
 
-        OnPlayerHealthChange?.Invoke(_health);
+        OnPlayerHealthChange?.Invoke(_health);*/
     }
 
     void Update()
@@ -131,13 +128,13 @@ public class PlayerController : MonoBehaviour, IHealth
         //return EventSystem.current.IsPointerOverGameObject();
     }
 
-    private void SplitPlayerAndApplyForce(Vector2 biesctorDirection)
+    private void SplitPlayerAndApplyForce(Vector2 biesctorDirection, Vector2 dragStartPoint, Vector2 dragEndPoint)
     {
         _spriteRenderer.sprite = _playerCore;
         _rigidbody2D.linearVelocity = Vector2.zero;
         _trailRenderer.emitting = false;
 
-        float halfAngle = _maxSpreadAngle * 0.5f;
+        float halfAngle = GetHalfAngle(dragStartPoint, dragEndPoint);
         Vector2[] directions = { Quaternion.Euler(0, 0, halfAngle) * biesctorDirection.normalized, Quaternion.Euler(0, 0, -halfAngle) * biesctorDirection.normalized };
 
         int i = 0;
@@ -156,20 +153,28 @@ public class PlayerController : MonoBehaviour, IHealth
         _rigidbody2D.GetComponent<Rigidbody2D>().AddForce(-biesctorDirection.normalized * (shootPower/4), ForceMode2D.Impulse);
     }
 
+    private float GetHalfAngle(Vector2 dragStartPoint, Vector2 dragEndPoint)
+    {
+        float dragDistance = Vector2.Distance(dragStartPoint, dragEndPoint);
+        float t = Mathf.Clamp01(dragDistance / _maxDragDistance);
+        float halfAngle = Mathf.Lerp(_minSpreadAngle * 0.5f, _maxSpreadAngle * 0.5f, t);
+        return halfAngle;
+    }
+
     private void UnitePlayerParts()
     {
         _spriteRenderer.sprite = _playerUnited;
         _trailRenderer.emitting = true;
 
-        // TODO: move the splitted parts to the position of the core
+        // TODO: move the split parts to the position of the core
         foreach (Transform child in transform)
         {
             if (child.CompareTag("Player"))
             {
                 child.gameObject.GetComponent<Rigidbody2D>().linearVelocity = Vector2.zero;
                 child.gameObject.GetComponent<Rigidbody2D>().angularVelocity = 0.0f;
-                child.gameObject.GetComponent<Transform>().localPosition = Vector3.zero;
-                child.gameObject.GetComponent<Transform>().localRotation = Quaternion.Euler(0f, 0f, 0f);
+                child.gameObject.transform.localPosition = Vector3.zero;
+                child.gameObject.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
                 child.gameObject.SetActive(false);
             }
         }
@@ -196,7 +201,9 @@ public class PlayerController : MonoBehaviour, IHealth
             Vector2 currentTouchPos = _mainCamera.ScreenToWorldPoint(screenPos);
 
             Vector2 bisector = (currentTouchPos - _dragStartPosition);
-            float halfAngle = _maxSpreadAngle * 0.5f;
+            float halfAngle = GetHalfAngle(_dragStartPosition, currentTouchPos);
+            Debug.Log("Spread Angle: " + halfAngle * 2);
+
             Vector2[] directions = { Quaternion.Euler(0, 0, halfAngle) * bisector.normalized, Quaternion.Euler(0, 0, -halfAngle) * bisector.normalized };
             _trajectorySimulator.DrawTrajectory(transform.position, directions[0], directions[1], shootPower);
         }
@@ -207,11 +214,11 @@ public class PlayerController : MonoBehaviour, IHealth
             _rigidbody2D.angularVelocity = 0.0f;
             _trajectorySimulator.ClearLinePositions();
             _dragEndPosition = _mainCamera.ScreenToWorldPoint(_input.Player.PointerPosition.ReadValue<Vector2>());
-            Vector2 dragDirection = _dragEndPosition - _dragStartPosition; //Bisectoe
+            Vector2 dragDirection = _dragEndPosition - _dragStartPosition; //Bisector
 
             _isAiming = false;
 
-            SplitPlayerAndApplyForce(dragDirection);
+            SplitPlayerAndApplyForce(dragDirection, _dragStartPosition, _dragEndPosition);
             EndSlowMotion();
         }
     }

@@ -3572,7 +3572,6 @@ MonoBehaviour:
   repulsorSlider: {fileID: 1661746219}
   chainShotButton: {fileID: 1453033444}
   repulsorButton: {fileID: 541628657}
-  proTipsText: {fileID: 880357790}
   showDuration: 5
   fadeOutDuration: 2
   buttonClickSound: {fileID: 8300000, guid: 496206ba31fc5414b8aae5abafe9c63b, type: 3}
@@ -10075,8 +10074,11 @@ MonoBehaviour:
   acceleration: 100
   shootPower: 25
   maxAimLineDistance: 8
-  _playerCore: {fileID: 0}
-  _playerUnited: {fileID: 0}
+  _maxDragDistance: 10
+  _maxSpreadAngle: 60
+  _minSpreadAngle: 15
+  _playerCore: {fileID: 4414629621775294166, guid: ae4dbb0b2d21aba4682d20a0cc368d2e, type: 3}
+  _playerUnited: {fileID: -6906212207499067498, guid: 18fdd0d35deb479408f2e5bdf93a33af, type: 3}
   playerParticleSystem: {fileID: 1401706095}
   minBounds: {x: -11.75, y: -6.5}
   maxBounds: {x: 11.75, y: 6.5}
