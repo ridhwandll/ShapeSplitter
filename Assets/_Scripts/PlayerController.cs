@@ -136,14 +136,6 @@ public class PlayerController : MonoBehaviour, IHealth
         AimAndShoot();
     }
 
-    private float GetHalfAngle(Vector2 dragStartPoint, Vector2 dragEndPoint)
-    {
-        float dragDistance = Vector2.Distance(dragStartPoint, dragEndPoint);
-        float t = Mathf.Clamp01(dragDistance / _maxDragDistance);
-        float halfAngle = Mathf.Lerp(_minSpreadAngle * 0.5f, _maxSpreadAngle * 0.5f, t);
-        return halfAngle;
-    }
-
     private void SplitPlayerAndApplyForce(Vector2 biesctorDirection, Vector2 dragStartPoint, Vector2 dragEndPoint)
     {
         _playerState = PlayerState.SPLIT;
@@ -248,8 +240,16 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private List<Vector2> GetSplitShapeDirections(Vector2 bisector, Vector2 currentTouchPosition)
     {
+        float GetHalfAngle()
+        {
+            float dragDistance = Vector2.Distance(_dragStartPosition, currentTouchPosition);
+            float t = Mathf.Clamp01(dragDistance / _maxDragDistance);
+            float halfAngle = Mathf.Lerp(_minSpreadAngle * 0.5f, _maxSpreadAngle * 0.5f, t);
+            return halfAngle;
+        }
+
         List<Vector2> result = new List<Vector2>(_splitShapeCount);
-        float halfAngle = GetHalfAngle(_dragStartPosition, currentTouchPosition);
+        float halfAngle = GetHalfAngle();
 
         float startAngle = -halfAngle;
         float step = (halfAngle * 2) / (_splitShapeCount - 1);
