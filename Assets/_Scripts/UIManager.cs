@@ -13,12 +13,7 @@ public class UIManager : MonoBehaviour
     public Slider healthSlider;
     public TMP_Text healthText;
     public Image healthBarBorder;
-    
-    [Header("LevelInfo")]
-    public TMP_Text waveNumber;
-    public TMP_Text difficultyText;
-    public TMP_Text scoreText;
-    
+        
     [Header("Pause Menu")]
     public GameObject pauseMenu;
 
@@ -51,11 +46,8 @@ public class UIManager : MonoBehaviour
     {
         GameManager.Instance.OnPauseChanged += OnPauseChanged;
         GameManager.Instance.OnPlayerDied += OnPlayerDied;
-        waveNumber.text = "WAVE: " + enemySpawner.GetWaveNumber();
         enemySpawner.OnDifficultyChanged += OnWaveChanged;
         enemySpawner.OnEnemyKilled += OnEnemyDied;
-        difficultyText.text = Globals.Difficulty.ToString().ToUpper();
-        scoreText.text = "SCORE: " + enemySpawner.GetEnemyKillScore();
 
         // Setup events which player controller notifies about
         player.OnPlayerHealthChange += health => UpdatePlayerHealth(health);
@@ -152,20 +144,10 @@ public class UIManager : MonoBehaviour
 
     private void OnEnemyDied()
     {       
-        var score = enemySpawner.GetEnemyKillScore();
-        if (Globals.Difficulty == DifficultyLevel.Easy)
-        {
-            scoreText.text = "";
-        }
-        else
-        {
-            scoreText.text = "SCORE: " + score;
-        }
     }
     
     private void OnWaveChanged(int difficulty)
     {
-        waveNumber.text = "WAVE: " + difficulty;
     }
     
     public void OnReturnToMMPressed()

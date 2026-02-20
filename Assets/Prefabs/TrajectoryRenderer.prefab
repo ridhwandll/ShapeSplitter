@@ -92,36 +92,36 @@ LineRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.060036533
-        inSlope: -0.15100442
-        outSlope: -0.15100442
+        value: 0.16138542
+        inSlope: -0.15519908
+        outSlope: -0.15519908
         tangentMode: 0
         weightedMode: 0
         inWeight: 0.33333334
-        outWeight: 0.15675676
+        outWeight: 0.16913946
       - serializedVersion: 3
         time: 1
         value: 0
-        inSlope: -0.095811605
-        outSlope: -0.095811605
+        inSlope: -0.14534216
+        outSlope: -0.14534216
         tangentMode: 0
         weightedMode: 0
-        inWeight: 0.1312849
+        inWeight: 0.13946587
         outWeight: 0
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 1, g: 1, b: 1, a: 0.53333336}
-      key1: {r: 1, g: 1, b: 1, a: 0.15686275}
+      key0: {r: 1, g: 0.8997098, b: 0.6556604, a: 1}
+      key1: {r: 1, g: 1, b: 1, a: 1}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
       key5: {r: 0, g: 0, b: 0, a: 0}
       key6: {r: 0, g: 0, b: 0, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
-      ctime0: 0
+      ctime0: 193
       ctime1: 65535
       ctime2: 0
       ctime3: 0
