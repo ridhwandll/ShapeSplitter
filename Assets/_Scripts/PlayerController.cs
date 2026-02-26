@@ -178,7 +178,6 @@ public class PlayerController : MonoBehaviour, IHealth
                     splitObjectRb.transform.localPosition = Vector3.zero;
                     splitObjectRb.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
                     Debug.Log("United split object number: " + i);
-
                     playerParticleSystem.Play();
                     splitObjectRb.gameObject.SetActive(false);
                 }
@@ -198,6 +197,18 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private void AimAndShoot()
     {
+        void SetSplitShapesColliderToTrigger(bool trigger)
+        {
+            for (int i = 0; i < _splitShapeCount; i++)
+            {
+                Rigidbody2D splitObjectRb = _splitObjectsRigidbody2D[i];
+                if (splitObjectRb.gameObject.activeInHierarchy)
+                {
+                    splitObjectRb.gameObject.GetComponent<CircleCollider2D>().isTrigger = trigger;
+                }
+            }
+        }
+
         if (_playerState == PlayerState.UNITED)
         {
             if (_input.Player.Move.WasPressedThisFrame() && _isAiming == false)
@@ -234,9 +245,18 @@ public class PlayerController : MonoBehaviour, IHealth
         else if (_playerState == PlayerState.SPLIT)
         {
             if (_input.Player.Move.IsPressed())
+            {
                 UnitePlayerParts();
+                SetSplitShapesColliderToTrigger(true);
+            }
+            else
+            {
+                SetSplitShapesColliderToTrigger(false);
+            }
+
         }
     }
+
 
     private List<Vector2> GetSplitShapeDirections(Vector2 bisector, Vector2 currentTouchPosition)
     {

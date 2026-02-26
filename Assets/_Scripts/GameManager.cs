@@ -42,6 +42,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         _input = GameObject.FindGameObjectWithTag("InputMaster").GetComponent<InputManager>().Input;
+        Application.targetFrameRate = (int)Screen.currentResolution.refreshRateRatio.value;
     }
 
     public void InvalidatePaused()
