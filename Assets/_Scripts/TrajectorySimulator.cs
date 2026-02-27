@@ -5,9 +5,13 @@ using UnityEngine.SceneManagement;
 public class TrajectorySimulator : MonoBehaviour
 {
     [Header("Simulation Settings")]
-    public LayerMask wallsLayerMask;
-    public int maxSimulationSteps = 200;
-    public float timeStep = 0.02f;
+    [SerializeField] private bool _ricochetSimulation;
+    [SerializeField] private LayerMask _wallsLayerMask;
+    [SerializeField] private int _maxSimulationSteps = 200;
+    [SerializeField] private float _timeStep = 0.02f;
+
+    [Header("Non Simulation Visuals")]
+    [SerializeField] private int _lineLength = 6;
 
     [SerializeField] private GameObject trajectoryRendererObj;
 
@@ -22,15 +26,12 @@ public class TrajectorySimulator : MonoBehaviour
     private Collider2D _playerCollider;
 
     private LineRenderer[] _lineRenderers;
-
     private List<Vector3> trajectoryPoints = new List<Vector3>();
 
     void Start()
     {
         _playerRigidBody = GetComponent<Rigidbody2D>();
-        _playerCollider = GetComponent<Collider2D>();
-
-        
+        _playerCollider = GetComponent<Collider2D>();        
     }
 
     public void Initialize(int splitShapeCount)
@@ -40,10 +41,10 @@ public class TrajectorySimulator : MonoBehaviour
         {
             _lineRenderers[i] = Instantiate(trajectoryRendererObj, transform).GetComponent<LineRenderer>();
         }
-        CreateGhostScene();
+        CreateGhostScene();        
     }
 
-    void Destroy()
+    void OnDestroy()
     {
         foreach(LineRenderer lineRenderer in _lineRenderers)
             Destroy(lineRenderer.gameObject);
@@ -88,8 +89,8 @@ public class TrajectorySimulator : MonoBehaviour
             GameObject[] allObjects = FindObjectsByType<GameObject>(FindObjectsSortMode.None);
             foreach (var go in allObjects)
             {
-                // Check if object is in wallsLayerMask
-                if (((wallsLayerMask.value >> go.layer) & 1) == 0)
+                // Check if object is in _wallsLayerMask
+                if (((_wallsLayerMask.value >> go.layer) & 1) == 0)
                     continue;
 
                 Collider2D col = go.GetComponent<Collider2D>();
@@ -143,36 +144,46 @@ public class TrajectorySimulator : MonoBehaviour
     }
 
     // Call every frame while aiming
-    public void DrawTrajectory(Vector2 startPosition, List<Vector2> directions, float shootPower)
+    public void DrawTrajectories(Vector2 startPosition, List<Vector2> directions, float shootPower)
     {
         for (int i = 0; i < directions.Count; i++)        
-            SimulateSingleTrajectory(startPosition, directions[i], shootPower, _lineRenderers[i]);
+            DrawSingleTrajectory(startPosition, directions[i], shootPower, _lineRenderers[i]);
     }
 
-    private void SimulateSingleTrajectory(Vector2 startPosition, Vector2 direction, float shootPower, LineRenderer lr)
+    private void DrawSingleTrajectory(Vector2 startPosition, Vector2 direction, float shootPower, LineRenderer lr)
     {
-        if (direction.sqrMagnitude < 0.0001f)
-            return;
-
-        ghostObject.SetActive(true);
-        ghostObject.transform.position = startPosition;
-        ghostObject.transform.rotation = Quaternion.identity;
-        ghostRb.linearVelocity = direction.normalized * (shootPower / _playerRigidBody.mass);
-        ghostRb.angularVelocity = 0;
-
-        trajectoryPoints.Clear();
-        trajectoryPoints.Add(startPosition);
-
-        for (int i = 0; i < maxSimulationSteps; i++)
+        if (_ricochetSimulation)
         {
-            ghostPhysicsScene.Simulate(timeStep);
-            trajectoryPoints.Add(ghostRb.position);
-            if (ghostRb.linearVelocity.magnitude < 0.01f) break;
+            if (direction.sqrMagnitude < 0.0001f)
+                return;
+
+            ghostObject.SetActive(true);
+            ghostObject.transform.position = startPosition;
+            ghostObject.transform.rotation = Quaternion.identity;
+            ghostRb.linearVelocity = direction.normalized * (shootPower / _playerRigidBody.mass);
+            ghostRb.angularVelocity = 0;
+
+            trajectoryPoints.Clear();
+            trajectoryPoints.Add(startPosition);
+
+            for (int i = 0; i < _maxSimulationSteps; i++)
+            {
+                ghostPhysicsScene.Simulate(_timeStep);
+                trajectoryPoints.Add(ghostRb.position);
+                if (ghostRb.linearVelocity.magnitude < 0.01f)
+                    break;
+            }
+
+            lr.positionCount = trajectoryPoints.Count;
+            lr.SetPositions(trajectoryPoints.ToArray());
+
+            ghostObject.SetActive(false);
         }
-
-        lr.positionCount = trajectoryPoints.Count;
-        lr.SetPositions(trajectoryPoints.ToArray());
-
-        ghostObject.SetActive(false);
+        else
+        {
+            lr.positionCount = 2;
+            lr.SetPosition(0, startPosition);
+            lr.SetPosition(1, startPosition + direction.normalized * _lineLength);
+        }
     }
 }

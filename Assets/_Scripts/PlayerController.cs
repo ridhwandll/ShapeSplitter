@@ -14,64 +14,44 @@ public enum PlayerState
 
 public class PlayerController : MonoBehaviour, IHealth
 {
+    [Header("AIM Settings")]
     [SerializeField] private int _splitShapeCount = 2;
-    private Rigidbody2D _rigidbody2D;
-    private Vector2 _dragStartPosition;
-    private Vector2 _dragEndPosition;
-    private bool _isAiming;
-    public float shootPower = 2.0f;
-    
-    [SerializeField] GameObject _playerSplitPrefab;
-    private Rigidbody2D[] _splitObjectsRigidbody2D;
-    private bool[] _isSplitShapeUnited = new bool[2];
-
-    PlayerState _playerState;
-
-    private TrajectorySimulator _trajectorySimulator;
-    private CircleCollider2D _collider2D;
-    private SpriteRenderer _spriteRenderer;
     [SerializeField] private float _maxDragDistance = 10.0f;
     [SerializeField] private float _maxSpreadAngle = 60.0f;
     [SerializeField] private float _minSpreadAngle = 15.0f;
+    [SerializeField] private float shootPower = 2.0f;
+
+    [Header("Player Images")]
     [SerializeField] private Sprite _playerCore;
     [SerializeField] private Sprite _playerUnited;
+    [SerializeField] private GameObject _playerSplitPrefab;
+    [SerializeField] private ParticleSystem playerParticleSystem;
 
-    public ParticleSystem playerParticleSystem;
+    // AIM
+    private Vector2 _dragStartPosition;
+    private Vector2 _dragEndPosition;
+    private bool _isAiming;
+    
+    private Rigidbody2D[] _splitObjectsRigidbody2D;
+    private bool[] _isSplitShapeUnited;
 
-    public Vector2 minBounds;
-    public Vector2 maxBounds;
+    private PlayerState _playerState;
 
     // Health
     private int _health;
 
-    // ChainShot
-    private float _chainShotTimer = 0f;
-    private int _maxChains = 6;
-    private float _chainRange = 15f;
-    public float _chainDelay = 0.2f;
-    public float chainLineLifetime = 0.4f;
-    public LayerMask enemyMask;
-    public AudioClip chainShotSound;
-    public LineRenderer chainLinePrefab;
-
-    //Repulsor
-    private float _repulsorTimer = 0f;
-    public AudioClip repulsorSound;
-
-    private TrailRenderer _trailRenderer;
-    private Camera _mainCamera;
-    public GameObject bulletPrefab;
-    public GameObject repulsorPrefab;
-
+    private Rigidbody2D _rigidbody2D;
+    private TrajectorySimulator _trajectorySimulator;
+    private SpriteRenderer _spriteRenderer;
     private ChromaticAberration _chromaticAberration;
     private Vignette _vignette;
+    private Camera _mainCamera;
+    private TrailRenderer _trailRenderer;
 
     private InputMaster _input;
 
     // Public Events available for registering (Mainly used by UIManager)
     public Action<int> OnPlayerHealthChange;
-    public Action<float> OnRepulsorTimerChange;
-    public Action<float> OnChainShotTimerChange;
 
     void Start()
     {
@@ -82,7 +62,6 @@ public class PlayerController : MonoBehaviour, IHealth
         postProcessStack.GetComponent<Volume>().profile.TryGet<Vignette>(out _vignette);
         _trailRenderer = GetComponent<TrailRenderer>();
         _spriteRenderer = GetComponent<SpriteRenderer>();
-        _collider2D = GetComponent<CircleCollider2D>();
         _trajectorySimulator = GetComponent<TrajectorySimulator>();
 
         _chromaticAberration.active = false; 
@@ -99,31 +78,8 @@ public class PlayerController : MonoBehaviour, IHealth
             _splitObjectsRigidbody2D[j].gameObject.SetActive(false);
         }
 
+        //Do not simulate ricochet by default
         _trajectorySimulator.Initialize(_splitShapeCount);
-        ApplyShopItemLevels();
-    }
-
-    public void ApplyShopItemLevels()
-    {
-        /*_chainShotTimer = Globals.ChainShotCooldown;
-        _repulsorTimer = Globals.RepulsorCooldown;
-
-        int lifeLevel = Globals.GetShopElementLevel(ShopElementType.Life);
-        Globals.PlayerMaxHealth = 50 + (lifeLevel - 1) * Globals.HealthIncreasePerLevel;
-
-        int chainBulletLevel = Globals.GetShopElementLevel(ShopElementType.ChainBullet);
-        _maxChains = 5 + (chainBulletLevel - 1); // Add one chain per level. 5 chains in level 1
-
-        int speedLevel = Globals.GetShopElementLevel(ShopElementType.Speed);
-        moveSpeed = Mathf.Lerp(12f, 20f, (speedLevel - 1) / 14f);
-
-        int repulsorLevel = Globals.GetShopElementLevel(ShopElementType.Repulsor);
-        //Globals.RepulsorCooldown = 150.0f - (repulsorLevel - 1) * Globals.RepulsorCooldownDecreasePerLevel;
-        Globals.RepulsorCooldown = 20f - (repulsorLevel - 1) * Globals.RepulsorCooldownDecreasePerLevel;
-
-        _health = Globals.PlayerMaxHealth;
-
-        OnPlayerHealthChange?.Invoke(_health);*/
     }
 
     void Update()
@@ -131,8 +87,6 @@ public class PlayerController : MonoBehaviour, IHealth
         if (GameManager.Instance.IsPaused)
             return;
 
-        UpdateChainShot();
-        UpdateRepulsor();
         AimAndShoot();
     }
 
@@ -153,8 +107,8 @@ public class PlayerController : MonoBehaviour, IHealth
             i++;
         }
 
-        //TODO: Conservation of momentum
-        _rigidbody2D.GetComponent<Rigidbody2D>().AddForce(-biesctorDirection.normalized * (shootPower/4), ForceMode2D.Impulse);
+        // Add force to the core
+        _rigidbody2D.GetComponent<Rigidbody2D>().AddForce(biesctorDirection.normalized * (shootPower/4), ForceMode2D.Impulse);
     }
 
     
@@ -226,7 +180,7 @@ public class PlayerController : MonoBehaviour, IHealth
 
                 Vector2 bisector = (currentTouchPos - _dragStartPosition);
                 List<Vector2> directions = GetSplitShapeDirections(bisector, currentTouchPos);
-                _trajectorySimulator.DrawTrajectory(transform.position, directions, shootPower);
+                _trajectorySimulator.DrawTrajectories(transform.position, directions, shootPower);
             }
 
             if (_input.Player.Move.WasReleasedThisFrame() && _isAiming)
@@ -286,13 +240,13 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private void StartSlowMotion()
     {
-        Time.timeScale = 0.5f;
+        Time.timeScale = 0.2f;
         Time.fixedDeltaTime = Time.timeScale * 0.02f;
     }
 
     private void EndSlowMotion()
     {
-        Time.timeScale = 1f;
+        Time.timeScale = 1.0f;
         Time.fixedDeltaTime = Time.timeScale * 0.02f;
     }
 
@@ -332,147 +286,5 @@ public class PlayerController : MonoBehaviour, IHealth
         }
 
         OnPlayerHealthChange?.Invoke(_health);
-    }
-
-    private void UpdateChainShot()
-    {
-        if (_chainShotTimer > 0f)
-            _chainShotTimer -= Time.deltaTime;
-
-        float progress = Mathf.Clamp01((Globals.ChainShotCooldown - _chainShotTimer) / Globals.ChainShotCooldown);
-        OnChainShotTimerChange?.Invoke(progress * Globals.ChainShotCooldown);
-        
-        // Trigger ChainShot ability
-        if (_input.Player.ChainShot.IsPressed() && _chainShotTimer <= 0f)        
-            ActivateChainShot();        
-    }
-    
-    private void UpdateRepulsor()
-    {
-        if (_repulsorTimer > 0f)
-            _repulsorTimer -= Time.deltaTime;
-
-        float progress = Mathf.Clamp01((Globals.RepulsorCooldown - _repulsorTimer) / Globals.RepulsorCooldown);
-        OnRepulsorTimerChange?.Invoke(progress * Globals.RepulsorCooldown);
-        
-        // Trigger Repulsor ability
-        if (_input.Player.Repulse.IsPressed() && _repulsorTimer <= 0f)        
-            ActivateRepulsor();        
-    }
-    
-    public void ActivateRepulsor()
-    {
-        Instantiate(repulsorPrefab, transform.position, Quaternion.identity);
-        TakeDamage(Globals.RepulsorSelfDamage, true);
-        SoundFXManager.instance.PlaySoundFXClip(repulsorSound, 0.8f);
-        _repulsorTimer = Globals.RepulsorCooldown;
-        _mainCamera.gameObject.GetComponent<CameraShake>().Shake(0.3f, 8, 0.4f);
-    }
-    
-    // ChainShot
-    Transform FindNextTarget(Vector2 from, HashSet<Transform> hit)
-    {
-        Collider2D[] hits = Physics2D.OverlapCircleAll(from, _chainRange, enemyMask);
-
-        float closest = float.MaxValue;
-        Transform best = null;
-
-        foreach (var c in hits)
-        {
-            Transform t = c.transform;
-            if (hit.Contains(t))
-                continue;
-
-            IHealth h = t.GetComponent<IHealth>();
-            if (h == null)
-                continue;
-
-            float d = Vector2.Distance(from, t.position);
-            if (d < closest)
-            {
-                closest = d;
-                best = t;
-            }
-        }
-        return best;
-    }
-
-    public void ActivateChainShot()
-    {
-        Transform first = FindNextTarget(transform.position, new HashSet<Transform>());
-        if (first != null)
-        {
-            StartCoroutine(ChainShotRoutine(first));
-            TakeDamage(Globals.ChainShotSelfDamage, true);
-            _chainShotTimer = Globals.ChainShotCooldown;
-        }
-    }
-    
-    IEnumerator ChainLineFadeOut(LineRenderer lineRenderer)
-    {
-        float timeElapsed = 0f;
-        Color startColor = lineRenderer.startColor;
-        Color endColor = lineRenderer.endColor;
-
-        while (timeElapsed < chainLineLifetime)
-        {
-            timeElapsed += Time.deltaTime;
-            float alpha = Mathf.Lerp(1f, 0f, timeElapsed / chainLineLifetime);
-
-            // Update alpha for both start and end colors
-            lineRenderer.startColor = new Color(startColor.r, startColor.g, startColor.b, alpha);
-            lineRenderer.endColor = new Color(endColor.r, endColor.g, endColor.b, alpha);
-
-            yield return null;
-        }
-
-        // Ensure it is completely invisible
-        lineRenderer.startColor = new Color(startColor.r, startColor.g, startColor.b, 0f);
-        lineRenderer.endColor = new Color(endColor.r, endColor.g, endColor.b, 0f);
-
-        Destroy(lineRenderer.gameObject);
-    }
-    void SpawnChainLine(Vector3 from, Vector3 to)
-    {
-        LineRenderer lr = Instantiate(chainLinePrefab);
-        lr.positionCount = 2;
-        lr.SetPosition(0, from);
-        lr.SetPosition(1, to);
-        lr.startColor = Color.orange;
-        lr.endColor = Color.orangeRed;
-        lr.startWidth = 0.15f;
-        lr.endWidth = 0.05f;
-        lr.numCornerVertices = 5;
-        lr.numCapVertices = 5;
-        
-        SoundFXManager.instance.PlaySoundFXClip(chainShotSound, 0.6f);
-        _mainCamera.gameObject.GetComponent<CameraShake>().Shake(0.4f, 3, 0.1f);
-        
-        StartCoroutine(ChainLineFadeOut(lr));
-    }
-    
-    IEnumerator ChainShotRoutine(Transform firstTarget)
-    {
-        HashSet<Transform> hitEnemies = new HashSet<Transform>();
-        Transform currentTarget = firstTarget;
-        Vector3 lastTarget = transform.position; //Last target is player, initial line start
-
-        for (int i = 0; i < _maxChains; i++)
-        {
-            if (currentTarget == null)
-                yield break;
-
-            hitEnemies.Add(currentTarget);
-            Vector3 curerntPos = currentTarget.position; // Store it locally as we are destroying Enemy gameObject later
-            
-            SpawnChainLine(lastTarget, curerntPos);
-            
-            currentTarget.GetComponent<IHealth>()?.TakeDamage(Globals.ChainShotDamage, false);
-            
-            yield return new WaitForSeconds(_chainDelay);
-            
-            lastTarget = curerntPos;
-            currentTarget = FindNextTarget(curerntPos, hitEnemies);
-        }
     }
 }

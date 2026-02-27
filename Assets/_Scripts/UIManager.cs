@@ -8,7 +8,6 @@ public class UIManager : MonoBehaviour
     [Header("Player")]
     public PlayerController player;
 
-    //Health Bar
     [Header("Health Bar")]
     public Slider healthSlider;
     public TMP_Text healthText;
@@ -17,7 +16,6 @@ public class UIManager : MonoBehaviour
     [Header("Pause Menu")]
     public GameObject pauseMenu;
 
-    //Death menu stuff
     [Header("Death Menu")]
     public GameObject deathMenu;
     public TMP_Text enemyKillScoreText;
@@ -26,15 +24,6 @@ public class UIManager : MonoBehaviour
     public TMP_Text coinsEarnedText;
     
     public EnemySpawner enemySpawner;
-
-    [Header("Dash ChainShot and Repulsor bar")]
-    //public Slider dashSlider;
-    public Slider chainShotSlider;
-    public Slider repulsorSlider;
-
-    //public Button dashButton;
-    public Button chainShotButton;
-    public Button repulsorButton;
 
     [Header("Tips")]
     public float showDuration = 7f;
@@ -51,42 +40,11 @@ public class UIManager : MonoBehaviour
 
         // Setup events which player controller notifies about
         player.OnPlayerHealthChange += health => UpdatePlayerHealth(health);
-        player.OnChainShotTimerChange += chainShot => UpdateChainShotSlider(chainShot);
-        player.OnRepulsorTimerChange += repulsor => UpdateRepulsorSlider(repulsor);
-
-        // Setup the ability buttons
-        chainShotButton.onClick.AddListener(player.ActivateChainShot);
-        repulsorButton.onClick.AddListener(player.ActivateRepulsor);
-    }
-
-    public void UpdateRepulsorSlider(float timeLeftTillNextRepulse)
-    {
-        repulsorSlider.value = timeLeftTillNextRepulse;
-
-        if (repulsorSlider.value == repulsorSlider.maxValue)
-            repulsorButton.interactable = true;
-        else
-            repulsorButton.interactable = false;
-    }
-
-    public void UpdateChainShotSlider(float timeLeftTillNextcs)
-    {
-        chainShotSlider.value = timeLeftTillNextcs;
-
-        if (chainShotSlider.value == chainShotSlider.maxValue)
-            chainShotButton.interactable = true;
-        else
-            chainShotButton.interactable = false;
     }
 
     public void UpdatePlayerHealth(int playerHealth) // NOT CALLED EVERY FRAME
     {
-        repulsorSlider.minValue = 0;
-        chainShotSlider.minValue = 0;
         healthSlider.minValue = 0;
-            
-        repulsorSlider.maxValue = Globals.RepulsorCooldown;
-        chainShotSlider.maxValue = Globals.ChainShotCooldown;
         healthSlider.maxValue = Globals.PlayerMaxHealth;
         
         healthSlider.value = playerHealth;

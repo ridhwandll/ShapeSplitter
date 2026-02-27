@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: b1249f336e3791441860b64fcb83b359
+guid: a18142e4927935443ab7c85a0d5240dc
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2115169202091490748
-    second: Circle.SplitPart_0
+      213: 3694788327267579368
+    second: Circle.Core_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Circle.SplitPart_0
+      name: Circle.Core_0
       rect:
         serializedVersion: 2
-        x: 24
-        y: 24
-        width: 152
-        height: 152
+        x: 49
+        y: 49
+        width: 102
+        height: 102
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cbd7282ce279a5d10800000000000000
-      internalID: 2115169202091490748
+      spriteID: 8e53b076866864330800000000000000
+      internalID: 3694788327267579368
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Circle.SplitPart_0: 2115169202091490748
+      Circle.Core_0: 3694788327267579368
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
