@@ -10,8 +10,10 @@ public class TrajectorySimulator : MonoBehaviour
     [SerializeField] private int _maxSimulationSteps = 200;
     [SerializeField] private float _timeStep = 0.02f;
 
-    [Header("Non Simulation Visuals")]
-    [SerializeField] private int _lineLength = 6;
+    [Header("Visuals")]
+    [SerializeField] private int _nonSimulationLineLength = 6;
+    [SerializeField] private Color _colorOne;
+    [SerializeField] private Color _colorTwo;
 
     [SerializeField] private GameObject trajectoryRendererObj;
 
@@ -34,12 +36,21 @@ public class TrajectorySimulator : MonoBehaviour
         _playerCollider = GetComponent<Collider2D>();        
     }
 
-    public void Initialize(int splitShapeCount)
+    public void Initialize(int splitShapeCount, Color colorOne, Color colorTwo)
     {
+        _colorOne = colorOne;
+        _colorTwo = colorTwo;
+        Gradient gradient = new Gradient();
+        gradient.SetKeys(
+            new GradientColorKey[] {new GradientColorKey(colorOne, 0.0f), new GradientColorKey(colorTwo, 1.0f)},
+            new GradientAlphaKey[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(0.4f, 1.0f)});
+
         _lineRenderers = new LineRenderer[splitShapeCount];
         for (int i = 0; i < splitShapeCount; i++)
         {
             _lineRenderers[i] = Instantiate(trajectoryRendererObj, transform).GetComponent<LineRenderer>();
+            _lineRenderers[i].colorGradient = gradient;
+
         }
         CreateGhostScene();        
     }
@@ -183,7 +194,7 @@ public class TrajectorySimulator : MonoBehaviour
         {
             lr.positionCount = 2;
             lr.SetPosition(0, startPosition);
-            lr.SetPosition(1, startPosition + direction.normalized * _lineLength);
+            lr.SetPosition(1, startPosition + direction.normalized * _nonSimulationLineLength);
         }
     }
 }

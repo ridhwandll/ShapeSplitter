@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -14,16 +13,8 @@ public enum PlayerState
 
 public class PlayerController : MonoBehaviour, IHealth
 {
-    [Header("AIM Settings")]
-    [SerializeField] private int _splitShapeCount = 2;
+    [SerializeField] private Shape _shapeData;
     [SerializeField] private float _maxDragDistance = 10.0f;
-    [SerializeField] private float _maxSpreadAngle = 60.0f;
-    [SerializeField] private float _minSpreadAngle = 15.0f;
-    [SerializeField] private float shootPower = 2.0f;
-
-    [Header("Player Images")]
-    [SerializeField] private Sprite _playerCore;
-    [SerializeField] private Sprite _playerUnited;
     [SerializeField] private GameObject _playerSplitPrefab;
     [SerializeField] private ParticleSystem playerParticleSystem;
 
@@ -68,18 +59,27 @@ public class PlayerController : MonoBehaviour, IHealth
         _input = GameObject.FindGameObjectWithTag("InputMaster").GetComponent<InputManager>().Input;
         _playerState = PlayerState.UNITED;
 
-        _splitObjectsRigidbody2D = new Rigidbody2D[_splitShapeCount];
-        _isSplitShapeUnited = new bool[_splitShapeCount];
+        Gradient gradient = new Gradient();
+        gradient.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(_shapeData.ShapeThemeColorOne, 0.0f), new GradientColorKey(_shapeData.ShapeThemeColorTwo, 1.0f)},
+            new GradientAlphaKey[] {new GradientAlphaKey(1.0f, 0.0f),new GradientAlphaKey(0.3f, 1.0f)});
 
-        for (int j = 0; j < _splitShapeCount; j++)
+        _splitObjectsRigidbody2D = new Rigidbody2D[_shapeData.SplitShapeCount];
+        _isSplitShapeUnited = new bool[_shapeData.SplitShapeCount];
+        for (int j = 0; j < _shapeData.SplitShapeCount; j++)
         {
             _isSplitShapeUnited[j] = false;
             _splitObjectsRigidbody2D[j] = Instantiate(_playerSplitPrefab, transform).GetComponent<Rigidbody2D>();
+            _splitObjectsRigidbody2D[j].GetComponent<SpriteRenderer>().sprite = _shapeData.PlayerSplit;
+            _splitObjectsRigidbody2D[j].GetComponent<TrailRenderer>().colorGradient = gradient;
             _splitObjectsRigidbody2D[j].gameObject.SetActive(false);
         }
 
-        //Do not simulate ricochet by default
-        _trajectorySimulator.Initialize(_splitShapeCount);
+        _spriteRenderer.sprite = _shapeData.PlayerUnited;
+        _trailRenderer.colorGradient = gradient;
+
+        // Do not simulate ricochet by default
+        _trajectorySimulator.Initialize(_shapeData.SplitShapeCount, _shapeData.ShapeThemeColorOne, _shapeData.ShapeThemeColorTwo);
     }
 
     void Update()
@@ -93,7 +93,7 @@ public class PlayerController : MonoBehaviour, IHealth
     private void SplitPlayerAndApplyForce(Vector2 biesctorDirection, Vector2 dragStartPoint, Vector2 dragEndPoint)
     {
         _playerState = PlayerState.SPLIT;
-        _spriteRenderer.sprite = _playerCore;
+        _spriteRenderer.sprite = _shapeData.PlayerCore;
         _rigidbody2D.linearVelocity = Vector2.zero;
         _trailRenderer.emitting = false;
 
@@ -103,22 +103,22 @@ public class PlayerController : MonoBehaviour, IHealth
         foreach (Rigidbody2D splitObjectRb in _splitObjectsRigidbody2D)
         {
             splitObjectRb.gameObject.SetActive(true);
-            splitObjectRb.AddForce(directions[i].normalized * shootPower, ForceMode2D.Impulse);
+            splitObjectRb.AddForce(directions[i].normalized * _shapeData.ShootPower, ForceMode2D.Impulse);
             i++;
         }
 
         // Add force to the core
-        _rigidbody2D.GetComponent<Rigidbody2D>().AddForce(biesctorDirection.normalized * (shootPower/4), ForceMode2D.Impulse);
+        _rigidbody2D.GetComponent<Rigidbody2D>().AddForce(biesctorDirection.normalized * (_shapeData.ShootPower / 4), ForceMode2D.Impulse);
     }
 
     
     private void UnitePlayerParts()
     {
-        for (int i = 0; i < _splitShapeCount; i++)
+        for (int i = 0; i < _shapeData.SplitShapeCount; i++)
         {
             Rigidbody2D splitObjectRb = _splitObjectsRigidbody2D[i];
 
-            splitObjectRb.linearVelocity = (_rigidbody2D.position - (Vector2)splitObjectRb.transform.position).normalized * shootPower;
+            splitObjectRb.linearVelocity = (_rigidbody2D.position - (Vector2)splitObjectRb.transform.position).normalized * _shapeData.ShootPower;
             splitObjectRb.angularVelocity = 0.0f;
 
             splitObjectRb.transform.localPosition = Vector3.Lerp(splitObjectRb.transform.localPosition, Vector3.zero, Time.unscaledDeltaTime * 7);
@@ -141,7 +141,7 @@ public class PlayerController : MonoBehaviour, IHealth
         if (_isSplitShapeUnited.All(n => n == true))
         {
             _playerState = PlayerState.UNITED;
-            _spriteRenderer.sprite = _playerUnited;
+            _spriteRenderer.sprite = _shapeData.PlayerUnited;
             _trailRenderer.emitting = true;
 
             for (int j = 0; j < _isSplitShapeUnited.Length; j++)
@@ -153,7 +153,7 @@ public class PlayerController : MonoBehaviour, IHealth
     {
         void SetSplitShapesColliderToTrigger(bool trigger)
         {
-            for (int i = 0; i < _splitShapeCount; i++)
+            for (int i = 0; i < _shapeData.SplitShapeCount; i++)
             {
                 Rigidbody2D splitObjectRb = _splitObjectsRigidbody2D[i];
                 if (splitObjectRb.gameObject.activeInHierarchy)
@@ -180,7 +180,11 @@ public class PlayerController : MonoBehaviour, IHealth
 
                 Vector2 bisector = (currentTouchPos - _dragStartPosition);
                 List<Vector2> directions = GetSplitShapeDirections(bisector, currentTouchPos);
-                _trajectorySimulator.DrawTrajectories(transform.position, directions, shootPower);
+
+                float angle = Mathf.Atan2(bisector.y, bisector.x) * Mathf.Rad2Deg;
+                transform.rotation = Quaternion.Euler(0f, 0f, angle);
+
+                _trajectorySimulator.DrawTrajectories(transform.position, directions, _shapeData.ShootPower);
             }
 
             if (_input.Player.Move.WasReleasedThisFrame() && _isAiming)
@@ -218,15 +222,15 @@ public class PlayerController : MonoBehaviour, IHealth
         {
             float dragDistance = Vector2.Distance(_dragStartPosition, currentTouchPosition);
             float t = Mathf.Clamp01(dragDistance / _maxDragDistance);
-            float halfAngle = Mathf.Lerp(_minSpreadAngle * 0.5f, _maxSpreadAngle * 0.5f, t);
+            float halfAngle = Mathf.Lerp(_shapeData.MinSpreadAngle * 0.5f, _shapeData.MaxSpreadAngle * 0.5f, t);
             return halfAngle;
         }
 
-        List<Vector2> result = new List<Vector2>(_splitShapeCount);
+        List<Vector2> result = new List<Vector2>(_shapeData.SplitShapeCount);
         float halfAngle = GetHalfAngle();
 
         float startAngle = -halfAngle;
-        float step = (halfAngle * 2) / (_splitShapeCount - 1);
+        float step = (halfAngle * 2) / (_shapeData.SplitShapeCount - 1);
 
         for (int i = 0; i < result.Capacity; i++)
         {
@@ -260,7 +264,7 @@ public class PlayerController : MonoBehaviour, IHealth
         if (_health <= 15 && _chromaticAberration)
         {
             _chromaticAberration.active = true;
-            _vignette.color.value = Color.red;
+            _vignette.color.value = UnityEngine.Color.red;
         }
         
         if (_health == 0) //LEVEL END HERE
@@ -282,7 +286,7 @@ public class PlayerController : MonoBehaviour, IHealth
         if (_health > 15 && _chromaticAberration)
         {
             _chromaticAberration.active = false;
-            _vignette.color.value = Color.black;
+            _vignette.color.value = UnityEngine.Color.black;
         }
 
         OnPlayerHealthChange?.Invoke(_health);
