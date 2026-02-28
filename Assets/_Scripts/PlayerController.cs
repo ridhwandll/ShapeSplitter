@@ -72,14 +72,24 @@ public class PlayerController : MonoBehaviour, IHealth
             _splitObjectsRigidbody2D[j] = Instantiate(_playerSplitPrefab, transform).GetComponent<Rigidbody2D>();
             _splitObjectsRigidbody2D[j].GetComponent<SpriteRenderer>().sprite = _shapeData.PlayerSplit;
             _splitObjectsRigidbody2D[j].GetComponent<TrailRenderer>().colorGradient = gradient;
+            RecalculatePolygonCollider(_splitObjectsRigidbody2D[j].gameObject);
             _splitObjectsRigidbody2D[j].gameObject.SetActive(false);
         }
 
         _spriteRenderer.sprite = _shapeData.PlayerUnited;
         _trailRenderer.colorGradient = gradient;
-
+        RecalculatePolygonCollider(gameObject);
         // Do not simulate ricochet by default
         _trajectorySimulator.Initialize(_shapeData.SplitShapeCount, _shapeData.ShapeThemeColorOne, _shapeData.ShapeThemeColorTwo);
+    }
+    private void RecalculatePolygonCollider(GameObject go)
+    {
+        PolygonCollider2D existing = go.GetComponent<PolygonCollider2D>();
+        if (existing != null)
+            Destroy(existing);
+
+        PolygonCollider2D poly = go.AddComponent<PolygonCollider2D>();
+        // Automatically generates points from SpriteRenderer
     }
 
     void Update()
@@ -120,9 +130,7 @@ public class PlayerController : MonoBehaviour, IHealth
 
             splitObjectRb.linearVelocity = (_rigidbody2D.position - (Vector2)splitObjectRb.transform.position).normalized * _shapeData.ShootPower;
             splitObjectRb.angularVelocity = 0.0f;
-
             splitObjectRb.transform.localPosition = Vector3.Lerp(splitObjectRb.transform.localPosition, Vector3.zero, Time.unscaledDeltaTime * 7);
-            splitObjectRb.transform.localRotation = Quaternion.Lerp(splitObjectRb.transform.localRotation, Quaternion.Euler(0f, 0f, 0f), Time.unscaledDeltaTime * 7);
 
             if (splitObjectRb.transform.localPosition.magnitude < 1.5f)
             {
@@ -146,6 +154,9 @@ public class PlayerController : MonoBehaviour, IHealth
 
             for (int j = 0; j < _isSplitShapeUnited.Length; j++)
                 _isSplitShapeUnited[j] = false;
+
+            _rigidbody2D.angularVelocity = 0.0f;
+            transform.rotation = Quaternion.Euler(0f, 0f, 0.0f);
         }
     }
 
@@ -158,7 +169,7 @@ public class PlayerController : MonoBehaviour, IHealth
                 Rigidbody2D splitObjectRb = _splitObjectsRigidbody2D[i];
                 if (splitObjectRb.gameObject.activeInHierarchy)
                 {
-                    splitObjectRb.gameObject.GetComponent<CircleCollider2D>().isTrigger = trigger;
+                    splitObjectRb.gameObject.GetComponent<Collider2D>().isTrigger = trigger;
                 }
             }
         }

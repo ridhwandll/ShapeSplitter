@@ -19,6 +19,6 @@ MonoBehaviour:
   ShootPower: 30
   ShapeThemeColorOne: {r: 1, g: 0.54509807, b: 0.13725491, a: 0}
   ShapeThemeColorTwo: {r: 0.9921569, g: 0.76470596, b: 0.19607845, a: 0}
-  PlayerCore: {fileID: 3694788327267579368, guid: a18142e4927935443ab7c85a0d5240dc, type: 3}
-  PlayerUnited: {fileID: -6906212207499067498, guid: 42faee59e6d737647aa8c0ba9fd87145, type: 3}
-  PlayerSplit: {fileID: 2115169202091490748, guid: 758763d039515eb4a92375aec39860e8, type: 3}
+  PlayerCore: {fileID: 21300000, guid: a18142e4927935443ab7c85a0d5240dc, type: 3}
+  PlayerUnited: {fileID: 21300000, guid: 42faee59e6d737647aa8c0ba9fd87145, type: 3}
+  PlayerSplit: {fileID: 21300000, guid: 758763d039515eb4a92375aec39860e8, type: 3}

@@ -11,8 +11,8 @@ public class Shape : ScriptableObject
     public float MinSpreadAngle;
     public float ShootPower;
 
-    public UnityEngine.Color ShapeThemeColorOne;
-    public UnityEngine.Color ShapeThemeColorTwo;
+    public Color ShapeThemeColorOne;
+    public Color ShapeThemeColorTwo;
 
     [Header("Shape Visuals")]
     public Sprite PlayerCore;

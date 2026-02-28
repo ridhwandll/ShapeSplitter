@@ -4905,7 +4905,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5273778571307294786}
   - component: {fileID: 2913031501779709832}
-  - component: {fileID: 4877295185306902182}
+  - component: {fileID: 8623448842773569518}
   - component: {fileID: 651189737938576731}
   - component: {fileID: 7869314356079398232}
   - component: {fileID: 7050923080129857522}
@@ -4992,8 +4992,8 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!58 &4877295185306902182
-CircleCollider2D:
+--- !u!60 &8623448842773569518
+PolygonCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -5027,7 +5027,53 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 1
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 2, y: 2}
+    newSize: {x: 2, y: 2}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Points:
+    m_Paths:
+    - - {x: 0.69, y: -0.77}
+      - {x: 0.84, y: -0.59}
+      - {x: 0.89, y: -0.51}
+      - {x: 0.98999995, y: -0.29999998}
+      - {x: 1, y: -0.25}
+      - {x: 1, y: 0.22999999}
+      - {x: 0.98999995, y: 0.29999998}
+      - {x: 0.9, y: 0.51}
+      - {x: 0.81, y: 0.63}
+      - {x: 0.69, y: 0.76}
+      - {x: 0.59, y: 0.84}
+      - {x: 0.35999998, y: 0.96999997}
+      - {x: 0.22999999, y: 1}
+      - {x: -0.22, y: 1}
+      - {x: -0.26, y: 0.98999995}
+      - {x: -0.35999998, y: 0.96999997}
+      - {x: -0.56, y: 0.85999995}
+      - {x: -0.63, y: 0.81}
+      - {x: -0.76, y: 0.69}
+      - {x: -0.84, y: 0.59}
+      - {x: -0.94, y: 0.39999998}
+      - {x: -0.96999997, y: 0.35}
+      - {x: -1, y: 0.22}
+      - {x: -1, y: -0.22}
+      - {x: -0.96, y: -0.35999998}
+      - {x: -0.89, y: -0.51}
+      - {x: -0.81, y: -0.63}
+      - {x: -0.69, y: -0.77}
+      - {x: -0.51, y: -0.89}
+      - {x: -0.35999998, y: -0.96999997}
+      - {x: -0.22, y: -1}
+      - {x: 0.22999999, y: -1}
+      - {x: 0.29999998, y: -0.98999995}
+      - {x: 0.51, y: -0.89}
+      - {x: 0.59, y: -0.84}
+  m_UseDelaunayMesh: 1
 --- !u!50 &651189737938576731
 Rigidbody2D:
   serializedVersion: 5
@@ -5067,13 +5113,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c0e25cb3163abe4fb9c156687fa6997, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  _splitShapeCount: 2
-  _maxDragDistance: 6
-  _maxSpreadAngle: 60
-  _minSpreadAngle: 20
-  shootPower: 30
-  _playerCore: {fileID: 3694788327267579368, guid: a18142e4927935443ab7c85a0d5240dc, type: 3}
-  _playerUnited: {fileID: -6906212207499067498, guid: 42faee59e6d737647aa8c0ba9fd87145, type: 3}
+  _shapeData: {fileID: 11400000, guid: 1b2de3689c4077849b81b9d7542265fa, type: 2}
+  _maxDragDistance: 10
   _playerSplitPrefab: {fileID: 3324003465050919163, guid: 032a147f0e7c4a147be43b59a5fcf337, type: 3}
   playerParticleSystem: {fileID: 5447100541993661451}
 --- !u!114 &7050923080129857522
@@ -5094,7 +5135,9 @@ MonoBehaviour:
     m_Bits: 128
   _maxSimulationSteps: 200
   _timeStep: 0.02
-  _lineLength: 10
+  _nonSimulationLineLength: 6
+  _colorOne: {r: 0, g: 0, b: 0, a: 0}
+  _colorTwo: {r: 0, g: 0, b: 0, a: 0}
   trajectoryRendererObj: {fileID: 8513546736189436953, guid: 97fe3be8ed5a2d344b4cd1dca20d97cf, type: 3}
 --- !u!96 &6850247336452633951
 TrailRenderer:

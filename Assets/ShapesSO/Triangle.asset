@@ -15,10 +15,10 @@ MonoBehaviour:
   Name: Triangle
   SplitShapeCount: 3
   MaxSpreadAngle: 160
-  MinSpreadAngle: 30
-  ShootPower: 75
+  MinSpreadAngle: 5
+  ShootPower: 70
   ShapeThemeColorOne: {r: 0.17254902, g: 0.8196079, b: 0.9686275, a: 0}
   ShapeThemeColorTwo: {r: 0.5019608, g: 0.21960786, b: 0.97647065, a: 0}
-  PlayerCore: {fileID: 5786912125042278766, guid: 06fccd7b9dd650548acd7bad541dcfe8, type: 3}
-  PlayerUnited: {fileID: 2108706218607724213, guid: 89e55a901580c33458d5fa30b4964af3, type: 3}
-  PlayerSplit: {fileID: 9143892592541240685, guid: 8e80a91b25935b04891a5c1aca84f3b2, type: 3}
+  PlayerCore: {fileID: 21300000, guid: 06fccd7b9dd650548acd7bad541dcfe8, type: 3}
+  PlayerUnited: {fileID: 21300000, guid: 89e55a901580c33458d5fa30b4964af3, type: 3}
+  PlayerSplit: {fileID: 21300000, guid: 8e80a91b25935b04891a5c1aca84f3b2, type: 3}
