@@ -25,7 +25,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "ChainShot",
+                    "name": "Ability1",
                     "type": "Button",
                     "id": "f7ab44ee-b60d-478b-99e2-f97abcd89291",
                     "expectedControlType": "",
@@ -34,7 +34,16 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Repulse",
+                    "name": "Ability2",
+                    "type": "Button",
+                    "id": "628ce533-2282-40ac-9cbd-2738cd2db1b9",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Ultimate",
                     "type": "Button",
                     "id": "d5d57e94-f872-4f0c-a7d9-d327596a88af",
                     "expectedControlType": "",
@@ -51,7 +60,18 @@
                     "interactions": "Press",
                     "processors": "",
                     "groups": "KeyboardAndMouse",
-                    "action": "ChainShot",
+                    "action": "Ability1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4d4ea7dd-c4b9-4ef1-9e81-846e4a7ddcbf",
+                    "path": "<Keyboard>/q",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "KeyboardAndMouse",
+                    "action": "Ability2",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -62,7 +82,7 @@
                     "interactions": "Press",
                     "processors": "",
                     "groups": "KeyboardAndMouse",
-                    "action": "Repulse",
+                    "action": "Ultimate",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

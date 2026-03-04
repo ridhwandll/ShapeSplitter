@@ -4418,6 +4418,10 @@ PrefabInstance:
       propertyPath: _nonSimulationLineLength
       value: 12
       objectReference: {fileID: 0}
+    - target: {fileID: 7869314356079398232, guid: 840fee49959a45f4893ace6f11b6b58d, type: 3}
+      propertyPath: _shapeData
+      value: 
+      objectReference: {fileID: 11400000, guid: 91e8831b21b4556448232b82b9bea68f, type: 2}
     - target: {fileID: 8623448842773569518, guid: 840fee49959a45f4893ace6f11b6b58d, type: 3}
       propertyPath: m_UseDelaunayMesh
       value: 1

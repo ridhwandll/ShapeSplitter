@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.U2D;
 
 public enum PlayerState
 {
@@ -44,6 +45,11 @@ public class PlayerController : MonoBehaviour, IHealth
     // Public Events available for registering (Mainly used by UIManager)
     public Action<int> OnPlayerHealthChange;
 
+    public Shape GetShapeData()
+    {
+        return _shapeData;
+    }
+
     void Start()
     {
         _mainCamera = Camera.main;
@@ -70,18 +76,32 @@ public class PlayerController : MonoBehaviour, IHealth
         {
             _isSplitShapeUnited[j] = false;
             _splitObjectsRigidbody2D[j] = Instantiate(_playerSplitPrefab, transform).GetComponent<Rigidbody2D>();
-            _splitObjectsRigidbody2D[j].GetComponent<SpriteRenderer>().sprite = _shapeData.PlayerSplit;
+            _splitObjectsRigidbody2D[j].GetComponent<SpriteRenderer>().sprite = _shapeData.ShapeSplitSprite;
             _splitObjectsRigidbody2D[j].GetComponent<TrailRenderer>().colorGradient = gradient;
             RecalculatePolygonCollider(_splitObjectsRigidbody2D[j].gameObject);
             _splitObjectsRigidbody2D[j].gameObject.SetActive(false);
         }
 
-        _spriteRenderer.sprite = _shapeData.PlayerUnited;
+        _spriteRenderer.sprite = _shapeData.ShapeUnitedSprite;
         _trailRenderer.colorGradient = gradient;
         RecalculatePolygonCollider(gameObject);
-        // Do not simulate ricochet by default
+
         _trajectorySimulator.Initialize(_shapeData.SplitShapeCount, _shapeData.ShapeThemeColorOne, _shapeData.ShapeThemeColorTwo);
     }
+
+    private void OnEnable()
+    {
+        _input.Player.Ability1.performed += ctx => { _shapeData.Ability1.Activate(this); };
+        _input.Player.Ability2.performed += ctx => { _shapeData.Ability2.Activate(this); };
+        _input.Player.Ultimate.performed += ctx => { _shapeData.Ultimate.Activate(this); };
+    }
+    private void OnDisable()
+    {
+        _input.Player.Ability1.performed -= ctx => { _shapeData.Ability1.Activate(this); };
+        _input.Player.Ability2.performed -= ctx => { _shapeData.Ability2.Activate(this); };
+        _input.Player.Ultimate.performed -= ctx => { _shapeData.Ultimate.Activate(this); };
+    }
+
     private void RecalculatePolygonCollider(GameObject go)
     {
         PolygonCollider2D existing = go.GetComponent<PolygonCollider2D>();
@@ -103,7 +123,7 @@ public class PlayerController : MonoBehaviour, IHealth
     private void SplitPlayerAndApplyForce(Vector2 biesctorDirection, Vector2 dragStartPoint, Vector2 dragEndPoint)
     {
         _playerState = PlayerState.SPLIT;
-        _spriteRenderer.sprite = _shapeData.PlayerCore;
+        _spriteRenderer.sprite = _shapeData.ShapeCoreSprite;
         _rigidbody2D.linearVelocity = Vector2.zero;
         _trailRenderer.emitting = false;
 
@@ -139,7 +159,6 @@ public class PlayerController : MonoBehaviour, IHealth
                     _isSplitShapeUnited[i] = true;
                     splitObjectRb.transform.localPosition = Vector3.zero;
                     splitObjectRb.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
-                    Debug.Log("United split object number: " + i);
                     playerParticleSystem.Play();
                     splitObjectRb.gameObject.SetActive(false);
                 }
@@ -149,7 +168,7 @@ public class PlayerController : MonoBehaviour, IHealth
         if (_isSplitShapeUnited.All(n => n == true))
         {
             _playerState = PlayerState.UNITED;
-            _spriteRenderer.sprite = _shapeData.PlayerUnited;
+            _spriteRenderer.sprite = _shapeData.ShapeUnitedSprite;
             _trailRenderer.emitting = true;
 
             for (int j = 0; j < _isSplitShapeUnited.Length; j++)
@@ -222,10 +241,8 @@ public class PlayerController : MonoBehaviour, IHealth
             {
                 SetSplitShapesColliderToTrigger(false);
             }
-
         }
     }
-
 
     private List<Vector2> GetSplitShapeDirections(Vector2 bisector, Vector2 currentTouchPosition)
     {

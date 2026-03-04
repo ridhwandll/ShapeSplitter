@@ -15,7 +15,12 @@ public class Shape : ScriptableObject
     public Color ShapeThemeColorTwo;
 
     [Header("Shape Visuals")]
-    public Sprite PlayerCore;
-    public Sprite PlayerUnited;
-    public Sprite PlayerSplit;
+    public Sprite ShapeCoreSprite;
+    public Sprite ShapeUnitedSprite;
+    public Sprite ShapeSplitSprite;
+
+    [Header("Abilities")]
+    public Ability Ability1;
+    public Ability Ability2;
+    public Ability Ultimate;
 }
