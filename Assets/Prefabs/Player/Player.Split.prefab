@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2238573957017208605}
   - component: {fileID: 1450772308761640514}
   - component: {fileID: 2496846338653342329}
+  - component: {fileID: 5700488071502611738}
   m_Layer: 6
   m_Name: Player.Split
   m_TagString: Player
@@ -288,3 +289,15 @@ TrailRenderer:
   m_Autodestruct: 0
   m_Emitting: 1
   m_ApplyActiveColorSpace: 1
+--- !u!114 &5700488071502611738
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3324003465050919163}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 439fa2a37fc4b9946b5b29b9afd98acc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'

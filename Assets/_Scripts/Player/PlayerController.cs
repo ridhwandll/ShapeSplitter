@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.U2D;
+using UnityEngine.tvOS;
+
 
 public enum PlayerState
 {
@@ -61,14 +63,14 @@ public class PlayerController : MonoBehaviour, IHealth
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _trajectorySimulator = GetComponent<TrajectorySimulator>();
 
-        _chromaticAberration.active = false; 
+        _chromaticAberration.active = false;
         _input = GameObject.FindGameObjectWithTag("InputMaster").GetComponent<InputManager>().Input;
         _playerState = PlayerState.UNITED;
 
         Gradient gradient = new Gradient();
         gradient.SetKeys(
-            new GradientColorKey[] { new GradientColorKey(_shapeData.ShapeThemeColorOne, 0.0f), new GradientColorKey(_shapeData.ShapeThemeColorTwo, 1.0f)},
-            new GradientAlphaKey[] {new GradientAlphaKey(1.0f, 0.0f),new GradientAlphaKey(0.3f, 1.0f)});
+            new GradientColorKey[] { new GradientColorKey(_shapeData.ShapeThemeColorOne, 0.0f), new GradientColorKey(_shapeData.ShapeThemeColorTwo, 1.0f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(1.0f, 0.0f), new GradientAlphaKey(0.3f, 1.0f) });
 
         _splitObjectsRigidbody2D = new Rigidbody2D[_shapeData.SplitShapeCount];
         _isSplitShapeUnited = new bool[_shapeData.SplitShapeCount];
@@ -87,19 +89,10 @@ public class PlayerController : MonoBehaviour, IHealth
         RecalculatePolygonCollider(gameObject);
 
         _trajectorySimulator.Initialize(_shapeData.SplitShapeCount, _shapeData.ShapeThemeColorOne, _shapeData.ShapeThemeColorTwo);
-    }
 
-    private void OnEnable()
-    {
-        _input.Player.Ability1.performed += ctx => { _shapeData.Ability1.Activate(this); };
-        _input.Player.Ability2.performed += ctx => { _shapeData.Ability2.Activate(this); };
-        _input.Player.Ultimate.performed += ctx => { _shapeData.Ultimate.Activate(this); };
-    }
-    private void OnDisable()
-    {
-        _input.Player.Ability1.performed -= ctx => { _shapeData.Ability1.Activate(this); };
-        _input.Player.Ability2.performed -= ctx => { _shapeData.Ability2.Activate(this); };
-        _input.Player.Ultimate.performed -= ctx => { _shapeData.Ultimate.Activate(this); };
+        _input.Player.Ability1.performed += ctx => { _shapeData.Ability1.TryActivate(this); };
+        _input.Player.Ability2.performed += ctx => { _shapeData.Ability2.TryActivate(this); };
+        _input.Player.Ultimate.performed += ctx => { _shapeData.Ultimate.TryActivate(this); };
     }
 
     private void RecalculatePolygonCollider(GameObject go)
@@ -132,39 +125,17 @@ public class PlayerController : MonoBehaviour, IHealth
         int i = 0;
         foreach (Rigidbody2D splitObjectRb in _splitObjectsRigidbody2D)
         {
-            splitObjectRb.gameObject.SetActive(true);
-            splitObjectRb.AddForce(directions[i].normalized * _shapeData.ShootPower, ForceMode2D.Impulse);
+            splitObjectRb.gameObject.SetActive(true);            
+            splitObjectRb.AddForce(directions[i].normalized * _shapeData.SplitShapeShootSpeed, ForceMode2D.Impulse);
             i++;
         }
 
         // Add force to the core
-        _rigidbody2D.GetComponent<Rigidbody2D>().AddForce(biesctorDirection.normalized * (_shapeData.ShootPower / 4), ForceMode2D.Impulse);
+        _rigidbody2D.AddForce(biesctorDirection.normalized * _shapeData.CoreMoveSpeed, ForceMode2D.Impulse);
     }
 
-    
-    private void UnitePlayerParts()
+    private void CheckIfAllSplitPartsAreUnited()
     {
-        for (int i = 0; i < _shapeData.SplitShapeCount; i++)
-        {
-            Rigidbody2D splitObjectRb = _splitObjectsRigidbody2D[i];
-
-            splitObjectRb.linearVelocity = (_rigidbody2D.position - (Vector2)splitObjectRb.transform.position).normalized * _shapeData.ShootPower;
-            splitObjectRb.angularVelocity = 0.0f;
-            splitObjectRb.transform.localPosition = Vector3.Lerp(splitObjectRb.transform.localPosition, Vector3.zero, Time.unscaledDeltaTime * 7);
-
-            if (splitObjectRb.transform.localPosition.magnitude < 1.5f)
-            {
-                if (splitObjectRb.gameObject.activeInHierarchy)
-                {
-                    _isSplitShapeUnited[i] = true;
-                    splitObjectRb.transform.localPosition = Vector3.zero;
-                    splitObjectRb.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
-                    playerParticleSystem.Play();
-                    splitObjectRb.gameObject.SetActive(false);
-                }
-            }
-        }
-
         if (_isSplitShapeUnited.All(n => n == true))
         {
             _playerState = PlayerState.UNITED;
@@ -172,27 +143,91 @@ public class PlayerController : MonoBehaviour, IHealth
             _trailRenderer.emitting = true;
 
             for (int j = 0; j < _isSplitShapeUnited.Length; j++)
+            {
                 _isSplitShapeUnited[j] = false;
+                _splitObjectsRigidbody2D[j].gameObject.GetComponent<PlayerSplitShape>().ResetCollider(); // Resets the collider to not trigger
+            }
 
             _rigidbody2D.angularVelocity = 0.0f;
             transform.rotation = Quaternion.Euler(0f, 0f, 0.0f);
         }
     }
 
-    private void AimAndShoot()
+    private void UnitePlayerParts_Anchor()
     {
-        void SetSplitShapesColliderToTrigger(bool trigger)
+        for (int i = 0; i < _shapeData.SplitShapeCount; i++)
         {
-            for (int i = 0; i < _shapeData.SplitShapeCount; i++)
+            Rigidbody2D splitObjectRb = _splitObjectsRigidbody2D[i];
+            splitObjectRb.gameObject.GetComponent<Collider2D>().isTrigger = true;
+
+            splitObjectRb.linearVelocity = (_rigidbody2D.position - (Vector2)splitObjectRb.transform.position).normalized * _shapeData.SplitShapeReturnSpeed;
+            splitObjectRb.transform.localPosition = Vector3.Lerp(splitObjectRb.transform.localPosition, Vector3.zero, Time.unscaledDeltaTime * 7);
+            splitObjectRb.angularVelocity = 0.0f;
+
+            if (splitObjectRb.transform.localPosition.magnitude < 1f)
             {
-                Rigidbody2D splitObjectRb = _splitObjectsRigidbody2D[i];
                 if (splitObjectRb.gameObject.activeInHierarchy)
                 {
-                    splitObjectRb.gameObject.GetComponent<Collider2D>().isTrigger = trigger;
+                    _isSplitShapeUnited[i] = true;
+                    splitObjectRb.transform.localPosition = Vector3.zero;
+                    splitObjectRb.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+                    //playerParticleSystem.Play();
+                    splitObjectRb.gameObject.SetActive(false);
                 }
             }
         }
+        CheckIfAllSplitPartsAreUnited();
+    }
 
+    private void UnitePlayerParts_Others()
+    {
+        for (int i = 0; i < _shapeData.SplitShapeCount; i++)
+        {
+            Rigidbody2D splitObjectRb = _splitObjectsRigidbody2D[i];
+
+            if (splitObjectRb.gameObject.GetComponent<PlayerSplitShape>().CollidedWithOthersOnce)
+            {
+                splitObjectRb.gameObject.GetComponent<Collider2D>().isTrigger = true;
+                Vector2 normalizedDSirectionToCore = (_rigidbody2D.position - (Vector2)splitObjectRb.transform.position).normalized;
+
+                // Removes the tangential velocity that causes orbiting                
+                splitObjectRb.linearVelocity = Vector2.zero;
+                splitObjectRb.linearVelocity = Vector3.Project(splitObjectRb.linearVelocity, normalizedDSirectionToCore);                
+                splitObjectRb.AddForce(normalizedDSirectionToCore * _shapeData.SplitShapeReturnSpeed, ForceMode2D.Impulse);
+
+                splitObjectRb.angularVelocity = 0.0f;
+                _rigidbody2D.angularVelocity = 0.0f;
+
+                if (splitObjectRb.transform.localPosition.magnitude < 1f)
+                {
+                    if (splitObjectRb.gameObject.activeInHierarchy)
+                    {
+                        _isSplitShapeUnited[i] = true;
+                        splitObjectRb.transform.localPosition = Vector3.zero;
+                        splitObjectRb.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
+                        //playerParticleSystem.Play();
+                        splitObjectRb.gameObject.SetActive(false);
+                    }
+                }
+            }
+        }
+        CheckIfAllSplitPartsAreUnited();
+    }
+
+    void SetSplitShapesColliderToTrigger(bool trigger)
+    {
+        for (int i = 0; i < _shapeData.SplitShapeCount; i++)
+        {
+            Rigidbody2D splitObjectRb = _splitObjectsRigidbody2D[i];
+            if (splitObjectRb.gameObject.activeInHierarchy)
+            {
+                splitObjectRb.gameObject.GetComponent<Collider2D>().isTrigger = trigger;
+            }
+        }
+    }
+
+    private void AimAndShoot()
+    {
         if (_playerState == PlayerState.UNITED)
         {
             if (_input.Player.Move.WasPressedThisFrame() && _isAiming == false)
@@ -201,7 +236,7 @@ public class PlayerController : MonoBehaviour, IHealth
                 _isAiming = true;
                 StartSlowMotion();
             }
-            
+
             if (_input.Player.Move.IsPressed() && _isAiming) // Draw the Aim Line
             {
                 Vector3 screenPos = _input.Player.PointerPosition.ReadValue<Vector2>();
@@ -214,7 +249,7 @@ public class PlayerController : MonoBehaviour, IHealth
                 float angle = Mathf.Atan2(bisector.y, bisector.x) * Mathf.Rad2Deg;
                 transform.rotation = Quaternion.Euler(0f, 0f, angle);
 
-                _trajectorySimulator.DrawTrajectories(transform.position, directions, _shapeData.ShootPower);
+                _trajectorySimulator.DrawTrajectories(transform.position, directions, _shapeData.SplitShapeShootSpeed);
             }
 
             if (_input.Player.Move.WasReleasedThisFrame() && _isAiming)
@@ -232,14 +267,26 @@ public class PlayerController : MonoBehaviour, IHealth
         }
         else if (_playerState == PlayerState.SPLIT)
         {
-            if (_input.Player.Move.IsPressed())
+            // ANCHORs has the ability to control when the shapes come back to core
+            if (_shapeData.Role == ShapeRole.ANCHOR)
             {
-                UnitePlayerParts();
-                SetSplitShapesColliderToTrigger(true);
+                if (_input.Player.Move.IsPressed())
+                {
+                    UnitePlayerParts_Anchor();                    
+                }
+                else
+                {
+                    SetSplitShapesColliderToTrigger(false);
+                }
             }
-            else
+            // SPLINTERs come back to core after its hit with any collider
+            else if (_shapeData.Role == ShapeRole.SPLINTER)
             {
-                SetSplitShapesColliderToTrigger(false);
+                UnitePlayerParts_Others();
+            }
+            else if (_shapeData.Role == ShapeRole.SHELL)
+            {
+                // idk what mechanism to implement here
             }
         }
     }

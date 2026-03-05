@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: Overdrive
   m_EditorClassIdentifier: Assembly-CSharp::Ability_Overdrive
   AbilityName: Overdrive
-  Icon: {fileID: 0}
-  Cooldown: 0
+  Cooldown: 5
   IsUltimate: 0
   UltimateActivationPoints: 0
   ShootPowerMultiplier: 2

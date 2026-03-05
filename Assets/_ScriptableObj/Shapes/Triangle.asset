@@ -13,10 +13,13 @@ MonoBehaviour:
   m_Name: Triangle
   m_EditorClassIdentifier: Assembly-CSharp::Shape
   Name: Triangle
+  Role: 2
   SplitShapeCount: 3
-  MaxSpreadAngle: 160
+  MaxSpreadAngle: 170
   MinSpreadAngle: 5
-  ShootPower: 70
+  SplitShapeShootSpeed: 70
+  CoreMoveSpeed: 30
+  SplitShapeReturnSpeed: 20
   ShapeThemeColorOne: {r: 0.17254902, g: 0.8196079, b: 0.9686275, a: 0}
   ShapeThemeColorTwo: {r: 0.5019608, g: 0.21960786, b: 0.97647065, a: 0}
   ShapeCoreSprite: {fileID: 21300000, guid: 06fccd7b9dd650548acd7bad541dcfe8, type: 3}
