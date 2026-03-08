@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Overdrive
   m_EditorClassIdentifier: Assembly-CSharp::Ability_Overdrive
   AbilityName: Overdrive
-  Cooldown: 5
+  Cooldown: 8
   IsUltimate: 0
   UltimateActivationPoints: 0
-  ShootPowerMultiplier: 2
+  ShootPowerMultiplier: 3
+  ParticleSystemPrefab: {fileID: 4542708184932835343, guid: 0efeadc604856b447baa7d7c2adca78e, type: 3}

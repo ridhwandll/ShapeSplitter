@@ -95,6 +95,13 @@ public class PlayerController : MonoBehaviour, IHealth
         _input.Player.Ultimate.performed += ctx => { _shapeData.Ultimate.TryActivate(this); };
     }
 
+    private void OnDestroy()
+    {
+        if (_shapeData.Ability1) _shapeData.Ability1.TryDeactivate(this);
+        if (_shapeData.Ability2) _shapeData.Ability2.TryDeactivate(this);
+        if (_shapeData.Ultimate) _shapeData.Ultimate.TryDeactivate(this);
+    }
+
     private void RecalculatePolygonCollider(GameObject go)
     {
         PolygonCollider2D existing = go.GetComponent<PolygonCollider2D>();

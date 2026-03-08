@@ -5,7 +5,7 @@ public abstract class Ability : ScriptableObject
 {
     public string AbilityName;
     public float Cooldown = 5.0f;
-    public bool IsReady { get; private set; } = true;
+    public bool CanActivate { get; private set; } = true;
 
     // Is Ultimate Ability
     public bool IsUltimate;
@@ -13,22 +13,31 @@ public abstract class Ability : ScriptableObject
 
     public bool TryActivate(PlayerController shape)
     {
-        if (!IsReady)
+        if (CanActivate == false)
             return false;
 
         shape.StartCoroutine(Run(shape));
         return true;
     }
 
+    public void TryDeactivate(PlayerController shape)
+    {
+        if (CanActivate == false)
+        {
+            Deactivate(shape);
+            CanActivate = true;
+        }
+    }
+
     private IEnumerator Run(PlayerController shape)
     {
-        IsReady = false;
         Activate(shape);
+        CanActivate = false;
 
         yield return new WaitForSeconds(Cooldown);
 
+        CanActivate = true;
         Deactivate(shape);
-        IsReady = true;
     }
 
 
