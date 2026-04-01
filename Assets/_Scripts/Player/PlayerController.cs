@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor.Experimental.GraphView;
+using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.tvOS;
 
 
 public enum PlayerState
@@ -17,19 +16,24 @@ public enum PlayerState
 public class PlayerController : MonoBehaviour, IHealth
 {
     [SerializeField] private Shape _shapeData;
-    [SerializeField] private float _maxDragDistance = 10.0f;
+    [SerializeField] private float _maxDragDistance = 5.0f;
+    [SerializeField] private float _minDragDistance = 1.0f;
     [SerializeField] private GameObject _playerSplitPrefab;
-    [SerializeField] private ParticleSystem playerParticleSystem;
+    [SerializeField] private ParticleSystem _splitShapeReturnPS;
 
     // AIM
     private Vector2 _dragStartPosition;
     private Vector2 _dragEndPosition;
     private bool _isAiming;
-    
+    private bool _isHolding;
+
     private Rigidbody2D[] _splitObjectsRigidbody2D;
     private bool[] _isSplitShapeUnited;
 
     private PlayerState _playerState;
+
+    // Particle system
+    ParticleSystem _splitShapeReturnParticleSystem;
 
     // Health
     private int _health;
@@ -93,6 +97,13 @@ public class PlayerController : MonoBehaviour, IHealth
         _input.Player.Ability1.performed += ctx => { _shapeData.Ability1.TryActivate(this); };
         _input.Player.Ability2.performed += ctx => { _shapeData.Ability2.TryActivate(this); };
         _input.Player.Ultimate.performed += ctx => { _shapeData.Ultimate.TryActivate(this); };
+
+        // Set the PSs 
+        {
+            _splitShapeReturnParticleSystem = Instantiate(_splitShapeReturnPS, transform);
+            ParticleSystem.MainModule main = _splitShapeReturnParticleSystem.main;
+            main.startColor = new ParticleSystem.MinMaxGradient(_shapeData.ShapeThemeColorOne, _shapeData.ShapeThemeColorTwo);
+        }
     }
 
     private void OnDestroy()
@@ -178,7 +189,8 @@ public class PlayerController : MonoBehaviour, IHealth
                     _isSplitShapeUnited[i] = true;
                     splitObjectRb.transform.localPosition = Vector3.zero;
                     splitObjectRb.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
-                    //playerParticleSystem.Play();
+                    _splitShapeReturnParticleSystem.Play();
+                    splitObjectRb.GetComponent<TrailRenderer>().Clear();
                     splitObjectRb.gameObject.SetActive(false);
                 }
             }
@@ -212,7 +224,8 @@ public class PlayerController : MonoBehaviour, IHealth
                         _isSplitShapeUnited[i] = true;
                         splitObjectRb.transform.localPosition = Vector3.zero;
                         splitObjectRb.transform.localRotation = Quaternion.Euler(0f, 0f, 0f);
-                        //playerParticleSystem.Play();
+                        _splitShapeReturnParticleSystem.Play();
+                        splitObjectRb.GetComponent<TrailRenderer>().Clear();
                         splitObjectRb.gameObject.SetActive(false);
                     }
                 }
@@ -240,8 +253,21 @@ public class PlayerController : MonoBehaviour, IHealth
             if (_input.Player.Move.WasPressedThisFrame() && _isAiming == false)
             {
                 _dragStartPosition = _mainCamera.ScreenToWorldPoint(_input.Player.PointerPosition.ReadValue<Vector2>());
-                _isAiming = true;
-                StartSlowMotion();
+                _isHolding = true;
+            }
+
+            if (_isHolding && !_isAiming)
+            {
+                Vector2 currentPos = _mainCamera.ScreenToWorldPoint(_input.Player.PointerPosition.ReadValue<Vector2>());
+
+                float dragDistance = Vector2.Distance(_dragStartPosition, currentPos);
+
+                if (dragDistance >= _minDragDistance)
+                {
+                    // Start aim
+                    _isAiming = true;
+                    StartSlowMotion();
+                }
             }
 
             if (_input.Player.Move.IsPressed() && _isAiming) // Draw the Aim Line
@@ -251,12 +277,15 @@ public class PlayerController : MonoBehaviour, IHealth
                 Vector2 currentTouchPos = _mainCamera.ScreenToWorldPoint(screenPos);
 
                 Vector2 bisector = (currentTouchPos - _dragStartPosition);
-                List<Vector2> directions = GetSplitShapeDirections(bisector, currentTouchPos);
+                if (bisector.magnitude >= _minDragDistance)
+                {
+                    List<Vector2> directions = GetSplitShapeDirections(bisector, currentTouchPos);
 
-                float angle = Mathf.Atan2(bisector.y, bisector.x) * Mathf.Rad2Deg;
-                transform.rotation = Quaternion.Euler(0f, 0f, angle);
+                    float angle = Mathf.Atan2(bisector.y, bisector.x) * Mathf.Rad2Deg;
+                    transform.rotation = Quaternion.Euler(0f, 0f, angle);
 
-                _trajectorySimulator.DrawTrajectories(transform.position, directions, _shapeData.SplitShapeShootSpeed);
+                    _trajectorySimulator.DrawTrajectories(transform.position, directions, _shapeData.SplitShapeShootSpeed);
+                }
             }
 
             if (_input.Player.Move.WasReleasedThisFrame() && _isAiming)
@@ -265,11 +294,16 @@ public class PlayerController : MonoBehaviour, IHealth
                 _rigidbody2D.angularVelocity = 0.0f;
                 _trajectorySimulator.ClearLinePositions();
                 _dragEndPosition = _mainCamera.ScreenToWorldPoint(_input.Player.PointerPosition.ReadValue<Vector2>());
-                Vector2 dragDirection = _dragEndPosition - _dragStartPosition; //Bisector
+                Vector2 dragDirection = _dragEndPosition - _dragStartPosition; // Bisector
 
                 _isAiming = false;
                 SplitPlayerAndApplyForce(dragDirection, _dragStartPosition, _dragEndPosition);
                 EndSlowMotion();
+            }
+
+            if (_input.Player.Move.WasReleasedThisFrame() && !_isAiming)
+            {
+                _isHolding = false;
             }
         }
         else if (_playerState == PlayerState.SPLIT)
@@ -354,9 +388,11 @@ public class PlayerController : MonoBehaviour, IHealth
             Destroy(gameObject);
             GameManager.Instance.SetPlayerAlive(false);
         }
-        
-        if (!isDamagingByOwnBullet) 
-            playerParticleSystem.Play();
+
+        if (!isDamagingByOwnBullet)
+        {
+            //Play PS
+        }
 
         OnPlayerHealthChange?.Invoke(_health);
     }
