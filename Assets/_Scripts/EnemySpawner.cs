@@ -139,7 +139,7 @@ public class EnemySpawner : MonoBehaviour
         }
         
         GameObject enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity, transform);
-        enemy.GetComponent<Enemy>().Initiate(this, enemyType);
+        //enemy.GetComponent<Enemy>().Initiate(this, enemyType);
         enemy.GetComponent<EnemySpawnIntro>()?.Play();
         _currentEnemies++;
     }
