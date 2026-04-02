@@ -25,6 +25,5 @@ MonoBehaviour:
   ShapeCoreSprite: {fileID: 21300000, guid: 06fccd7b9dd650548acd7bad541dcfe8, type: 3}
   ShapeUnitedSprite: {fileID: 21300000, guid: 89e55a901580c33458d5fa30b4964af3, type: 3}
   ShapeSplitSprite: {fileID: 21300000, guid: 8e80a91b25935b04891a5c1aca84f3b2, type: 3}
-  Ability1: {fileID: 0}
-  Ability2: {fileID: 0}
+  Ability: {fileID: 11400000, guid: 0049145b0369e1042b53b58f6ba155ef, type: 2}
   Ultimate: {fileID: 0}

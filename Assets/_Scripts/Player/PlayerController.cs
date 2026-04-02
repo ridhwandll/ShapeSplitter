@@ -26,7 +26,6 @@ public class PlayerController : MonoBehaviour, IHealth
     private Vector2 _dragEndPosition;
     private bool _isAiming;
     private bool _isHolding;
-
     private Rigidbody2D[] _splitObjectsRigidbody2D;
     private bool[] _isSplitShapeUnited;
 
@@ -94,8 +93,7 @@ public class PlayerController : MonoBehaviour, IHealth
 
         _trajectorySimulator.Initialize(_shapeData.SplitShapeCount, _shapeData.ShapeThemeColorOne, _shapeData.ShapeThemeColorTwo);
 
-        _input.Player.Ability1.performed += ctx => { _shapeData.Ability1.TryActivate(this); };
-        _input.Player.Ability2.performed += ctx => { _shapeData.Ability2.TryActivate(this); };
+        _input.Player.Ability1.performed += ctx => { _shapeData.Ability.TryActivate(this); };
         _input.Player.Ultimate.performed += ctx => { _shapeData.Ultimate.TryActivate(this); };
 
         // Set the PSs 
@@ -108,8 +106,7 @@ public class PlayerController : MonoBehaviour, IHealth
 
     private void OnDestroy()
     {
-        if (_shapeData.Ability1) _shapeData.Ability1.TryDeactivate(this);
-        if (_shapeData.Ability2) _shapeData.Ability2.TryDeactivate(this);
+        if (_shapeData.Ability) _shapeData.Ability.TryDeactivate(this);
         if (_shapeData.Ultimate) _shapeData.Ultimate.TryDeactivate(this);
     }
 

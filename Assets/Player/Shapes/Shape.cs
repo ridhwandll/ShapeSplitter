@@ -29,7 +29,6 @@ public class Shape : ScriptableObject
     public Sprite ShapeSplitSprite;
 
     [Header("Abilities")]
-    public Ability Ability1;
-    public Ability Ability2;
+    public Ability Ability;
     public Ability Ultimate;
 }

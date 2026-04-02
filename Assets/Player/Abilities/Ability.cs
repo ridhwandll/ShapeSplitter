@@ -4,6 +4,7 @@ using UnityEngine;
 public abstract class Ability : ScriptableObject
 {
     public string AbilityName;
+    public string AbilityDescription;
     public float Cooldown = 5.0f;
     public bool CanActivate { get; private set; } = true;
 
