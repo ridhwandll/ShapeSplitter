@@ -11,6 +11,7 @@ TagManager:
   - PostProcessStack
   - LevelTransition
   - InputMaster
+  - PlayerSplitShape
   layers:
   - Default
   - TransparentFX

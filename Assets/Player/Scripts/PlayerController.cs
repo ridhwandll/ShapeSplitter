@@ -35,7 +35,7 @@ public class PlayerController : MonoBehaviour, IHealth
     ParticleSystem _splitShapeReturnParticleSystem;
 
     // Health
-    private int _health;
+    private int _health = 150;
 
     private Rigidbody2D _rigidbody2D;
     private TrajectorySimulator _trajectorySimulator;

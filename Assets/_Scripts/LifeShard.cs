@@ -29,28 +29,8 @@ public class LifeShard : MonoBehaviour
         Destroy(gameObject, lifetime);
     }
 
-    public void Initiate(EnemyType enemyType)
+    public void Initiate()
     {
-        switch (enemyType)
-        {
-            case EnemyType.BigChonk:
-                healthAtSpawn = 8;
-                healthAfter3s = 15;
-                healthAfter6s = 20;
-                transform.localScale = new Vector3(transform.localScale.x * 2.5f, transform.localScale.y * 2.5f, 1f);
-                break;
-            case EnemyType.LongRanged:
-                healthAtSpawn = 2;
-                healthAfter3s = 3;
-                healthAfter6s = 6;
-                transform.localScale = new Vector3(transform.localScale.x * 1.5f, transform.localScale.y * 1.5f, 1f);
-                break;
-            case EnemyType.ShortRanged:
-                healthAtSpawn = 1;
-                healthAfter3s = 2;
-                healthAfter6s = 3;
-                break;
-        }
         transform.rotation = Quaternion.Euler(0f, 0f, Random.Range(0f, 360f));
         
         Rigidbody2D rb = GetComponent<Rigidbody2D>();

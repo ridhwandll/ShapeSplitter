@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1072f9ba36f3e041bb0e2f0ef565484, type: 3}
+  m_Name: Assasin_ED
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyData
+  EnemyName: Assasin
+  MaxHealth: 10
+  MoveSpeed: 5
+  Damage: 5
+  Prefab: {fileID: 4169636126582779010, guid: fa6b1eb5a2df93f41a07f78869c26c0f, type: 3}

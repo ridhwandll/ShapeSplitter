@@ -35,8 +35,6 @@ public class UIManager : MonoBehaviour
     {
         GameManager.Instance.OnPauseChanged += OnPauseChanged;
         GameManager.Instance.OnPlayerDied += OnPlayerDied;
-        enemySpawner.OnDifficultyChanged += OnWaveChanged;
-        enemySpawner.OnEnemyKilled += OnEnemyDied;
 
         // Setup events which player controller notifies about
         player.OnPlayerHealthChange += health => UpdatePlayerHealth(health);
@@ -75,28 +73,6 @@ public class UIManager : MonoBehaviour
     {
         pauseMenu.SetActive(false);
         deathMenu.SetActive(true);
-        
-        int finalScore = enemySpawner.GetFinalScore();
-        if (Globals.Difficulty == DifficultyLevel.Easy)
-        {
-            enemyKillScoreText.text = "";
-            difficultyAwardedText.text = "Difficulty Award: EASY MODE";
-            totalScoreText.text = "Total Score: 00";
-            coinsEarnedText.text = "COINS: +100";
-            Globals.Coins += 100;
-        }
-        else
-        {
-            enemyKillScoreText.text = "Kill Score: " + enemySpawner.GetEnemyKillScore();
-            difficultyAwardedText.text = "Wave Award: " + enemySpawner.GetWaveScore(Globals.Difficulty) + " // " + enemySpawner.GetWaveNumber() + " waves in " + Globals.Difficulty.ToString().ToUpper();
-            totalScoreText.text = "Total Score: " + finalScore;
-            int coinsEarned = Globals.ScoreToCoinConv(finalScore);
-            coinsEarnedText.text = "COINS: +" + coinsEarned;
-            Globals.Coins += coinsEarned;
-        
-            if (Globals.Highscore < finalScore)
-                Globals.Highscore = finalScore;
-        }
         PlayerProgress.Instance.Save();
     }
 

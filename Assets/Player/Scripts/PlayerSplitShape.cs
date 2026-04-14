@@ -14,5 +14,13 @@ public class PlayerSplitShape : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         CollidedWithOthersOnce = true;
+
+        if(collision.gameObject.CompareTag("Enemy"))
+        {
+            IHealth health = collision.gameObject.GetComponent<IHealth>();
+            Debug.Log(health.GetMaxHealth());
+            health.TakeDamage(5);
+        }
+
     }
 }

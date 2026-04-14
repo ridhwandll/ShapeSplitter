@@ -85,28 +85,6 @@ namespace MainMenu
             _vignetteToggle.value =  Globals.Vignette;
             _tonemappingToggle.value =  Globals.Tonemapping;
             
-            //// OPTIONS-DIFFICULTY
-            _difficultyOptionsGroup =root.Q<RadioButtonGroup>("DifficultyRadioButtons");
-            _difficultyOptionsGroup.RegisterValueChangedCallback((evt) =>
-            {
-                Debug.Log("Selected index: " + ((DifficultyLevel)evt.newValue).ToString());
-                switch (evt.newValue)
-                {
-                    case 0:
-                        Globals.Difficulty = DifficultyLevel.Easy;
-                        break;
-                    case 1:
-                        Globals.Difficulty = DifficultyLevel.Medium;
-                        break;
-                    case 2:
-                        Globals.Difficulty = DifficultyLevel.Hard;
-                        break;
-                    case 3:
-                        Globals.Difficulty = DifficultyLevel.Impossible;
-                        break;
-                }
-            });
-            _difficultyOptionsGroup.value = (int)Globals.Difficulty;
             
             //// OPTIONS-AUDIO
             _masterVolSlider.RegisterValueChangedCallback(OnMasterVolumeChanged);

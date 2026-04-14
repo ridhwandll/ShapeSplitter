@@ -2,9 +2,10 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    private int _damage = 1;
     public float speed = 10f;
     public float lifetime = 2f;
+
+    private int _damage = 1;
     private Vector2 direction;
     private bool _isEnemyBullet;
     
@@ -25,25 +26,23 @@ public class Bullet : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        IHealth health = collision.gameObject.GetComponent<IHealth>();
-        
-        if (collision.gameObject.CompareTag("Enemy") && !_isEnemyBullet)
         {
-            health.TakeDamage(_damage);
-            Destroy(gameObject);
+            IHealth health = collision.gameObject.GetComponent<IHealth>();
+            if ((collision.gameObject.CompareTag("Enemy") && !_isEnemyBullet))
+            {
+                health.TakeDamage(_damage);
+                Destroy(gameObject);
+            }
+        }
+        {
+            IHealth health = collision.gameObject.GetComponent<IHealth>();
+            if (collision.gameObject.CompareTag("Player") && _isEnemyBullet)
+            {
+                health.TakeDamage(_damage);
+                Destroy(gameObject);
+            }
         }
     }
-
-    void OnTriggerEnter2D(Collider2D collision) // Player is a Trigger Only
-    {
-        IHealth health = collision.gameObject.GetComponent<IHealth>();
-        if (collision.gameObject.CompareTag("Player") && _isEnemyBullet)
-        {
-            health.TakeDamage(_damage);
-            Destroy(gameObject);
-        }
-    }
-
     private void SetupTrailRenderer()
     {
         Color bulletColor = _isEnemyBullet ? Globals.EnemyColor : Globals.PlayerColor;

@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 5700488071502611738}
   m_Layer: 6
   m_Name: Player.Split
-  m_TagString: Player
+  m_TagString: PlayerSplitShape
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -301,3 +301,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 439fa2a37fc4b9946b5b29b9afd98acc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  CollidedWithOthersOnce: 0
